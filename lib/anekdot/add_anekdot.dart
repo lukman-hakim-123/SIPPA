@@ -1,46 +1,71 @@
 import 'package:flutter/material.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:sippa/add_user/controller/user_controller.dart';
+import 'package:sippa/anekdot/controller/anekdot_controller.dart';
 import 'package:sippa/widget_view/appbar.dart';
-import 'package:sippa/widget_view/drawer.dart';
-import 'package:sippa/widget_view/field.dart';
+import 'package:intl/intl.dart';
 
 class AddAnekdotPage extends ConsumerStatefulWidget {
-  static route() =>
-      MaterialPageRoute(builder: (context) => const AddAnekdotPage());
-  const AddAnekdotPage({super.key});
+  static route({required kelompok}) => MaterialPageRoute(
+      builder: (context) => AddAnekdotPage(kelompok: kelompok));
+
+  final String kelompok;
+  const AddAnekdotPage({super.key, required this.kelompok});
 
   @override
   ConsumerState<ConsumerStatefulWidget> createState() => _AddAnekdotPageState();
 }
 
 class _AddAnekdotPageState extends ConsumerState<AddAnekdotPage> {
-  int _selectedIndex = 2;
-
-  void _onItemSelected(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
-  }
-
   final analisisCapaianController = TextEditingController();
   final tanggalController = TextEditingController();
-  final bulanController = TextEditingController();
+  final pengamatanController = TextEditingController();
   final muridIdController = TextEditingController();
+  DateTime? _selectedDate;
 
   @override
   void dispose() {
     super.dispose();
     analisisCapaianController.dispose();
     tanggalController.dispose();
+    pengamatanController.dispose();
+    muridIdController.dispose();
   }
 
-  bool _obscureText = true;
+  Future<void> _selectDate(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: _selectedDate ?? DateTime.now(),
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2101),
+    );
+    if (picked != null && picked != _selectedDate) {
+      setState(() {
+        _selectedDate = picked;
+        tanggalController.text =
+            DateFormat('dd MMMM yyyy').format(_selectedDate!);
+      });
+    }
+  }
+
+  void addAnekdot() {
+    ref.read(anekdotControllerProvider.notifier).addAnekdot(
+        analisisCapaian: analisisCapaianController.text,
+        tanggal: tanggalController.text,
+        pengamatan: pengamatanController.text,
+        muridId: muridIdController.text,
+        context: context);
+  }
+
   @override
   Widget build(BuildContext context) {
+    final muridAsyncValue =
+        ref.watch(getMuridByFiltersProvider(widget.kelompok));
+
     return Scaffold(
       appBar: const CustomAppBar(
-        title: 'Tambah Murid',
+        title: 'Tambah Anekdot',
       ),
       backgroundColor: Colors.white,
       body: SingleChildScrollView(
@@ -54,56 +79,79 @@ class _AddAnekdotPageState extends ConsumerState<AddAnekdotPage> {
           child: Column(
             children: [
               const SizedBox(
-                height: 60,
+                height: 40,
+              ),
+              muridAsyncValue.when(
+                data: (muridList) {
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 22),
+                    child: DropdownButtonFormField<String>(
+                      decoration: const InputDecoration(
+                        labelText: "Murid",
+                        border: OutlineInputBorder(),
+                      ),
+                      items: muridList.map((murid) {
+                        return DropdownMenuItem<String>(
+                          value: murid.id,
+                          child: Text(murid.nama),
+                        );
+                      }).toList(),
+                      onChanged: (String? newValue) {
+                        muridIdController.text = newValue ?? '';
+                      },
+                    ),
+                  );
+                },
+                loading: () => const CircularProgressIndicator(),
+                error: (error, stack) => Text('Error: $error'),
               ),
               Padding(
                 padding: const EdgeInsets.only(bottom: 22),
-                child: CustomTextField(
-                  labelText: "Bulan",
-                  controller: bulanController,
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(bottom: 22),
-                child: CustomTextField(
-                  labelText: "muridId",
-                  controller: muridIdController,
-                  forceUppercase: true,
+                child: Column(
+                  children: [
+                    TextField(
+                      controller: tanggalController,
+                      decoration: InputDecoration(
+                        border: const OutlineInputBorder(),
+                        labelText: 'Tanggal',
+                        suffixIcon: IconButton(
+                          icon: const Icon(Icons.calendar_today),
+                          onPressed: () => _selectDate(context),
+                        ),
+                      ),
+                      readOnly: true,
+                    ),
+                  ],
                 ),
               ),
               Padding(
                 padding: const EdgeInsets.only(bottom: 22),
                 child: TextField(
-                  keyboardType: TextInputType.text,
+                  keyboardType: TextInputType.multiline,
+                  maxLines: null,
+                  minLines: 5,
+                  controller: pengamatanController,
+                  maxLength: 1000,
+                  decoration: const InputDecoration(
+                      border: OutlineInputBorder(), labelText: 'Pengamatan'),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(bottom: 22),
+                child: TextField(
+                  keyboardType: TextInputType.multiline,
+                  maxLines: null,
+                  minLines: 5,
                   controller: analisisCapaianController,
+                  maxLength: 1000,
                   decoration: const InputDecoration(
                       border: OutlineInputBorder(),
                       labelText: 'analisisCapaian'),
                 ),
               ),
-              Padding(
-                padding: const EdgeInsets.only(bottom: 22),
-                child: TextField(
-                  obscureText: _obscureText,
-                  controller: tanggalController,
-                  decoration: InputDecoration(
-                      suffixIcon: IconButton(
-                        icon: Icon(_obscureText
-                            ? Icons.visibility
-                            : Icons.visibility_off),
-                        onPressed: () {
-                          setState(() {
-                            _obscureText = !_obscureText; // Toggle _obscureText
-                          });
-                        },
-                      ),
-                      border: const OutlineInputBorder(),
-                      labelText: 'tanggal'),
-                ),
-              ),
               ElevatedButton(
                 onPressed: () {
-                  // onSignup();
+                  addAnekdot();
                 },
                 style: ButtonStyle(
                   backgroundColor:
@@ -119,7 +167,7 @@ class _AddAnekdotPageState extends ConsumerState<AddAnekdotPage> {
                 child: Container(
                   width: double.infinity,
                   alignment: Alignment.center,
-                  child: const Text("Tambah Murid",
+                  child: const Text("Tambah Anekdot",
                       style:
                           TextStyle(fontFamily: 'inter', color: Colors.white)),
                 ),
@@ -131,10 +179,6 @@ class _AddAnekdotPageState extends ConsumerState<AddAnekdotPage> {
           ),
         ),
       )),
-      drawer: CustomDrawer(
-        selectedIndex: _selectedIndex,
-        onItemSelected: _onItemSelected,
-      ),
     );
   }
 }

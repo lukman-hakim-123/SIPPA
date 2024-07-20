@@ -19,6 +19,8 @@ abstract class IAnekdotAPI {
   FutureEither<Document> addAnekdot(AnekdotModel anekdot);
   Future<List<Document>> getUserAnekdot(String uid);
   Stream<RealtimeMessage> getLatestAnekdot();
+  Future<List<Document>> getKelompokAnekdot(String kelompok);
+  Future<List<Document>> getAllAnekdot();
 }
 
 class AnekdotAPI implements IAnekdotAPI {
@@ -51,13 +53,34 @@ class AnekdotAPI implements IAnekdotAPI {
   }
 
   @override
-  Future<List<Document>> getUserAnekdot(String uid) async {
+  Future<List<Document>> getUserAnekdot(String muridId) async {
+    final documents = await _db.listDocuments(
+      databaseId: AppwriteConstants.databaseId,
+      collectionId: AppwriteConstants.anekdotCollection,
+      queries: [
+        Query.equal('muridId', muridId),
+      ],
+    );
+    return documents.documents;
+  }
+
+  @override
+  Future<List<Document>> getKelompokAnekdot(String uid) async {
     final documents = await _db.listDocuments(
       databaseId: AppwriteConstants.databaseId,
       collectionId: AppwriteConstants.anekdotCollection,
       queries: [
         Query.equal('uid', uid),
       ],
+    );
+    return documents.documents;
+  }
+
+  @override
+  Future<List<Document>> getAllAnekdot() async {
+    final documents = await _db.listDocuments(
+      databaseId: AppwriteConstants.databaseId,
+      collectionId: AppwriteConstants.anekdotCollection,
     );
     return documents.documents;
   }

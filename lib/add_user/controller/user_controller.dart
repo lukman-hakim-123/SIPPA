@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sippa/apis/users_api.dart';
+import 'package:sippa/auth/controllers/auth_controller.dart';
 import 'package:sippa/models/user.dart';
 
 final muridControllerProvider =
@@ -10,13 +11,21 @@ final muridControllerProvider =
 final getMuridByFiltersProvider =
     FutureProvider.family<List<User>, String>((ref, kelompok) async {
   final muridController = ref.watch(muridControllerProvider.notifier);
-  await muridController.fetchMurid(kelompok);
-  return ref.watch(muridControllerProvider);
+  final levelUser = ref.watch(currentUserDetailsProvider).value!.levelUser;
+  if (levelUser == 1) {
+    await muridController.fetchAllMurid();
+    return ref.watch(muridControllerProvider);
+  } else {
+    await muridController.fetchMurid(kelompok);
+    return ref.watch(muridControllerProvider);
+  }
 });
+
 final getLatestUsersProvider = StreamProvider((ref) {
   final userApi = ref.watch(userAPIProvider);
   return userApi.getLatestMurid();
 });
+
 final getGuruByFiltersProvider = FutureProvider<List<User>>((ref) async {
   final guruController = ref.watch(muridControllerProvider.notifier);
   await guruController.fetchGuru();
@@ -33,7 +42,18 @@ class UserController extends StateNotifier<List<User>> {
 
   Future<void> fetchMurid(String kelompok) async {
     try {
-      final documents = await _userAPI.getAllMurid(kelompok);
+      final documents = await _userAPI.getKelompokMurid(kelompok);
+      state = documents.map((doc) => User.fromMap(doc.data)).toList();
+    } catch (e) {
+      state = [];
+      // Handle errors as needed
+      // Or handle error state if needed
+    }
+  }
+
+  Future<void> fetchAllMurid() async {
+    try {
+      final documents = await _userAPI.getAllMurid();
       state = documents.map((doc) => User.fromMap(doc.data)).toList();
     } catch (e) {
       state = [];

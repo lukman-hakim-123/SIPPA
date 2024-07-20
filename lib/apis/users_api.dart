@@ -17,7 +17,8 @@ final userAPIProvider = Provider((ref) {
 abstract class IUserAPI {
   FutureEitherVoid saveUserData(User userModel);
   Future<model.Document> getUserData(String uid);
-  Future<List<model.Document>> getAllMurid(String kelompok);
+  Future<List<model.Document>> getKelompokMurid(String kelompok);
+  Future<List<model.Document>> getAllMurid();
   Stream<RealtimeMessage> getLatestMurid();
   Future<List<model.Document>> getAllGuru();
 }
@@ -54,13 +55,25 @@ class UserAPI implements IUserAPI {
   }
 
   @override
-  Future<List<model.Document>> getAllMurid(String kelompok) async {
+  Future<List<model.Document>> getKelompokMurid(String kelompok) async {
     final documents = await _db.listDocuments(
       databaseId: AppwriteConstants.databaseId,
       collectionId: AppwriteConstants.collectionUserId,
       queries: [
         Query.equal('levelUser', 3),
         Query.equal('kelompok', kelompok),
+      ],
+    );
+    return documents.documents;
+  }
+
+  @override
+  Future<List<model.Document>> getAllMurid() async {
+    final documents = await _db.listDocuments(
+      databaseId: AppwriteConstants.databaseId,
+      collectionId: AppwriteConstants.collectionUserId,
+      queries: [
+        Query.equal('levelUser', 3),
       ],
     );
     return documents.documents;
