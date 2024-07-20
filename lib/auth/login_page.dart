@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:sippa/auth/signup_page.dart';
 
 import 'controllers/auth_controller.dart';
 
@@ -28,9 +27,11 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     ref.read(authControllerProvider.notifier).login(
         email: emailController.text,
         password: passwordController.text,
-        context: context);
+        context: context,
+        ref: ref);
   }
 
+  bool _obscureText = true;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -75,14 +76,26 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                   ),
                 ),
                 Padding(
-                  padding: const EdgeInsets.only(bottom: 15),
-                  child: TextField(
-                    obscureText: true,
-                    controller: passwordController,
-                    decoration: const InputDecoration(
-                        border: OutlineInputBorder(), labelText: 'Password'),
-                  ),
-                ),
+                    padding: const EdgeInsets.only(bottom: 15),
+                    child: TextField(
+                      obscureText: _obscureText,
+                      controller: passwordController,
+                      decoration: InputDecoration(
+                        border: const OutlineInputBorder(),
+                        labelText: 'Password',
+                        suffixIcon: IconButton(
+                          icon: Icon(_obscureText
+                              ? Icons.visibility
+                              : Icons.visibility_off),
+                          onPressed: () {
+                            setState(() {
+                              _obscureText =
+                                  !_obscureText; // Toggle _obscureText
+                            });
+                          },
+                        ),
+                      ),
+                    )),
                 ElevatedButton(
                   onPressed: () {
                     onLogin();
@@ -109,11 +122,6 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                 const SizedBox(
                   height: 15,
                 ),
-                TextButton(
-                    onPressed: () {
-                      Navigator.push(context, SignupPage.route());
-                    },
-                    child: Text('signup'))
               ],
             ),
           ),

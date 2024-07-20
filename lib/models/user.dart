@@ -3,27 +3,43 @@ import 'dart:convert';
 
 class User {
   final String id;
-
   final String email;
+  final String nama;
+  final String kelompok;
+  final int levelUser;
 
   User({
     required this.id,
     required this.email,
+    required this.nama,
+    required this.kelompok,
+    required this.levelUser,
   });
 
   User copyWith({
     String? id,
     String? email,
+    String? nama,
+    String? kelompok,
+    int? levelUser,
   }) {
     return User(
       id: id ?? this.id,
       email: email ?? this.email,
+      nama: nama ?? this.nama,
+      kelompok: kelompok ?? this.kelompok,
+      levelUser: levelUser ?? this.levelUser,
     );
   }
 
   Map<String, dynamic> toMap() {
     final result = <String, dynamic>{};
-    result.addAll({'email': email});
+    result.addAll({
+      'email': email,
+      'nama': nama,
+      'kelompok': kelompok,
+      'levelUser': levelUser,
+    });
     return result;
   }
 
@@ -31,6 +47,9 @@ class User {
     return User(
       id: map['\$id'] ?? '',
       email: map['email'] ?? '',
+      nama: map['nama'] ?? '',
+      kelompok: map['kelompok'] ?? '',
+      levelUser: map['levelUser'] ?? 0,
     );
   }
 
@@ -40,15 +59,22 @@ class User {
       User.fromMap(json.decode(source) as Map<String, dynamic>);
 
   @override
-  String toString() => 'User(id: $id, email: $email)';
+  String toString() {
+    return 'User(id: $id, email: $email, nama: $nama, kelompok: $kelompok, levelUser: $levelUser)';
+  }
 
   @override
   bool operator ==(covariant User other) {
     if (identical(this, other)) return true;
 
-    return other.id == id && other.email == email;
+    return other.email == email &&
+        other.nama == nama &&
+        other.kelompok == kelompok &&
+        other.levelUser == levelUser;
   }
 
   @override
-  int get hashCode => id.hashCode ^ email.hashCode;
+  int get hashCode {
+    return id.hashCode ^ email.hashCode ^ nama.hashCode ^ kelompok.hashCode;
+  }
 }

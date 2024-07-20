@@ -9,17 +9,25 @@ import '../core/type_defs.dart';
 import '../models/user.dart';
 
 final userAPIProvider = Provider((ref) {
-  return UserAPI(db: ref.watch(appwriteDatabaseProvider));
+  return UserAPI(
+      db: ref.watch(appwriteDatabaseProvider),
+      realtime: ref.watch(appwriteRealtimeProvider));
 });
 
 abstract class IUserAPI {
   FutureEitherVoid saveUserData(User userModel);
   Future<model.Document> getUserData(String uid);
+  Future<List<model.Document>> getAllMurid(String kelompok);
+  Stream<RealtimeMessage> getLatestMurid();
+  Future<List<model.Document>> getAllGuru();
 }
 
 class UserAPI implements IUserAPI {
   final Databases _db;
-  UserAPI({required Databases db}) : _db = db;
+  final Realtime _realtime;
+  UserAPI({required Databases db, required Realtime realtime})
+      : _db = db,
+        _realtime = realtime;
 
   @override
   FutureEitherVoid saveUserData(User userModel) async {
@@ -43,5 +51,37 @@ class UserAPI implements IUserAPI {
         databaseId: AppwriteConstants.databaseId,
         collectionId: AppwriteConstants.collectionUserId,
         documentId: uid);
+  }
+
+  @override
+  Future<List<model.Document>> getAllMurid(String kelompok) async {
+    final documents = await _db.listDocuments(
+      databaseId: AppwriteConstants.databaseId,
+      collectionId: AppwriteConstants.collectionUserId,
+      queries: [
+        Query.equal('levelUser', 3),
+        Query.equal('kelompok', kelompok),
+      ],
+    );
+    return documents.documents;
+  }
+
+  @override
+  Stream<RealtimeMessage> getLatestMurid() {
+    return _realtime.subscribe([
+      'databases.${AppwriteConstants.databaseId}.collections.${AppwriteConstants.collectionUserId}.documents',
+    ]).stream;
+  }
+
+  @override
+  Future<List<model.Document>> getAllGuru() async {
+    final documents = await _db.listDocuments(
+      databaseId: AppwriteConstants.databaseId,
+      collectionId: AppwriteConstants.collectionUserId,
+      queries: [
+        Query.equal('levelUser', 2),
+      ],
+    );
+    return documents.documents;
   }
 }

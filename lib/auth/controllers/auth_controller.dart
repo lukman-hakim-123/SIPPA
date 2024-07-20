@@ -2,6 +2,7 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:appwrite/models.dart' as model;
+import 'package:sippa/anekdot/anekdot_page.dart';
 import 'package:sippa/apis/auth_api.dart';
 import 'package:sippa/apis/users_api.dart';
 import 'package:sippa/auth/login_page.dart';
@@ -12,10 +13,12 @@ import '../../core/utils.dart';
 final authControllerProvider =
     StateNotifierProvider<AuthController, bool>((ref) {
   return AuthController(
-      authAPI: ref.watch(authAPIProvider), userAPI: ref.watch(userAPIProvider));
+    authAPI: ref.watch(authAPIProvider),
+    userAPI: ref.watch(userAPIProvider),
+  );
 });
 
-final currentUserDetailProvider = FutureProvider((ref) {
+final currentUserDetailsProvider = FutureProvider((ref) {
   final currentUserId = ref.watch(currentUserAccountProvider).value!.$id;
   final userDetails = ref.watch(userDetailsProvider(currentUserId));
   return userDetails.value;
@@ -47,17 +50,47 @@ class AuthController extends StateNotifier<bool> {
   void signup({
     required String email,
     required String password,
+    required String nama,
+    required String kelompok,
     required BuildContext context,
   }) async {
     state = true;
     final response = await _authAPI.signup(email: email, password: password);
     state = false;
     response.fold((l) => showSnackBar(context, l.message), (r) async {
-      User userModel = User(email: email, id: r.$id);
+      User userModel = User(
+          email: email,
+          id: r.$id,
+          nama: nama,
+          kelompok: kelompok,
+          levelUser: 3);
       final res2 = await _userAPI.saveUserData(userModel);
       res2.fold((l) => showSnackBar(context, l.message), (r) {
         showSnackBar(context, "Account Created Successfully");
-        Navigator.push(context, LoginPage.route());
+      });
+    });
+  }
+
+  void signupguru({
+    required String email,
+    required String password,
+    required String nama,
+    required String kelompok,
+    required BuildContext context,
+  }) async {
+    state = true;
+    final response = await _authAPI.signup(email: email, password: password);
+    state = false;
+    response.fold((l) => showSnackBar(context, l.message), (r) async {
+      User userModel = User(
+          email: email,
+          id: r.$id,
+          nama: nama,
+          kelompok: kelompok,
+          levelUser: 2);
+      final res2 = await _userAPI.saveUserData(userModel);
+      res2.fold((l) => showSnackBar(context, l.message), (r) {
+        showSnackBar(context, "Account Created Successfully");
       });
     });
   }
@@ -66,12 +99,15 @@ class AuthController extends StateNotifier<bool> {
     required String email,
     required String password,
     required BuildContext context,
+    required WidgetRef ref,
   }) async {
     state = true;
     final response = await _authAPI.login(email: email, password: password);
     state = false;
-    response.fold((l) => showSnackBar(context, l.message), (r) async {
+    response.fold((l) => showSnackBar(context, l.message), (r) {
       showSnackBar(context, "Login is Successfully");
+      ref.refresh(currentUserAccountProvider);
+      Navigator.pushReplacement(context, AnekdotPage.route());
     });
   }
 
@@ -87,7 +123,7 @@ class AuthController extends StateNotifier<bool> {
         (l) => null,
         (r) => {
               Navigator.pushAndRemoveUntil(
-                  context, LoginPage.route(), (route) => false)
+                  context, LoginPage.route(), (route) => false),
             });
   }
 }
