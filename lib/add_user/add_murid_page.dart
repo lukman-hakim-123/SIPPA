@@ -1,10 +1,7 @@
 import 'package:flutter/material.dart';
-
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sippa/widget_view/appbar.dart';
-import 'package:sippa/widget_view/drawer.dart';
 import 'package:sippa/widget_view/field.dart';
-
 import '../auth/controllers/auth_controller.dart';
 
 class AddMuridPage extends ConsumerStatefulWidget {
@@ -17,25 +14,19 @@ class AddMuridPage extends ConsumerStatefulWidget {
 }
 
 class _AddMuridPageState extends ConsumerState<AddMuridPage> {
-  int _selectedIndex = 2;
-
-  void _onItemSelected(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
-  }
-
+  final List<String> kelompokOptions = ['A', 'B', 'C', 'D', 'E', 'F'];
+  String? selectedKelompok;
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
   final nameController = TextEditingController();
-  final kelompokController = TextEditingController();
-  // final passwordController = TextEditingController();
 
   @override
   void dispose() {
-    super.dispose();
     emailController.dispose();
     passwordController.dispose();
+    nameController.dispose();
+    super.dispose();
   }
 
   void onSignup() {
@@ -43,13 +34,18 @@ class _AddMuridPageState extends ConsumerState<AddMuridPage> {
         email: emailController.text,
         password: passwordController.text,
         nama: nameController.text,
-        kelompok: kelompokController.text,
+        kelompok: selectedKelompok!,
         context: context);
   }
 
-  bool _obscureText = true;
+  final bool _obscureText = true;
+
   @override
   Widget build(BuildContext context) {
+    final levelUser = ref.watch(currentUserDetailsProvider).value!.levelUser;
+    final kelompok = ref.watch(currentUserDetailsProvider).value!.kelompok;
+    List<String> kelompokOptionsFiltered =
+        (levelUser == 2) ? [kelompok] : kelompokOptions;
     return Scaffold(
       appBar: const CustomAppBar(
         title: 'Tambah Murid',
@@ -63,89 +59,119 @@ class _AddMuridPageState extends ConsumerState<AddMuridPage> {
           bottom: 40,
         ),
         child: Center(
-          child: Column(
-            children: [
-              const SizedBox(
-                height: 60,
-              ),
-              Padding(
-                padding: const EdgeInsets.only(bottom: 22),
-                child: CustomTextField(
-                  labelText: "Nama",
-                  controller: nameController,
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(bottom: 22),
-                child: CustomTextField(
-                  labelText: "Kelompok",
-                  controller: kelompokController,
-                  forceUppercase: true,
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(bottom: 22),
-                child: TextField(
-                  keyboardType: TextInputType.emailAddress,
-                  controller: emailController,
-                  decoration: const InputDecoration(
-                      border: OutlineInputBorder(), labelText: 'Email'),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(bottom: 22),
-                child: TextField(
-                  obscureText: _obscureText,
-                  controller: passwordController,
-                  decoration: InputDecoration(
-                      suffixIcon: IconButton(
-                        icon: Icon(_obscureText
-                            ? Icons.visibility
-                            : Icons.visibility_off),
-                        onPressed: () {
-                          setState(() {
-                            _obscureText = !_obscureText; // Toggle _obscureText
-                          });
-                        },
-                      ),
-                      border: const OutlineInputBorder(),
-                      labelText: 'Password'),
-                ),
-              ),
-              ElevatedButton(
-                onPressed: () {
-                  onSignup();
-                },
-                style: ButtonStyle(
-                  backgroundColor:
-                      MaterialStateProperty.all(const Color(0xff104993)),
-                  shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                    RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(6.0),
-                    ),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const SizedBox(height: 60),
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 22),
+                  child: CustomTextField(
+                    labelText: "Nama",
+                    controller: nameController,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Nama tidak boleh kosong';
+                      }
+                      return null;
+                    },
                   ),
-                  fixedSize:
-                      MaterialStateProperty.all(const Size.fromHeight(45)),
                 ),
-                child: Container(
-                  width: double.infinity,
-                  alignment: Alignment.center,
-                  child: const Text("Tambah Murid",
-                      style:
-                          TextStyle(fontFamily: 'inter', color: Colors.white)),
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 22),
+                  child: DropdownButtonFormField<String>(
+                    decoration: const InputDecoration(
+                      border: OutlineInputBorder(),
+                      labelText: 'Kelompok',
+                    ),
+                    value: selectedKelompok,
+                    onChanged: (value) {
+                      setState(() {
+                        selectedKelompok = value;
+                      });
+                    },
+                    validator: (value) {
+                      if (value == null) {
+                        return 'Pilih kelompok';
+                      }
+                      return null;
+                    },
+                    items: kelompokOptionsFiltered.map((String option) {
+                      return DropdownMenuItem<String>(
+                        value: option,
+                        child: Text(option),
+                      );
+                    }).toList(),
+                  ),
                 ),
-              ),
-              const SizedBox(
-                height: 15,
-              ),
-            ],
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 22),
+                  child: CustomTextField(
+                    keyboardType: TextInputType.emailAddress,
+                    labelText: 'Email',
+                    controller: emailController,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Email tidak boleh kosong';
+                      }
+                      final emailRegex = RegExp(r'^[^@]+@[^@]+\.[^@]+$');
+                      if (!emailRegex.hasMatch(value)) {
+                        return 'Masukkan email yang valid';
+                      }
+                      return null;
+                    },
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 22),
+                  child: CustomTextField(
+                    obscureText: _obscureText,
+                    icon: true,
+                    labelText: 'Password',
+                    controller: passwordController,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Password tidak boleh kosong';
+                      }
+                      if (value.length < 8) {
+                        return 'Password harus minimal 8 karakter';
+                      }
+                      return null;
+                    },
+                  ),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    if (_formKey.currentState?.validate() ?? false) {
+                      onSignup();
+                    }
+                  },
+                  style: ButtonStyle(
+                    backgroundColor:
+                        MaterialStateProperty.all(const Color(0xff104993)),
+                    shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                      RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(6.0),
+                      ),
+                    ),
+                    fixedSize:
+                        MaterialStateProperty.all(const Size.fromHeight(45)),
+                  ),
+                  child: Container(
+                    width: double.infinity,
+                    alignment: Alignment.center,
+                    child: const Text("Tambah Murid",
+                        style: TextStyle(
+                            fontFamily: 'inter', color: Colors.white)),
+                  ),
+                ),
+                const SizedBox(height: 15),
+              ],
+            ),
           ),
         ),
       )),
-      drawer: CustomDrawer(
-        selectedIndex: _selectedIndex,
-        onItemSelected: _onItemSelected,
-      ),
     );
   }
 }

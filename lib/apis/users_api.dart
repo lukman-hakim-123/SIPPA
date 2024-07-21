@@ -21,6 +21,7 @@ abstract class IUserAPI {
   Future<List<model.Document>> getAllMurid();
   Stream<RealtimeMessage> getLatestMurid();
   Future<List<model.Document>> getAllGuru();
+  FutureVoid deleteGuru(User user);
 }
 
 class UserAPI implements IUserAPI {
@@ -96,5 +97,18 @@ class UserAPI implements IUserAPI {
       ],
     );
     return documents.documents;
+  }
+
+  @override
+  FutureVoid deleteGuru(User user) async {
+    try {
+      await _db.deleteDocument(
+        databaseId: AppwriteConstants.databaseId,
+        collectionId: AppwriteConstants.collectionUserId,
+        documentId: user.id,
+      );
+    } catch (e) {
+      // print(e.toString());
+    }
   }
 }

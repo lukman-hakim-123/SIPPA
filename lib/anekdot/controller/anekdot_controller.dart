@@ -23,7 +23,7 @@ final getAnekdotByUserIdProvider =
   if (levelUser == 1) {
     return anekdotController.getAllAnekdot();
   } else if (levelUser == 2) {
-    return anekdotController.getKelompokAnekdot(id);
+    return anekdotController.getAllAnekdot();
   } else {
     return anekdotController.getUserAnekdot(id);
   }
@@ -91,10 +91,51 @@ class AnekdotController extends StateNotifier<bool> {
     state = false;
     res.fold((l) => showSnackBar(context, l.message), (r) {
       showSnackBar(context, 'Anekdot Added');
-      Navigator.push(
+      Navigator.pushReplacement(
         context,
         AnekdotPage.route(),
       );
     });
+  }
+
+  void updateAnekdot({
+    required String anekdotId,
+    required String pengamatan,
+    required String tanggal,
+    required String analisisCapaian,
+    required String muridId,
+    required BuildContext context,
+  }) async {
+    state = true;
+    final user = _ref.read(currentUserDetailsProvider).value!;
+    AnekdotModel anekdot = AnekdotModel(
+      id: anekdotId,
+      pengamatan: pengamatan,
+      tanggal: tanggal,
+      analisisCapaian: analisisCapaian,
+      muridId: muridId,
+      uid: user.id,
+    );
+
+    final res = await _anekdotAPI.updateAnekdot(anekdot);
+    state = false;
+    res.fold((l) => showSnackBar(context, l.message), (r) {
+      showSnackBar(context, 'Anekdot Updated');
+      Navigator.pushReplacement(
+        context,
+        AnekdotPage.route(),
+      );
+    });
+  }
+
+  void deleteAnekdot(
+    AnekdotModel anekdot,
+    BuildContext context,
+  ) async {
+    try {
+      await _anekdotAPI.deleteAnekdot(anekdot);
+    } catch (e) {
+      // print(e.toString());
+    }
   }
 }

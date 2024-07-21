@@ -2,6 +2,8 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:appwrite/models.dart' as model;
+import 'package:sippa/add_user/list_guru.dart';
+import 'package:sippa/add_user/list_murid.dart';
 import 'package:sippa/anekdot/anekdot_page.dart';
 import 'package:sippa/apis/auth_api.dart';
 import 'package:sippa/apis/users_api.dart';
@@ -66,7 +68,9 @@ class AuthController extends StateNotifier<bool> {
           levelUser: 3);
       final res2 = await _userAPI.saveUserData(userModel);
       res2.fold((l) => showSnackBar(context, l.message), (r) {
-        showSnackBar(context, "Account Created Successfully");
+        showSnackBar(context, "Account Murid Created Successfully");
+        Navigator.pushReplacement(
+            context, MuridListPage.route(kelompok: kelompok));
       });
     });
   }
@@ -90,7 +94,8 @@ class AuthController extends StateNotifier<bool> {
           levelUser: 2);
       final res2 = await _userAPI.saveUserData(userModel);
       res2.fold((l) => showSnackBar(context, l.message), (r) {
-        showSnackBar(context, "Account Created Successfully");
+        showSnackBar(context, "Account Guru Created Successfully");
+        Navigator.pushReplacement(context, GuruListPage.route());
       });
     });
   }

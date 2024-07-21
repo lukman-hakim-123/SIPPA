@@ -1,13 +1,28 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-class CustomTextField extends StatelessWidget {
+class ppp extends StatefulWidget {
+  const ppp({super.key});
+
+  @override
+  State<ppp> createState() => _pppState();
+}
+
+class _pppState extends State<ppp> {
+  @override
+  Widget build(BuildContext context) {
+    return const Placeholder();
+  }
+}
+
+class CustomTextField extends StatefulWidget {
   final TextEditingController controller;
   final String labelText;
   final TextInputType keyboardType;
   final bool obscureText;
   final String? Function(String?)? validator;
   final bool forceUppercase;
+  final bool icon;
 
   const CustomTextField({
     super.key,
@@ -17,25 +32,49 @@ class CustomTextField extends StatelessWidget {
     this.obscureText = false,
     this.validator,
     this.forceUppercase = false,
+    this.icon = false,
   });
+
+  @override
+  State<CustomTextField> createState() => _CustomTextFieldState();
+}
+
+class _CustomTextFieldState extends State<CustomTextField> {
+  late bool _obscureText;
+
+  @override
+  void initState() {
+    super.initState();
+    _obscureText = widget.obscureText;
+  }
 
   @override
   Widget build(BuildContext context) {
     return TextFormField(
-      controller: controller,
-      keyboardType: keyboardType,
-      obscureText: obscureText,
+      controller: widget.controller,
+      keyboardType: widget.keyboardType,
+      obscureText: _obscureText,
       decoration: InputDecoration(
         border: const OutlineInputBorder(),
-        labelText: labelText,
-        // contentPadding:
-        //     const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        labelText: widget.labelText,
+        suffixIcon: widget.icon
+            ? IconButton(
+                icon: Icon(
+                    _obscureText ? Icons.visibility : Icons.visibility_off),
+                onPressed: () {
+                  setState(() {
+                    _obscureText = !_obscureText;
+                  });
+                },
+              )
+            : null,
       ),
-      validator: validator,
-      textCapitalization: forceUppercase
+      validator: widget.validator,
+      textCapitalization: widget.forceUppercase
           ? TextCapitalization.characters
           : TextCapitalization.none,
-      inputFormatters: forceUppercase ? [UpperCaseTextFormatter()] : null,
+      inputFormatters:
+          widget.forceUppercase ? [UpperCaseTextFormatter()] : null,
     );
   }
 }

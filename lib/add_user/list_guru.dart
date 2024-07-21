@@ -6,6 +6,8 @@ import 'package:sippa/constant/appwrite.dart';
 import 'package:sippa/models/user.dart';
 import 'package:sippa/widget_view/appbar.dart';
 import 'package:sippa/widget_view/drawer.dart';
+import 'package:sippa/add_user/add_guru_page.dart';
+import 'package:sippa/widget_view/teks.dart';
 
 class GuruListPage extends ConsumerStatefulWidget {
   static route() =>
@@ -30,8 +32,6 @@ class _GuruListPageState extends ConsumerState<GuruListPage> {
 
   @override
   Widget build(BuildContext context) {
-    // final guruAsyncValue = ref.watch(getGuruByFiltersProvider);
-    // ref.watch(combinedGuruListProvider);
     ref.listen<AsyncValue<RealtimeMessage>>(getLatestUsersProvider, (_, next) {
       next.whenData((data) {
         if (data.events.contains(
@@ -40,27 +40,109 @@ class _GuruListPageState extends ConsumerState<GuruListPage> {
           if (!guruList.any((existingUser) => existingUser.id == newUser.id)) {
             setState(() => guruList.add(newUser));
           }
+        } else if (data.events.contains(
+            'databases.*.collections.${AppwriteConstants.collectionUserId}.documents.*.delete')) {
+          final startingPoint = data.events[0].lastIndexOf('documents.');
+          final endPoint = data.events[0].lastIndexOf('.delete');
+          final deletedUserId =
+              data.events[0].substring(startingPoint + 10, endPoint);
+
+          setState(() {
+            guruList.removeWhere((user) => user.id == deletedUserId);
+          });
         }
       });
     });
     return Scaffold(
       appBar: const CustomAppBar(title: 'Daftar Guru'),
-      body: ListView.builder(
-        itemCount: guruList.length,
-        itemBuilder: (context, index) {
-          final guru = guruList[index];
-          return ListTile(
-            title: Text(guru.nama),
-            subtitle: Text('Kelompok: ${guru.kelompok}'),
-          );
-        },
+      body: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        child: ListView(
+          children: [
+            const SizedBox(height: 16),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: ElevatedButton(
+                onPressed: () {
+                  Navigator.push(context, AddGuruPage.route());
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.green,
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 3),
+                ),
+                child:
+                    const CustomText(text: "Tambah Guru", color: Colors.white),
+              ),
+            ),
+            const SizedBox(height: 16),
+            ...guruList.map((guru) => InkWell(
+                  onTap: () {},
+                  child: Card(
+                    margin: const EdgeInsets.symmetric(vertical: 8),
+                    child: ListTile(
+                      title: Text(guru.nama),
+                      subtitle: Text('Kelompok: ${guru.kelompok}'),
+                      trailing: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          // IconButton(
+                          //   icon: const Icon(Icons.edit),
+                          //   onPressed: () {
+                          //   },
+                          // ),
+                          IconButton(
+                            icon: const Icon(Icons.delete),
+                            onPressed: () {
+                              _showDeleteConfirmationDialog(context, ref, guru);
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                )),
+          ],
+        ),
       ),
       drawer: CustomDrawer(
         selectedIndex: selectedIndex,
         onItemSelected: (int index) {
-          selectedIndex = index;
+          setState(() {
+            selectedIndex = index;
+          });
         },
       ),
     );
   }
+}
+
+void _showDeleteConfirmationDialog(
+    BuildContext context, WidgetRef ref, User guru) {
+  showDialog(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: const Text('Konfirmasi Hapus'),
+      content: Text(
+          'Apakah Anda yakin ingin menghapus guru ${guru.nama} kelompok ${guru.kelompok}?'),
+      actions: [
+        TextButton(
+          onPressed: () {
+            Navigator.pop(context);
+          },
+          child: const Text('Batal'),
+        ),
+        TextButton(
+          onPressed: () {
+            Navigator.pop(context);
+            ref.read(muridControllerProvider.notifier).deleteGuru(guru);
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Guru berhasil dihapus')),
+            );
+          },
+          child: const Text('Hapus'),
+        ),
+      ],
+    ),
+  );
 }

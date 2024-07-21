@@ -72,4 +72,22 @@ class UserController extends StateNotifier<List<User>> {
       // Or handle error state if needed
     }
   }
+
+  Future<void> deleteGuru(User user) async {
+    try {
+      await _userAPI.deleteGuru(user);
+      await fetchGuru();
+    } catch (e) {
+      print('Gagal menghapus guru: $e');
+    }
+  }
+
+  Future<void> deleteMurid(User user) async {
+    try {
+      await _userAPI.deleteGuru(user);
+      await fetchGuru();
+    } catch (e) {
+      print('Gagal menghapus guru: $e');
+    }
+  }
 }
