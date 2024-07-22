@@ -25,7 +25,10 @@ final currentUserDetailsProvider = FutureProvider((ref) {
   final userDetails = ref.watch(userDetailsProvider(currentUserId));
   return userDetails.value;
 });
-
+final searchUserProvider = FutureProvider.family((ref, String userId) {
+  final userData = ref.watch(userDetailsProvider(userId));
+  return userData.value;
+});
 final userDetailsProvider = FutureProvider.family((ref, String uid) {
   final authController = ref.watch(authControllerProvider.notifier);
   return authController.getUserData(uid);

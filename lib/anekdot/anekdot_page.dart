@@ -44,9 +44,9 @@ class _AnekdotPageState extends ConsumerState<AnekdotPage> {
         padding: const EdgeInsets.symmetric(horizontal: 16),
         child: userDetailsAsync.when(
           data: (userDetails) {
-            // if (userDetails == null) {
-            //   ref.read(authControllerProvider.notifier).logout(context);
-            // }
+            if (userDetails == null) {
+              const Loader();
+            }
             final userId = userDetails!.id;
             final kelompok = userDetails.kelompok;
             final levelUser = userDetails.levelUser;

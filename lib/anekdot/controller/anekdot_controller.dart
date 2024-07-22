@@ -91,10 +91,7 @@ class AnekdotController extends StateNotifier<bool> {
     state = false;
     res.fold((l) => showSnackBar(context, l.message), (r) {
       showSnackBar(context, 'Anekdot Added');
-      Navigator.pushReplacement(
-        context,
-        AnekdotPage.route(),
-      );
+      Navigator.pop(context);
     });
   }
 
@@ -121,10 +118,7 @@ class AnekdotController extends StateNotifier<bool> {
     state = false;
     res.fold((l) => showSnackBar(context, l.message), (r) {
       showSnackBar(context, 'Anekdot Updated');
-      Navigator.pushReplacement(
-        context,
-        AnekdotPage.route(),
-      );
+      Navigator.pop(context);
     });
   }
 

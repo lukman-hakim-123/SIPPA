@@ -1,20 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-class ppp extends StatefulWidget {
-  const ppp({super.key});
-
-  @override
-  State<ppp> createState() => _pppState();
-}
-
-class _pppState extends State<ppp> {
-  @override
-  Widget build(BuildContext context) {
-    return const Placeholder();
-  }
-}
-
 class CustomTextField extends StatefulWidget {
   final TextEditingController controller;
   final String labelText;

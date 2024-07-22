@@ -88,6 +88,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                   Padding(
                     padding: const EdgeInsets.only(bottom: 15),
                     child: CustomTextField(
+                      obscureText: true,
                       controller: passwordController,
                       labelText: 'Password',
                       validator: (value) {

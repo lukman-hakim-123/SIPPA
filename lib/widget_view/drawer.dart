@@ -4,6 +4,7 @@ import 'package:sippa/add_user/list_guru.dart';
 import 'package:sippa/add_user/list_murid.dart';
 import 'package:sippa/anekdot/anekdot_page.dart';
 import 'package:sippa/auth/controllers/auth_controller.dart';
+import 'package:sippa/capaian_pembelajaran/cp_page.dart';
 import 'package:sippa/common/loading.dart';
 
 class CustomDrawer extends ConsumerWidget {
@@ -43,6 +44,14 @@ class CustomDrawer extends ConsumerWidget {
               selected: selectedIndex == 0,
               onTap: () {
                 Navigator.pushReplacement(context, AnekdotPage.route());
+              },
+            ),
+            ListTile(
+              title: const Text('cp'),
+              selected: selectedIndex == 3,
+              onTap: () {
+                Navigator.pushReplacement(context, CpPage.route());
+                onItemSelected(3);
               },
             ),
             ..._buildMenuItems(levelUser, selectedIndex, context, kelompok),
