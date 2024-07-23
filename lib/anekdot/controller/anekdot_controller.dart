@@ -1,7 +1,6 @@
 import 'package:appwrite/models.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:sippa/anekdot/anekdot_page.dart';
 import 'package:sippa/apis/anekdot_api.dart';
 import 'package:sippa/apis/users_api.dart';
 import 'package:sippa/core/utils.dart';

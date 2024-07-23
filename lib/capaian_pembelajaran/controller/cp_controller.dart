@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sippa/apis/cp_api.dart';
 import 'package:sippa/apis/users_api.dart';
-import 'package:sippa/capaian_pembelajaran/cp_page.dart';
 import 'package:sippa/core/utils.dart';
 import 'package:sippa/auth/controllers/auth_controller.dart';
 import 'package:sippa/models/cp.dart';

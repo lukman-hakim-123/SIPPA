@@ -6,6 +6,7 @@ import 'package:sippa/anekdot/anekdot_page.dart';
 import 'package:sippa/auth/controllers/auth_controller.dart';
 import 'package:sippa/capaian_pembelajaran/cp_page.dart';
 import 'package:sippa/common/loading.dart';
+import 'package:sippa/hasil_karya/hasil_karya_page.dart';
 
 class CustomDrawer extends ConsumerWidget {
   final int selectedIndex;
@@ -44,14 +45,23 @@ class CustomDrawer extends ConsumerWidget {
               selected: selectedIndex == 0,
               onTap: () {
                 Navigator.pushReplacement(context, AnekdotPage.route());
+                onItemSelected(0);
               },
             ),
             ListTile(
-              title: const Text('cp'),
-              selected: selectedIndex == 3,
+              title: const Text('Capaian Pembelajaran'),
+              selected: selectedIndex == 1,
               onTap: () {
                 Navigator.pushReplacement(context, CpPage.route());
-                onItemSelected(3);
+                onItemSelected(1);
+              },
+            ),
+            ListTile(
+              title: const Text('Hasil Karya'),
+              selected: selectedIndex == 2,
+              onTap: () {
+                Navigator.pushReplacement(context, HkPage.route());
+                onItemSelected(2);
               },
             ),
             ..._buildMenuItems(levelUser, selectedIndex, context, kelompok),

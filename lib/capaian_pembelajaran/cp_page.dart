@@ -25,7 +25,7 @@ class CpPage extends ConsumerStatefulWidget {
 }
 
 class _CpPageState extends ConsumerState<CpPage> {
-  int _selectedIndex = 0;
+  int _selectedIndex = 1;
   List<CpModel> _cpList = [];
 
   void _onItemSelected(int index) {
@@ -106,13 +106,16 @@ class _CpPageState extends ConsumerState<CpPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Padding(
-                    padding: EdgeInsets.only(bottom: 16),
-                    child: CustomText(
-                      text: "Capaian Pembelajaran 2024/2025",
-                      fontSize: 18,
-                      fontWeight: FontWeight.w800,
-                      textAlign: TextAlign.start,
+                  const Align(
+                    alignment: Alignment.centerRight,
+                    child: Padding(
+                      padding: EdgeInsets.only(bottom: 16),
+                      child: CustomText(
+                        text: "Capaian Pembelajaran",
+                        fontSize: 18,
+                        fontWeight: FontWeight.w800,
+                        textAlign: TextAlign.start,
+                      ),
                     ),
                   ),
                   if (levelUser != 3)
@@ -371,6 +374,7 @@ class _CpPageState extends ConsumerState<CpPage> {
                         const Center(child: CircularProgressIndicator()),
                     error: (error, stack) => const Loader(),
                   ),
+                  const SizedBox(height: 40),
                 ],
               ),
             );
@@ -388,48 +392,51 @@ class _CpPageState extends ConsumerState<CpPage> {
 }
 
 void _showDeleteDialog(BuildContext context, WidgetRef ref, CpModel cp,
-    AsyncValue<Document> muridData) {
-  muridData.when(
-    data: (data) {
-      final nama = data.data['nama'];
-      return showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: const Text('Hapus Data'),
-            content: SingleChildScrollView(
-              child: ListBody(
-                children: [
-                  Text(
-                      'Apakah Anda yakin ingin capaian pembelajaran $nama pada tanggal ${cp.tanggal}'),
-                ],
-              ),
-            ),
-            actions: <Widget>[
-              TextButton(
-                child: const Text('Cancel'),
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-              ),
-              TextButton(
-                child: const Text('Hapus'),
-                onPressed: () {
-                  Navigator.of(context).pop();
-                  ref.read(cpControllerProvider.notifier).deleteCp(cp, context);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Capaian Pembelajaran berhasil dihapus'),
-                    ),
+    AsyncValue<Document?> muridData) {
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: const Text('Hapus Data'),
+        content: SingleChildScrollView(
+          child: ListBody(
+            children: [
+              muridData.when(
+                data: (data) {
+                  final nama = data?.data['nama'] ?? 'Murid tidak ditemukan';
+                  return Text(
+                    'Apakah Anda yakin ingin menghapus capaian pembelajaran $nama pada tanggal ${cp.tanggal}',
                   );
                 },
+                loading: () => const CircularProgressIndicator(),
+                error: (_, __) => Text(
+                  'Apakah Anda yakin ingin menghapus capaian pembelajaran pada tanggal ${cp.tanggal}?',
+                ),
               ),
             ],
-          );
-        },
+          ),
+        ),
+        actions: <Widget>[
+          TextButton(
+            child: const Text('Batal'),
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+          ),
+          TextButton(
+            child: const Text('Hapus'),
+            onPressed: () {
+              Navigator.of(context).pop();
+              ref.read(cpControllerProvider.notifier).deleteCp(cp, context);
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Capaian Pembelajaran berhasil dihapus'),
+                ),
+              );
+            },
+          ),
+        ],
       );
     },
-    loading: () => const Loader(),
-    error: (error, stack) => const Text('Error'),
   );
 }

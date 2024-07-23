@@ -45,9 +45,9 @@ class _AnekdotPageState extends ConsumerState<AnekdotPage> {
         child: userDetailsAsync.when(
           data: (userDetails) {
             if (userDetails == null) {
-              const Loader();
+              return const Loader();
             }
-            final userId = userDetails!.id;
+            final userId = userDetails.id;
             final kelompok = userDetails.kelompok;
             final levelUser = userDetails.levelUser;
 
@@ -119,7 +119,7 @@ class _AnekdotPageState extends ConsumerState<AnekdotPage> {
               children: [
                 const SizedBox(height: 16),
                 const CustomText(
-                  text: "Catatan Anekdot 2024/2025",
+                  text: "Catatan Anekdot",
                   fontSize: 20,
                   fontWeight: FontWeight.w800,
                   textAlign: TextAlign.end,

@@ -103,6 +103,21 @@ class _EditCpPageState extends ConsumerState<EditCpPage> {
               const SizedBox(height: 30),
               muridAsyncValue.when(
                 data: (muridList) {
+                  final currentMuridExists = muridList
+                      .any((murid) => murid.id == muridIdController.text);
+
+                  if (!currentMuridExists) {
+                    // Schedule the SnackBar to show after the current build phase
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      Navigator.pop(context);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Data murid tidak ada'),
+                          duration: Duration(seconds: 2),
+                        ),
+                      );
+                    });
+                  }
                   return Padding(
                     padding: const EdgeInsets.only(bottom: 16),
                     child: DropdownButtonFormField<String>(

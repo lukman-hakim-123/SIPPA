@@ -2,33 +2,53 @@ import 'dart:convert';
 
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 class HkModel {
-  final String pengamatan;
+  final String semester;
   final String tanggal;
-  final String analisisCapaian;
+  final String deskripsi;
+  final String nilai;
+  final String jatiDiri;
+  final String literasi;
+  final String imageId;
+  final String kelompok;
   final String uid;
   final String id;
   final String muridId;
   HkModel({
-    required this.pengamatan,
+    required this.semester,
     required this.tanggal,
-    required this.analisisCapaian,
+    required this.deskripsi,
+    required this.nilai,
+    required this.jatiDiri,
+    required this.literasi,
+    required this.imageId,
+    required this.kelompok,
     required this.uid,
     required this.id,
     required this.muridId,
   });
 
   HkModel copyWith({
-    String? pengamatan,
+    String? semester,
     String? tanggal,
-    String? analisisCapaian,
+    String? deskripsi,
+    String? nilai,
+    String? jatiDiri,
+    String? literasi,
+    String? imageId,
+    String? kelompok,
     String? uid,
     String? id,
     String? muridId,
   }) {
     return HkModel(
-      pengamatan: pengamatan ?? this.pengamatan,
+      semester: semester ?? this.semester,
       tanggal: tanggal ?? this.tanggal,
-      analisisCapaian: analisisCapaian ?? this.analisisCapaian,
+      deskripsi: deskripsi ?? this.deskripsi,
+      nilai: nilai ?? this.nilai,
+      jatiDiri: jatiDiri ?? this.jatiDiri,
+      literasi: literasi ?? this.literasi,
+      imageId: imageId ?? this.imageId,
+      kelompok: kelompok ?? this.kelompok,
       uid: uid ?? this.uid,
       id: id ?? this.id,
       muridId: muridId ?? this.muridId,
@@ -37,23 +57,32 @@ class HkModel {
 
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
-      'pengamatan': pengamatan,
+      'semester': semester,
       'tanggal': tanggal,
-      'analisisCapaian': analisisCapaian,
+      'deskripsi': deskripsi,
+      'nilai': nilai,
+      'jatiDiri': jatiDiri,
+      'literasi': literasi,
+      'imageId': imageId,
+      'kelompok': kelompok,
       'uid': uid,
-      'id': id,
       'muridId': muridId,
     };
   }
 
   factory HkModel.fromMap(Map<String, dynamic> map) {
     return HkModel(
-      pengamatan: map['pengamatan'] as String,
-      tanggal: map['tanggal'] as String,
-      analisisCapaian: map['analisisCapaian'] as String,
-      uid: map['uid'] as String,
-      id: map['id'] as String,
-      muridId: map['muridId'] as String,
+      semester: map['semester'] ?? '',
+      tanggal: map['tanggal'] ?? '',
+      deskripsi: map['deskripsi'] ?? '',
+      nilai: map['nilai'] ?? '',
+      jatiDiri: map['jatiDiri'] ?? '',
+      literasi: map['literasi'] ?? '',
+      imageId: map['imageId'] ?? '',
+      kelompok: map['kelompok'] ?? '',
+      uid: map['uid'] ?? '',
+      id: map['\$id'] ?? '',
+      muridId: map['muridId'] ?? '',
     );
   }
 
@@ -64,16 +93,21 @@ class HkModel {
 
   @override
   String toString() {
-    return 'HkModel(pengamatan: $pengamatan, tanggal: $tanggal, analisisCapaian: $analisisCapaian, uid: $uid, id: $id, muridId: $muridId)';
+    return 'HkModel(semester: $semester, tanggal: $tanggal,  deskripsi: $deskripsi, nilai: $nilai, jatiDiri: $jatiDiri, literasi: $literasi, imageId: $imageId, kelompok: $kelompok, uid: $uid, id: $id, muridId: $muridId)';
   }
 
   @override
   bool operator ==(covariant HkModel other) {
     if (identical(this, other)) return true;
 
-    return other.pengamatan == pengamatan &&
+    return other.semester == semester &&
         other.tanggal == tanggal &&
-        other.analisisCapaian == analisisCapaian &&
+        other.deskripsi == deskripsi &&
+        other.nilai == nilai &&
+        other.jatiDiri == jatiDiri &&
+        other.literasi == literasi &&
+        other.imageId == imageId &&
+        other.kelompok == kelompok &&
         other.uid == uid &&
         other.id == id &&
         other.muridId == muridId;
@@ -81,9 +115,14 @@ class HkModel {
 
   @override
   int get hashCode {
-    return pengamatan.hashCode ^
+    return semester.hashCode ^
         tanggal.hashCode ^
-        analisisCapaian.hashCode ^
+        deskripsi.hashCode ^
+        nilai.hashCode ^
+        jatiDiri.hashCode ^
+        literasi.hashCode ^
+        imageId.hashCode ^
+        kelompok.hashCode ^
         uid.hashCode ^
         id.hashCode ^
         muridId.hashCode;
