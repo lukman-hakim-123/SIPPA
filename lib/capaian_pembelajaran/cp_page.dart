@@ -150,57 +150,58 @@ class _CpPageState extends ConsumerState<CpPage> {
                                       (Set<MaterialState> states) {
                                 return Colors.grey;
                               }),
-                              columns: const [
-                                DataColumn(
+                              columns: [
+                                const DataColumn(
                                     label: CustomText(
                                   text: 'Nama Murid',
                                   fontWeight: FontWeight.w700,
                                 )),
-                                DataColumn(
+                                const DataColumn(
                                     label: CustomText(
                                   text: 'Nama Guru',
                                   fontWeight: FontWeight.w700,
                                 )),
-                                DataColumn(
+                                const DataColumn(
                                     label: CustomText(
                                   text: 'Kelompok',
                                   fontWeight: FontWeight.w700,
                                 )),
-                                DataColumn(
+                                const DataColumn(
                                     label: CustomText(
                                   text: 'Tanggal',
                                   fontWeight: FontWeight.w700,
                                 )),
-                                DataColumn(
+                                const DataColumn(
                                     label: CustomText(
                                   text: 'Tujuan',
                                   fontWeight: FontWeight.w700,
                                 )),
-                                DataColumn(
+                                const DataColumn(
                                     label: CustomText(
                                   text: 'Konteks',
                                   fontWeight: FontWeight.w700,
                                 )),
-                                DataColumn(
+                                const DataColumn(
                                     label: CustomText(
                                   text: 'Belum Muncul',
                                   fontWeight: FontWeight.w700,
                                 )),
-                                DataColumn(
+                                const DataColumn(
                                     label: CustomText(
                                   text: 'Sudah Muncul',
                                   fontWeight: FontWeight.w700,
                                 )),
-                                DataColumn(
+                                const DataColumn(
                                     label: CustomText(
                                   text: 'Kejadian Yang Teramati',
                                   fontWeight: FontWeight.w700,
                                 )),
-                                DataColumn(
-                                    label: CustomText(
-                                  text: 'Action',
-                                  fontWeight: FontWeight.w700,
-                                )),
+                                if (levelUser != 3)
+                                  const DataColumn(
+                                      label: CustomText(
+                                    text: 'Action',
+                                    fontWeight: FontWeight.w700,
+                                  )),
                               ],
                               rows: _cpList
                                   .where((cp) => !(levelUser == 2 &&
@@ -339,29 +340,30 @@ class _CpPageState extends ConsumerState<CpPage> {
                                         ),
                                       ),
                                     ),
-                                    DataCell(
-                                      Row(
-                                        children: [
-                                          IconButton(
-                                            icon: const Icon(Icons.edit),
-                                            onPressed: () {
-                                              Navigator.push(
-                                                  context,
-                                                  EditCpPage.route(
-                                                      cp: cp,
-                                                      kelompok: kelompok));
-                                            },
-                                          ),
-                                          IconButton(
-                                            icon: const Icon(Icons.delete),
-                                            onPressed: () {
-                                              _showDeleteDialog(
-                                                  context, ref, cp, muridData);
-                                            },
-                                          ),
-                                        ],
+                                    if (levelUser != 3)
+                                      DataCell(
+                                        Row(
+                                          children: [
+                                            IconButton(
+                                              icon: const Icon(Icons.edit),
+                                              onPressed: () {
+                                                Navigator.push(
+                                                    context,
+                                                    EditCpPage.route(
+                                                        cp: cp,
+                                                        kelompok: kelompok));
+                                              },
+                                            ),
+                                            IconButton(
+                                              icon: const Icon(Icons.delete),
+                                              onPressed: () {
+                                                _showDeleteDialog(context, ref,
+                                                    cp, muridData);
+                                              },
+                                            ),
+                                          ],
+                                        ),
                                       ),
-                                    ),
                                   ],
                                 );
                               }).toList(),

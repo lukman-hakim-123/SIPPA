@@ -18,7 +18,10 @@ class AddAnekdotPage extends ConsumerStatefulWidget {
 
 class _AddAnekdotPageState extends ConsumerState<AddAnekdotPage> {
   final _formKey = GlobalKey<FormState>();
-  final analisisCapaianController = TextEditingController();
+  final nilaiController = TextEditingController();
+  final jatiDiriController = TextEditingController();
+  final literasiController = TextEditingController();
+  final umpanBalikController = TextEditingController();
   final tanggalController = TextEditingController();
   final pengamatanController = TextEditingController();
   final muridIdController = TextEditingController();
@@ -27,7 +30,10 @@ class _AddAnekdotPageState extends ConsumerState<AddAnekdotPage> {
   @override
   void dispose() {
     super.dispose();
-    analisisCapaianController.dispose();
+    nilaiController.dispose();
+    jatiDiriController.dispose();
+    literasiController.dispose();
+    umpanBalikController.dispose();
     tanggalController.dispose();
     pengamatanController.dispose();
     muridIdController.dispose();
@@ -52,7 +58,10 @@ class _AddAnekdotPageState extends ConsumerState<AddAnekdotPage> {
   void addAnekdot() {
     if (_formKey.currentState!.validate()) {
       ref.read(anekdotControllerProvider.notifier).addAnekdot(
-          analisisCapaian: analisisCapaianController.text,
+          nilai: nilaiController.text,
+          jatiDiri: jatiDiriController.text,
+          literasi: literasiController.text,
+          umpanBalik: umpanBalikController.text,
           tanggal: tanggalController.text,
           pengamatan: pengamatanController.text,
           muridId: muridIdController.text,
@@ -141,7 +150,7 @@ class _AddAnekdotPageState extends ConsumerState<AddAnekdotPage> {
                     child: TextFormField(
                       keyboardType: TextInputType.multiline,
                       maxLines: null,
-                      minLines: 5,
+                      minLines: 3,
                       controller: pengamatanController,
                       maxLength: 1000,
                       decoration: const InputDecoration(
@@ -161,16 +170,76 @@ class _AddAnekdotPageState extends ConsumerState<AddAnekdotPage> {
                     child: TextFormField(
                       keyboardType: TextInputType.multiline,
                       maxLines: null,
-                      minLines: 5,
-                      controller: analisisCapaianController,
-                      maxLength: 1000,
+                      minLines: 2,
+                      controller: nilaiController,
+                      maxLength: 500,
                       decoration: const InputDecoration(
                         border: OutlineInputBorder(),
-                        labelText: 'Analisis Capaian',
+                        labelText: 'Nilai agama dan budi pekerti',
                       ),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
-                          return 'Masukkan analisis capaian';
+                          return 'Masukkan Nilai agama dan budi pekerti';
+                        }
+                        return null;
+                      },
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 22),
+                    child: TextFormField(
+                      keyboardType: TextInputType.multiline,
+                      maxLines: null,
+                      minLines: 2,
+                      controller: jatiDiriController,
+                      maxLength: 500,
+                      decoration: const InputDecoration(
+                        border: OutlineInputBorder(),
+                        labelText: 'Jati diri',
+                      ),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Masukkan Jati diri';
+                        }
+                        return null;
+                      },
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 22),
+                    child: TextFormField(
+                      keyboardType: TextInputType.multiline,
+                      maxLines: null,
+                      minLines: 2,
+                      controller: literasiController,
+                      maxLength: 500,
+                      decoration: const InputDecoration(
+                        border: OutlineInputBorder(),
+                        labelText: 'Literasi dan STEAM',
+                      ),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Masukkan Literasi dan STEAM';
+                        }
+                        return null;
+                      },
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 22),
+                    child: TextFormField(
+                      keyboardType: TextInputType.multiline,
+                      maxLines: null,
+                      minLines: 2,
+                      controller: umpanBalikController,
+                      maxLength: 500,
+                      decoration: const InputDecoration(
+                        border: OutlineInputBorder(),
+                        labelText: 'Umpan balik',
+                      ),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Masukkan Umpan balik';
                         }
                         return null;
                       },

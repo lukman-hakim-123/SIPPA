@@ -4,14 +4,22 @@ import 'dart:convert';
 class AnekdotModel {
   final String pengamatan;
   final String tanggal;
-  final String analisisCapaian;
+  final String nilai;
+  final String jatiDiri;
+  final String literasi;
+  final String umpanBalik;
+  final String kelompok;
   final String uid;
   final String id;
   final String muridId;
   AnekdotModel({
     required this.pengamatan,
     required this.tanggal,
-    required this.analisisCapaian,
+    required this.nilai,
+    required this.jatiDiri,
+    required this.literasi,
+    required this.umpanBalik,
+    required this.kelompok,
     required this.uid,
     required this.id,
     required this.muridId,
@@ -20,7 +28,11 @@ class AnekdotModel {
   AnekdotModel copyWith({
     String? pengamatan,
     String? tanggal,
-    String? analisisCapaian,
+    String? nilai,
+    String? jatiDiri,
+    String? literasi,
+    String? umpanBalik,
+    String? kelompok,
     String? uid,
     String? id,
     String? muridId,
@@ -28,7 +40,11 @@ class AnekdotModel {
     return AnekdotModel(
       pengamatan: pengamatan ?? this.pengamatan,
       tanggal: tanggal ?? this.tanggal,
-      analisisCapaian: analisisCapaian ?? this.analisisCapaian,
+      nilai: nilai ?? this.nilai,
+      jatiDiri: jatiDiri ?? this.jatiDiri,
+      literasi: literasi ?? this.literasi,
+      umpanBalik: umpanBalik ?? this.umpanBalik,
+      kelompok: kelompok ?? this.kelompok,
       uid: uid ?? this.uid,
       id: id ?? this.id,
       muridId: muridId ?? this.muridId,
@@ -39,7 +55,11 @@ class AnekdotModel {
     return <String, dynamic>{
       'pengamatan': pengamatan,
       'tanggal': tanggal,
-      'analisisCapaian': analisisCapaian,
+      'nilai': nilai,
+      'jatiDiri': jatiDiri,
+      'literasi': literasi,
+      'umpanBalik': umpanBalik,
+      'kelompok': kelompok,
       'uid': uid,
       'muridId': muridId,
     };
@@ -49,7 +69,11 @@ class AnekdotModel {
     return AnekdotModel(
       pengamatan: map['pengamatan'] ?? '',
       tanggal: map['tanggal'] ?? '',
-      analisisCapaian: map['analisisCapaian'] ?? '',
+      nilai: map['nilai'] ?? '',
+      jatiDiri: map['jatiDiri'] ?? '',
+      literasi: map['literasi'] ?? '',
+      umpanBalik: map['umpanBalik'] ?? '',
+      kelompok: map['kelompok'] ?? '',
       uid: map['uid'] ?? '',
       id: map['\$id'] ?? '',
       muridId: map['muridId'] ?? '',
@@ -63,7 +87,7 @@ class AnekdotModel {
 
   @override
   String toString() {
-    return 'AnekdotModel(pengamatan: $pengamatan, tanggal: $tanggal, analisisCapaian: $analisisCapaian,  uid: $uid, id: $id, muridId: $muridId)';
+    return 'AnekdotModel(pengamatan: $pengamatan, tanggal: $tanggal, nilai: $nilai, jatiDiri: $jatiDiri, literasi: $literasi, umpanBalik: $umpanBalik, kelompok: $kelompok, uid: $uid, id: $id, muridId: $muridId)';
   }
 
   @override
@@ -72,7 +96,11 @@ class AnekdotModel {
 
     return other.pengamatan == pengamatan &&
         other.tanggal == tanggal &&
-        other.analisisCapaian == analisisCapaian &&
+        other.nilai == nilai &&
+        other.jatiDiri == jatiDiri &&
+        other.literasi == literasi &&
+        other.umpanBalik == umpanBalik &&
+        other.kelompok == kelompok &&
         other.uid == uid &&
         other.id == id &&
         other.muridId == muridId;
@@ -82,7 +110,11 @@ class AnekdotModel {
   int get hashCode {
     return pengamatan.hashCode ^
         tanggal.hashCode ^
-        analisisCapaian.hashCode ^
+        nilai.hashCode ^
+        jatiDiri.hashCode ^
+        literasi.hashCode ^
+        umpanBalik.hashCode ^
+        kelompok.hashCode ^
         uid.hashCode ^
         id.hashCode ^
         muridId.hashCode;

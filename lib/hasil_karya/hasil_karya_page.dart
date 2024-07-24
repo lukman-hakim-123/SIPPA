@@ -150,57 +150,58 @@ class _HkPageState extends ConsumerState<HkPage> {
                                       (Set<MaterialState> states) {
                                 return Colors.grey;
                               }),
-                              columns: const [
-                                DataColumn(
+                              columns: [
+                                const DataColumn(
                                     label: CustomText(
                                   text: 'Gambar',
                                   fontWeight: FontWeight.w700,
                                 )),
-                                DataColumn(
+                                const DataColumn(
                                     label: CustomText(
                                   text: 'Nama Murid',
                                   fontWeight: FontWeight.w700,
                                 )),
-                                DataColumn(
+                                const DataColumn(
                                     label: CustomText(
                                   text: 'Nama Guru',
                                   fontWeight: FontWeight.w700,
                                 )),
-                                DataColumn(
+                                const DataColumn(
                                     label: CustomText(
                                   text: 'Kelompok',
                                   fontWeight: FontWeight.w700,
                                 )),
-                                DataColumn(
+                                const DataColumn(
                                     label: CustomText(
                                   text: 'Tanggal',
                                   fontWeight: FontWeight.w700,
                                 )),
-                                DataColumn(
+                                const DataColumn(
                                     label: CustomText(
                                   text: 'Deskripsi',
                                   fontWeight: FontWeight.w700,
                                 )),
-                                DataColumn(
+                                const DataColumn(
                                     label: CustomText(
                                   text: 'Analisis Nilai Agama',
                                   fontWeight: FontWeight.w700,
                                 )),
-                                DataColumn(
+                                const DataColumn(
                                     label: CustomText(
                                   text: 'Analisis Jati Diri',
                                   fontWeight: FontWeight.w700,
                                 )),
-                                DataColumn(
+                                const DataColumn(
                                     label: CustomText(
                                   text: 'Analisis Literasi',
                                   fontWeight: FontWeight.w700,
                                 )),
-                                DataColumn(
-                                    label: CustomText(
-                                  text: 'Action',
-                                  fontWeight: FontWeight.w700,
-                                )),
+                                if (levelUser != 3)
+                                  const DataColumn(
+                                      label: CustomText(
+                                    text: 'Action',
+                                    fontWeight: FontWeight.w700,
+                                  )),
                               ],
                               rows: _hkList
                                   .where((hk) => !(levelUser == 2 &&
@@ -352,29 +353,30 @@ class _HkPageState extends ConsumerState<HkPage> {
                                             softWrap: true,
                                           )),
                                     ),
-                                    DataCell(
-                                      Row(
-                                        children: [
-                                          IconButton(
-                                            icon: const Icon(Icons.edit),
-                                            onPressed: () {
-                                              Navigator.push(
-                                                  context,
-                                                  EditHkPage.route(
-                                                      hk: hk,
-                                                      kelompok: kelompok));
-                                            },
-                                          ),
-                                          IconButton(
-                                            icon: const Icon(Icons.delete),
-                                            onPressed: () {
-                                              _showDeleteDialog(
-                                                  context, ref, hk, muridData);
-                                            },
-                                          ),
-                                        ],
+                                    if (levelUser != 3)
+                                      DataCell(
+                                        Row(
+                                          children: [
+                                            IconButton(
+                                              icon: const Icon(Icons.edit),
+                                              onPressed: () {
+                                                Navigator.push(
+                                                    context,
+                                                    EditHkPage.route(
+                                                        hk: hk,
+                                                        kelompok: kelompok));
+                                              },
+                                            ),
+                                            IconButton(
+                                              icon: const Icon(Icons.delete),
+                                              onPressed: () {
+                                                _showDeleteDialog(context, ref,
+                                                    hk, muridData);
+                                              },
+                                            ),
+                                          ],
+                                        ),
                                       ),
-                                    ),
                                   ],
                                 );
                               }).toList(),

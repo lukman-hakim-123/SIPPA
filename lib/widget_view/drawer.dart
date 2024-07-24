@@ -7,6 +7,7 @@ import 'package:sippa/auth/controllers/auth_controller.dart';
 import 'package:sippa/capaian_pembelajaran/cp_page.dart';
 import 'package:sippa/common/loading.dart';
 import 'package:sippa/hasil_karya/hasil_karya_page.dart';
+import 'package:sippa/tanggapan_ortu/tanggapan_page.dart';
 
 class CustomDrawer extends ConsumerWidget {
   final int selectedIndex;
@@ -61,6 +62,14 @@ class CustomDrawer extends ConsumerWidget {
               selected: selectedIndex == 2,
               onTap: () {
                 Navigator.pushReplacement(context, HkPage.route());
+                onItemSelected(2);
+              },
+            ),
+            ListTile(
+              title: const Text('Tanggapan OrangTua'),
+              selected: selectedIndex == 2,
+              onTap: () {
+                Navigator.pushReplacement(context, TanggapanPage.route());
                 onItemSelected(2);
               },
             ),

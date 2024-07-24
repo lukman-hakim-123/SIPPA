@@ -139,7 +139,7 @@ class HkAPI implements IHkAPI {
     try {
       final document = await _db.updateDocument(
         databaseId: AppwriteConstants.databaseId,
-       collectionId: AppwriteConstants.hkCollection,
+        collectionId: AppwriteConstants.hkCollection,
         documentId: hk.id,
         data: hk.toMap(),
       );
@@ -152,17 +152,16 @@ class HkAPI implements IHkAPI {
   }
 
   @override
-  FutureVoid deleteImage(String imageId)async{
-    try{
+  FutureVoid deleteImage(String imageId) async {
+    try {
       await _storage.deleteFile(
         bucketId: AppwriteConstants.hkBucketId,
         fileId: imageId,
       );
-    }catch (e) {
+    } catch (e) {
       // print(e.toString());
     }
   }
-  
 
   @override
   FutureVoid deleteHk(HkModel hk) async {

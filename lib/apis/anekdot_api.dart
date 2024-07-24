@@ -68,12 +68,12 @@ class AnekdotAPI implements IAnekdotAPI {
   }
 
   @override
-  Future<List<Document>> getKelompokAnekdot(String uid) async {
+  Future<List<Document>> getKelompokAnekdot(String kelompok) async {
     final documents = await _db.listDocuments(
       databaseId: AppwriteConstants.databaseId,
       collectionId: AppwriteConstants.anekdotCollection,
       queries: [
-        Query.equal('uid', uid),
+        Query.equal('kelompok', kelompok),
       ],
     );
     return documents.documents;
@@ -105,7 +105,11 @@ class AnekdotAPI implements IAnekdotAPI {
         data: {
           'pengamatan': anekdot.pengamatan,
           'tanggal': anekdot.tanggal,
-          'analisisCapaian': anekdot.analisisCapaian,
+          'nilai': anekdot.nilai,
+          'jatiDiri': anekdot.jatiDiri,
+          'literasi': anekdot.literasi,
+          'umpanBalik': anekdot.umpanBalik,
+          'kelompok': anekdot.kelompok,
           'muridId': anekdot.muridId,
         },
       );

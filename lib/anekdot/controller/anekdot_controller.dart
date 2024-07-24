@@ -72,16 +72,25 @@ class AnekdotController extends StateNotifier<bool> {
   void addAnekdot({
     required String pengamatan,
     required String tanggal,
-    required String analisisCapaian,
+    required String nilai,
+    required String jatiDiri,
+    required String literasi,
+    required String umpanBalik,
     required String muridId,
     required BuildContext context,
   }) async {
     state = true;
     final user = _ref.read(currentUserDetailsProvider).value!;
+    final kelompok = _ref.read(searchUserProvider(muridId)).value!.kelompok;
+
     AnekdotModel anekdot = AnekdotModel(
       pengamatan: pengamatan,
       tanggal: tanggal,
-      analisisCapaian: analisisCapaian,
+      nilai: nilai,
+      jatiDiri: jatiDiri,
+      literasi: literasi,
+      umpanBalik: umpanBalik,
+      kelompok: kelompok,
       muridId: muridId,
       uid: user.id,
       id: '',
@@ -98,17 +107,26 @@ class AnekdotController extends StateNotifier<bool> {
     required String anekdotId,
     required String pengamatan,
     required String tanggal,
-    required String analisisCapaian,
+    required String nilai,
+    required String jatiDiri,
+    required String literasi,
+    required String umpanBalik,
     required String muridId,
     required BuildContext context,
   }) async {
     state = true;
     final user = _ref.read(currentUserDetailsProvider).value!;
+    final kelompok = _ref.read(searchUserProvider(muridId)).value!.kelompok;
+
     AnekdotModel anekdot = AnekdotModel(
       id: anekdotId,
       pengamatan: pengamatan,
       tanggal: tanggal,
-      analisisCapaian: analisisCapaian,
+      nilai: nilai,
+      jatiDiri: jatiDiri,
+      literasi: literasi,
+      umpanBalik: umpanBalik,
+      kelompok: kelompok,
       muridId: muridId,
       uid: user.id,
     );
