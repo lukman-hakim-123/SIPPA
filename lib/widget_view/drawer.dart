@@ -6,6 +6,7 @@ import 'package:sippa/anekdot/anekdot_page.dart';
 import 'package:sippa/auth/controllers/auth_controller.dart';
 import 'package:sippa/capaian_pembelajaran/cp_page.dart';
 import 'package:sippa/common/loading.dart';
+import 'package:sippa/foto_berseri/foto_berseri_page.dart';
 import 'package:sippa/hasil_karya/hasil_karya_page.dart';
 import 'package:sippa/tanggapan_ortu/tanggapan_page.dart';
 
@@ -62,6 +63,14 @@ class CustomDrawer extends ConsumerWidget {
               selected: selectedIndex == 2,
               onTap: () {
                 Navigator.pushReplacement(context, HkPage.route());
+                onItemSelected(2);
+              },
+            ),
+            ListTile(
+              title: const Text('Foto Berseri'),
+              selected: selectedIndex == 2,
+              onTap: () {
+                Navigator.pushReplacement(context, FbPage.route());
                 onItemSelected(2);
               },
             ),

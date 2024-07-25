@@ -84,7 +84,6 @@ class HkController extends StateNotifier<bool> {
     required String tanggal,
     required String muridId,
     required BuildContext context,
-    io.File? imageId,
   }) async {
     state = true;
     final user = _ref.read(currentUserDetailsProvider).value!;

@@ -6,27 +6,27 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sippa/auth/controllers/auth_controller.dart';
 import 'package:sippa/common/loading.dart';
 import 'package:sippa/constant/appwrite.dart';
-import 'package:sippa/hasil_karya/add_hasil_karya_page.dart';
-import 'package:sippa/hasil_karya/controller/hasil_karya_controller.dart';
-import 'package:sippa/hasil_karya/edit_hasil_karya_page.dart';
+import 'package:sippa/foto_berseri/add_foto_berseri_page.dart';
+import 'package:sippa/foto_berseri/controller/foto_berseri_controller.dart';
+import 'package:sippa/foto_berseri/edit_foto_berseri_page.dart';
+import 'package:sippa/models/fb.dart';
 
-import 'package:sippa/models/hk.dart';
 import 'package:sippa/widget_view/appbar.dart';
 import 'package:sippa/widget_view/drawer.dart';
 import 'package:sippa/widget_view/teks.dart';
 
-class HkPage extends ConsumerStatefulWidget {
-  static route() => MaterialPageRoute(builder: (context) => const HkPage());
+class FbPage extends ConsumerStatefulWidget {
+  static route() => MaterialPageRoute(builder: (context) => const FbPage());
 
-  const HkPage({super.key});
+  const FbPage({super.key});
 
   @override
-  ConsumerState<ConsumerStatefulWidget> createState() => _HkPageState();
+  ConsumerState<ConsumerStatefulWidget> createState() => _FbPageState();
 }
 
-class _HkPageState extends ConsumerState<HkPage> {
+class _FbPageState extends ConsumerState<FbPage> {
   int _selectedIndex = 2;
-  List<HkModel> _hkList = [];
+  List<FbModel> _fbList = [];
 
   void _onItemSelected(int index) {
     setState(() {
@@ -38,7 +38,7 @@ class _HkPageState extends ConsumerState<HkPage> {
   Widget build(BuildContext context) {
     final userDetailsAsync = ref.watch(currentUserDetailsProvider);
     return Scaffold(
-      appBar: const CustomAppBar(title: 'Penilaian Hasil Karya'),
+      appBar: const CustomAppBar(title: 'Foto Berseri'),
       body: Padding(
         padding: const EdgeInsets.only(top: 12, left: 12, right: 12),
         child: userDetailsAsync.when(
@@ -49,53 +49,53 @@ class _HkPageState extends ConsumerState<HkPage> {
             final userId = userDetails.id;
             final kelompok = userDetails.kelompok;
             final levelUser = userDetails.levelUser;
-            final hkAsyncValue = ref.watch(getHkByUserIdProvider(userId));
-            ref.listen<AsyncValue<RealtimeMessage>>(getLatestHkProvider,
+            final fbAsyncValue = ref.watch(getFbByUserIdProvider(userId));
+            ref.listen<AsyncValue<RealtimeMessage>>(getLatestFbProvider,
                 (_, next) {
               next.whenData((data) {
                 if (data.events.contains(
-                  'databases.*.collections.${AppwriteConstants.hkCollection}.documents.*.create',
+                  'databases.*.collections.${AppwriteConstants.fbCollection}.documents.*.create',
                 )) {
-                  final newHk = HkModel.fromMap(data.payload);
+                  final newFb = FbModel.fromMap(data.payload);
                   if ((levelUser == 1) ||
-                      (levelUser == 2 && newHk.uid == userId) ||
-                      (levelUser == 3 && newHk.muridId == userId)) {
-                    if (!_hkList.any((hk) => hk.id == newHk.id)) {
+                      (levelUser == 2 && newFb.uid == userId) ||
+                      (levelUser == 3 && newFb.muridId == userId)) {
+                    if (!_fbList.any((fb) => fb.id == newFb.id)) {
                       setState(() {
-                        _hkList.add(newHk);
+                        _fbList.add(newFb);
                       });
                     }
                   }
                 } else if (data.events.contains(
-                  'databases.*.collections.${AppwriteConstants.hkCollection}.documents.*.update',
+                  'databases.*.collections.${AppwriteConstants.fbCollection}.documents.*.update',
                 )) {
                   final startingPoint =
                       data.events[0].lastIndexOf('documents.');
                   final endPoint = data.events[0].lastIndexOf('.update');
-                  final hkId =
+                  final fbId =
                       data.events[0].substring(startingPoint + 10, endPoint);
-                  var hk = _hkList.firstWhere((element) => element.id == hkId);
-                  final hkIndex = _hkList.indexOf(hk);
+                  var fb = _fbList.firstWhere((element) => element.id == fbId);
+                  final fbIndex = _fbList.indexOf(fb);
                   setState(() {
-                    _hkList.removeAt(hkIndex);
-                    final updatedHk = HkModel.fromMap(data.payload);
+                    _fbList.removeAt(fbIndex);
+                    final updatedFb = FbModel.fromMap(data.payload);
                     if ((levelUser == 1) ||
-                        (levelUser == 2 && updatedHk.uid == userId) ||
-                        (levelUser == 3 && updatedHk.muridId == userId)) {
-                      _hkList.insert(hkIndex, updatedHk);
+                        (levelUser == 2 && updatedFb.uid == userId) ||
+                        (levelUser == 3 && updatedFb.muridId == userId)) {
+                      _fbList.insert(fbIndex, updatedFb);
                     }
                   });
                 } else if (data.events.contains(
-                  'databases.*.collections.${AppwriteConstants.hkCollection}.documents.*.delete',
+                  'databases.*.collections.${AppwriteConstants.fbCollection}.documents.*.delete',
                 )) {
                   final startingPoint =
                       data.events[0].lastIndexOf('documents.');
                   final endPoint = data.events[0].lastIndexOf('.delete');
-                  final hkId =
+                  final fbId =
                       data.events[0].substring(startingPoint + 10, endPoint);
 
                   setState(() {
-                    _hkList.removeWhere((hk) => hk.id == hkId);
+                    _fbList.removeWhere((fb) => fb.id == fbId);
                   });
                 }
               });
@@ -111,7 +111,7 @@ class _HkPageState extends ConsumerState<HkPage> {
                     child: Padding(
                       padding: EdgeInsets.only(bottom: 16),
                       child: CustomText(
-                        text: "Hasil Karya",
+                        text: "Foto Berseri",
                         fontSize: 18,
                         fontWeight: FontWeight.w800,
                         textAlign: TextAlign.start,
@@ -122,7 +122,7 @@ class _HkPageState extends ConsumerState<HkPage> {
                     ElevatedButton(
                       onPressed: () {
                         Navigator.push(
-                            context, AddHkPage.route(kelompok: kelompok));
+                            context, AddFbPage.route(kelompok: kelompok));
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.green,
@@ -133,9 +133,9 @@ class _HkPageState extends ConsumerState<HkPage> {
                           text: "Tambah Data", color: Colors.white),
                     ),
                   const SizedBox(height: 16),
-                  hkAsyncValue.when(
-                    data: (hkList) {
-                      _hkList = hkList;
+                  fbAsyncValue.when(
+                    data: (fbList) {
+                      _fbList = fbList;
                       return Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -153,7 +153,17 @@ class _HkPageState extends ConsumerState<HkPage> {
                               columns: [
                                 const DataColumn(
                                     label: CustomText(
-                                  text: 'Gambar',
+                                  text: 'Foto 1',
+                                  fontWeight: FontWeight.w700,
+                                )),
+                                const DataColumn(
+                                    label: CustomText(
+                                  text: 'Foto 2',
+                                  fontWeight: FontWeight.w700,
+                                )),
+                                const DataColumn(
+                                    label: CustomText(
+                                  text: 'Foto 3',
                                   fontWeight: FontWeight.w700,
                                 )),
                                 const DataColumn(
@@ -178,7 +188,7 @@ class _HkPageState extends ConsumerState<HkPage> {
                                 )),
                                 const DataColumn(
                                     label: CustomText(
-                                  text: 'Deskripsi',
+                                  text: 'Keterangan',
                                   fontWeight: FontWeight.w700,
                                 )),
                                 const DataColumn(
@@ -193,7 +203,12 @@ class _HkPageState extends ConsumerState<HkPage> {
                                 )),
                                 const DataColumn(
                                     label: CustomText(
-                                  text: 'Analisis Literasi',
+                                  text: 'Analisis Literasi dan STEAM',
+                                  fontWeight: FontWeight.w700,
+                                )),
+                                const DataColumn(
+                                    label: CustomText(
+                                  text: 'Timbal Balik',
                                   fontWeight: FontWeight.w700,
                                 )),
                                 if (levelUser != 3)
@@ -203,14 +218,14 @@ class _HkPageState extends ConsumerState<HkPage> {
                                     fontWeight: FontWeight.w700,
                                   )),
                               ],
-                              rows: _hkList
-                                  .where((hk) => !(levelUser == 2 &&
-                                      hk.kelompok != kelompok))
-                                  .map((hk) {
+                              rows: _fbList
+                                  .where((fb) => !(levelUser == 2 &&
+                                      fb.kelompok != kelompok))
+                                  .map((fb) {
                                 final muridData =
-                                    ref.watch(getUserDataProvider(hk.muridId));
+                                    ref.watch(getUserDataProvider(fb.muridId));
                                 final guruData =
-                                    ref.watch(getUserDataProvider(hk.uid));
+                                    ref.watch(getUserDataProvider(fb.uid));
                                 return DataRow(
                                   cells: [
                                     DataCell(
@@ -221,7 +236,63 @@ class _HkPageState extends ConsumerState<HkPage> {
                                         ),
                                         child: ref
                                             .watch(
-                                                getHkImageProvider(hk.imageId))
+                                                getFbImageProvider(fb.imageId1))
+                                            .when(
+                                              data: (imageData) {
+                                                if (imageData != null) {
+                                                  return Image.memory(
+                                                    imageData,
+                                                    fit: BoxFit.cover,
+                                                  );
+                                                } else {
+                                                  return const Icon(Icons
+                                                      .image_not_supported);
+                                                }
+                                              },
+                                              loading: () =>
+                                                  const CircularProgressIndicator(),
+                                              error: (_, __) =>
+                                                  const Icon(Icons.error),
+                                            ),
+                                      ),
+                                    ),
+                                    DataCell(
+                                      ConstrainedBox(
+                                        constraints: const BoxConstraints(
+                                          maxWidth: 150,
+                                          maxHeight: 150,
+                                        ),
+                                        child: ref
+                                            .watch(
+                                                getFbImageProvider(fb.imageId2))
+                                            .when(
+                                              data: (imageData) {
+                                                if (imageData != null) {
+                                                  return Image.memory(
+                                                    imageData,
+                                                    fit: BoxFit.cover,
+                                                  );
+                                                } else {
+                                                  return const Icon(Icons
+                                                      .image_not_supported);
+                                                }
+                                              },
+                                              loading: () =>
+                                                  const CircularProgressIndicator(),
+                                              error: (_, __) =>
+                                                  const Icon(Icons.error),
+                                            ),
+                                      ),
+                                    ),
+                                    DataCell(
+                                      ConstrainedBox(
+                                        constraints: const BoxConstraints(
+                                          maxWidth: 150,
+                                          maxHeight: 150,
+                                        ),
+                                        child: ref
+                                            .watch(
+                                                getFbImageProvider(fb.imageId3))
                                             .when(
                                               data: (imageData) {
                                                 if (imageData != null) {
@@ -284,7 +355,7 @@ class _HkPageState extends ConsumerState<HkPage> {
                                               100, // Ubah sesuai kebutuhan
                                         ),
                                         child: Text(
-                                          hk.kelompok,
+                                          fb.kelompok,
                                           overflow: TextOverflow.visible,
                                           softWrap: true,
                                         ),
@@ -297,7 +368,7 @@ class _HkPageState extends ConsumerState<HkPage> {
                                               100, // Ubah sesuai kebutuhan
                                         ),
                                         child: Text(
-                                          hk.tanggal,
+                                          fb.tanggal,
                                           overflow: TextOverflow.visible,
                                           softWrap: true,
                                         ),
@@ -310,7 +381,7 @@ class _HkPageState extends ConsumerState<HkPage> {
                                               200, // Ubah sesuai kebutuhan
                                         ),
                                         child: Text(
-                                          hk.deskripsi,
+                                          fb.keterangan,
                                           overflow: TextOverflow.visible,
                                           softWrap: true,
                                         ),
@@ -323,7 +394,7 @@ class _HkPageState extends ConsumerState<HkPage> {
                                               200, // Ubah sesuai kebutuhan
                                         ),
                                         child: Text(
-                                          hk.nilai,
+                                          fb.nilai,
                                           overflow: TextOverflow.visible,
                                           softWrap: true,
                                         ),
@@ -336,7 +407,7 @@ class _HkPageState extends ConsumerState<HkPage> {
                                                 200, // Ubah sesuai kebutuhan
                                           ),
                                           child: Text(
-                                            hk.jatiDiri,
+                                            fb.jatiDiri,
                                             overflow: TextOverflow.visible,
                                             softWrap: true,
                                           )),
@@ -348,7 +419,19 @@ class _HkPageState extends ConsumerState<HkPage> {
                                                 200, // Ubah sesuai kebutuhan
                                           ),
                                           child: Text(
-                                            hk.literasi,
+                                            fb.umpanBalik,
+                                            overflow: TextOverflow.visible,
+                                            softWrap: true,
+                                          )),
+                                    ),
+                                    DataCell(
+                                      ConstrainedBox(
+                                          constraints: const BoxConstraints(
+                                            maxWidth:
+                                                200, // Ubah sesuai kebutuhan
+                                          ),
+                                          child: Text(
+                                            fb.literasi,
                                             overflow: TextOverflow.visible,
                                             softWrap: true,
                                           )),
@@ -362,8 +445,8 @@ class _HkPageState extends ConsumerState<HkPage> {
                                               onPressed: () {
                                                 Navigator.push(
                                                     context,
-                                                    EditHkPage.route(
-                                                        hk: hk,
+                                                    EditFbPage.route(
+                                                        fb: fb,
                                                         kelompok: kelompok));
                                               },
                                             ),
@@ -371,7 +454,7 @@ class _HkPageState extends ConsumerState<HkPage> {
                                               icon: const Icon(Icons.delete),
                                               onPressed: () {
                                                 _showDeleteDialog(context, ref,
-                                                    hk, muridData);
+                                                    fb, muridData);
                                               },
                                             ),
                                           ],
@@ -406,7 +489,7 @@ class _HkPageState extends ConsumerState<HkPage> {
   }
 }
 
-void _showDeleteDialog(BuildContext context, WidgetRef ref, HkModel hk,
+void _showDeleteDialog(BuildContext context, WidgetRef ref, FbModel fb,
     AsyncValue<Document?> muridData) {
   showDialog(
     context: context,
@@ -420,12 +503,12 @@ void _showDeleteDialog(BuildContext context, WidgetRef ref, HkModel hk,
                 data: (data) {
                   final nama = data?.data['nama'] ?? 'Murid tidak ditemukan';
                   return Text(
-                    'Apakah Anda yakin ingin menghapus hasil karya $nama pada tanggal ${hk.tanggal}',
+                    'Apakah Anda yakin ingin menghapus foto berseri $nama pada tanggal ${fb.tanggal}',
                   );
                 },
                 loading: () => const CircularProgressIndicator(),
                 error: (_, __) => const Text(
-                  'Apakah Anda yakin ingin menghapus hasil karya ini?',
+                  'Apakah Anda yakin ingin menghapus foto berseri ini?',
                 ),
               ),
             ],
@@ -442,7 +525,7 @@ void _showDeleteDialog(BuildContext context, WidgetRef ref, HkModel hk,
             child: const Text('Hapus'),
             onPressed: () {
               Navigator.of(context).pop();
-              ref.read(hkControllerProvider.notifier).deleteHk(hk, context);
+              ref.read(fbControllerProvider.notifier).deleteFb(fb, context);
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
                   content: Text('Hasil Karya berhasil dihapus'),

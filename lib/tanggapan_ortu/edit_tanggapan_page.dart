@@ -46,22 +46,6 @@ class _EditTanggapanPageState extends ConsumerState<EditTanggapanPage> {
     super.dispose();
   }
 
-  Future<void> _selectDate(BuildContext context) async {
-    final DateTime? picked = await showDatePicker(
-      context: context,
-      initialDate: _selectedTanggapanDate ?? DateTime.now(),
-      firstDate: DateTime(2000),
-      lastDate: DateTime(2101),
-    );
-    if (picked != null) {
-      setState(() {
-        _selectedTanggapanDate = picked;
-        tanggalTanggapanController.text =
-            DateFormat('dd MMMM yyyy').format(_selectedTanggapanDate!);
-      });
-    }
-  }
-
   void editTanggapan() {
     if (_formKey.currentState!.validate()) {
       ref.read(tanggapanControllerProvider.notifier).updateTanggapan(
