@@ -30,6 +30,7 @@ abstract class IUserAPI {
   Future<List<model.Document>> getAllGuru();
   FutureVoid deleteGuru(User user);
   FutureVoid deleteImage(String imageId);
+  FutureEither<model.Document> updateMurid(User user);
 }
 
 class UserAPI implements IUserAPI {
@@ -170,7 +171,7 @@ class UserAPI implements IUserAPI {
     return documents.documents;
   }
 
-  @override 
+  @override
   Stream<RealtimeMessage> getLatestMurid() {
     return _realtime.subscribe([
       'databases.${AppwriteConstants.databaseId}.collections.${AppwriteConstants.collectionUserId}.documents',
@@ -199,6 +200,32 @@ class UserAPI implements IUserAPI {
       );
     } catch (e) {
       // print(e.toString());
+    }
+  }
+
+  @override
+  FutureEither<model.Document> updateMurid(User user) async {
+    try {
+      final document = await _db.updateDocument(
+        databaseId: AppwriteConstants.databaseId,
+        collectionId: AppwriteConstants.collectionUserId,
+        documentId: user.id,
+        data: {
+          'nama': user.nama,
+          'kelompok': user.kelompok,
+          'imageId': user.imageId,
+        },
+      );
+      return right(document);
+    } on AppwriteException catch (e, st) {
+      return left(
+        Failure(
+          e.message ?? 'Some unexpected error occurred',
+          st,
+        ),
+      );
+    } catch (e, st) {
+      return left(Failure(e.toString(), st));
     }
   }
 }

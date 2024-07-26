@@ -12,6 +12,7 @@ import 'package:sippa/constant/appwrite.dart';
 import 'package:sippa/foto_berseri/foto_berseri_page.dart';
 import 'package:sippa/hasil_karya/hasil_karya_page.dart';
 import 'package:sippa/models/user.dart';
+import 'package:sippa/observasi/observasi_page.dart';
 import 'package:sippa/tanggapan_ortu/tanggapan_page.dart';
 import 'package:sippa/widget_view/edit_profil_page.dart';
 
@@ -134,6 +135,8 @@ class CustomDrawer extends ConsumerWidget {
                 title: const Text('Observasi'),
                 selected: selectedIndex == 1,
                 onTap: () {
+                  Navigator.pushReplacement(context, ObservasiPage.route());
+
                   onItemSelected(1);
                 },
               ),

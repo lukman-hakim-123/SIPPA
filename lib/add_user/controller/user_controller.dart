@@ -1,8 +1,12 @@
 import 'dart:typed_data';
+import 'dart:io' as io;
 
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:sippa/add_user/list_murid.dart';
 import 'package:sippa/apis/users_api.dart';
 import 'package:sippa/auth/controllers/auth_controller.dart';
+import 'package:sippa/core/utils.dart';
 import 'package:sippa/models/user.dart';
 
 final muridControllerProvider =
@@ -83,6 +87,9 @@ class UserController extends StateNotifier<List<User>> {
 
   Future<void> deleteGuru(User user) async {
     try {
+      if (user.imageId != '') {
+        await _userAPI.deleteImage(user.imageId);
+      }
       await _userAPI.deleteGuru(user);
       await fetchGuru();
     } catch (e) {
@@ -92,10 +99,56 @@ class UserController extends StateNotifier<List<User>> {
 
   Future<void> deleteMurid(User user) async {
     try {
+      if (user.imageId != '') {
+        await _userAPI.deleteImage(user.imageId);
+      }
       await _userAPI.deleteGuru(user);
       await fetchGuru();
     } catch (e) {
       print('Gagal menghapus guru: $e');
     }
+  }
+
+  void updateMurid({
+    required String muridId,
+    required String nama,
+    required String email,
+    required int levelUser,
+    required String
+        kelompok, // Nullable karena hanya level 1 yang bisa mengubahnya
+    required io.File? image,
+    required String imageId,
+    required BuildContext context,
+    required WidgetRef ref,
+  }) async {
+    // Menghapus gambar lama jika ada gambar baru
+    if (image != null) {
+      if (imageId != '' && imageId.isNotEmpty) {
+        await _userAPI.deleteImage(imageId);
+      }
+      imageId = await _userAPI.uploadFile(image, 'pp_${DateTime.now()}.jpg');
+    }
+
+    // Membuat model User baru dengan data yang diperbarui
+    User userModel = User(
+      id: muridId,
+      email: email,
+      imageId: imageId,
+      nama: nama,
+      kelompok: kelompok,
+      levelUser: levelUser,
+    );
+
+    // Memperbarui data murid di API
+    final res = await _userAPI.updateMurid(userModel);
+    res.fold(
+      (l) => showSnackBar(context, l.message),
+      (r) {
+        showSnackBar(context, 'Berhasil Terupdate');
+        Navigator.pop(
+          context,
+        );
+      },
+    );
   }
 }

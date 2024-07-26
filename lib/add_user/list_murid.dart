@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sippa/add_user/add_murid_page.dart';
 import 'package:sippa/add_user/controller/user_controller.dart';
+import 'package:sippa/add_user/edit_murid_page.dart';
 import 'package:sippa/constant/appwrite.dart';
 import 'package:sippa/models/user.dart';
 import 'package:sippa/widget_view/appbar.dart';
@@ -50,6 +51,20 @@ class _MuridListPageState extends ConsumerState<MuridListPage> {
             setState(() => muridList.add(newUser));
           }
         } else if (data.events.contains(
+          'databases.*.collections.${AppwriteConstants.collectionUserId}.documents.*.update',
+        )) {
+          final startingPoint = data.events[0].lastIndexOf('documents.');
+          final endPoint = data.events[0].lastIndexOf('.update');
+          final muridId =
+              data.events[0].substring(startingPoint + 10, endPoint);
+          var murid = muridList.firstWhere((element) => element.id == muridId);
+          final muridIndex = muridList.indexOf(murid);
+          setState(() {
+            muridList.removeAt(muridIndex);
+            final updatedMurid = User.fromMap(data.payload);
+            muridList.insert(muridIndex, updatedMurid);
+          });
+        } else if (data.events.contains(
             'databases.*.collections.${AppwriteConstants.collectionUserId}.documents.*.delete')) {
           final startingPoint = data.events[0].lastIndexOf('documents.');
           final endPoint = data.events[0].lastIndexOf('.delete');
@@ -86,25 +101,61 @@ class _MuridListPageState extends ConsumerState<MuridListPage> {
               ),
             ),
             const SizedBox(height: 16),
-            ...muridList.map((murid) => InkWell(
-                  onTap: () {},
-                  child: Card(
-                    margin: const EdgeInsets.symmetric(vertical: 8),
-                    child: ListTile(
-                      title: Text(murid.nama),
-                      subtitle: Text('Kelompok: ${murid.kelompok}'),
-                      trailing: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          IconButton(
-                            icon: const Icon(Icons.delete),
-                            onPressed: () {
-                              _showDeleteConfirmationDialog(
-                                  context, ref, murid);
+            ...muridList.map((murid) => Card(
+                  margin: const EdgeInsets.symmetric(vertical: 8),
+                  child: ListTile(
+                    leading: ClipOval(
+                      child: ref
+                          .watch(getUserImageProvider(murid
+                              .imageId)) // Anda mungkin perlu menyesuaikan nama provider
+                          .when(
+                            data: (imageData) {
+                              if (imageData != null) {
+                                return Image.memory(
+                                  imageData,
+                                  width:
+                                      50, // Sesuaikan dengan ukuran yang diinginkan
+                                  height: 50,
+                                  fit: BoxFit.cover,
+                                );
+                              } else {
+                                return Image.asset(
+                                  'assets/images/pp_kosong.jpg', // Gambar default jika tidak ada gambar
+                                  width: 50,
+                                  height: 50,
+                                  fit: BoxFit.cover,
+                                );
+                              }
                             },
+                            loading: () => const Center(
+                              child: CircularProgressIndicator(
+                                valueColor:
+                                    AlwaysStoppedAnimation<Color>(Colors.white),
+                              ),
+                            ),
+                            error: (_, __) => const Center(
+                              child: Icon(Icons.error, color: Colors.white),
+                            ),
                           ),
-                        ],
-                      ),
+                    ),
+                    title: Text(murid.nama),
+                    subtitle: Text('Kelompok: ${murid.kelompok}'),
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.edit),
+                          onPressed: () {
+                            Navigator.push(context, EditMuridPage.route(murid));
+                          },
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.delete),
+                          onPressed: () {
+                            _showDeleteConfirmationDialog(context, ref, murid);
+                          },
+                        ),
+                      ],
                     ),
                   ),
                 )),

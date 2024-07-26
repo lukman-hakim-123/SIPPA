@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
 import 'package:sippa/auth/controllers/auth_controller.dart';
 import 'package:sippa/models/to.dart';
 import 'package:sippa/tanggapan_ortu/controller/tanggapan_controller.dart';
@@ -24,7 +23,6 @@ class _EditTanggapanPageState extends ConsumerState<EditTanggapanPage> {
   late final TextEditingController tanggapanController;
   late final TextEditingController tanggalTanggapanController;
   late final TextEditingController balasanController;
-  DateTime? _selectedTanggapanDate;
 
   @override
   void initState() {
@@ -34,8 +32,6 @@ class _EditTanggapanPageState extends ConsumerState<EditTanggapanPage> {
     tanggalTanggapanController =
         TextEditingController(text: widget.tanggapan.tanggal);
     balasanController = TextEditingController(text: widget.tanggapan.balasan);
-    _selectedTanggapanDate =
-        DateFormat('dd MMMM yyyy').parse(widget.tanggapan.tanggal);
   }
 
   @override
@@ -108,13 +104,9 @@ class _EditTanggapanPageState extends ConsumerState<EditTanggapanPage> {
                         padding: const EdgeInsets.only(bottom: 22),
                         child: TextFormField(
                           controller: tanggalTanggapanController,
-                          decoration: InputDecoration(
-                            border: const OutlineInputBorder(),
+                          decoration: const InputDecoration(
+                            border: OutlineInputBorder(),
                             labelText: 'Tanggal Tanggapan',
-                            suffixIcon: IconButton(
-                              icon: const Icon(Icons.calendar_today),
-                              onPressed: () {},
-                            ),
                           ),
                           readOnly: true,
                           validator: (value) {

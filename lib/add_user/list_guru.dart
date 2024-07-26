@@ -2,6 +2,7 @@ import 'package:appwrite/appwrite.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sippa/add_user/controller/user_controller.dart';
+import 'package:sippa/add_user/edit_guru_page.dart';
 import 'package:sippa/constant/appwrite.dart';
 import 'package:sippa/models/user.dart';
 import 'package:sippa/widget_view/appbar.dart';
@@ -41,6 +42,19 @@ class _GuruListPageState extends ConsumerState<GuruListPage> {
             setState(() => guruList.add(newUser));
           }
         } else if (data.events.contains(
+          'databases.*.collections.${AppwriteConstants.collectionUserId}.documents.*.update',
+        )) {
+          final startingPoint = data.events[0].lastIndexOf('documents.');
+          final endPoint = data.events[0].lastIndexOf('.update');
+          final guruId = data.events[0].substring(startingPoint + 10, endPoint);
+          var guru = guruList.firstWhere((element) => element.id == guruId);
+          final guruIndex = guruList.indexOf(guru);
+          setState(() {
+            guruList.removeAt(guruIndex);
+            final updatedGuru = User.fromMap(data.payload);
+            guruList.insert(guruIndex, updatedGuru);
+          });
+        } else if (data.events.contains(
             'databases.*.collections.${AppwriteConstants.collectionUserId}.documents.*.delete')) {
           final startingPoint = data.events[0].lastIndexOf('documents.');
           final endPoint = data.events[0].lastIndexOf('.delete');
@@ -76,29 +90,54 @@ class _GuruListPageState extends ConsumerState<GuruListPage> {
               ),
             ),
             const SizedBox(height: 16),
-            ...guruList.map((guru) => InkWell(
-                  onTap: () {},
-                  child: Card(
-                    margin: const EdgeInsets.symmetric(vertical: 8),
-                    child: ListTile(
-                      title: Text(guru.nama),
-                      subtitle: Text('Kelompok: ${guru.kelompok}'),
-                      trailing: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          // IconButton(
-                          //   icon: const Icon(Icons.edit),
-                          //   onPressed: () {
-                          //   },
-                          // ),
-                          IconButton(
-                            icon: const Icon(Icons.delete),
-                            onPressed: () {
-                              _showDeleteConfirmationDialog(context, ref, guru);
+            ...guruList.map((guru) => Card(
+                  margin: const EdgeInsets.symmetric(vertical: 8),
+                  child: ListTile(
+                    leading: ClipOval(
+                      child: ref.watch(getUserImageProvider(guru.imageId)).when(
+                            data: (imageData) {
+                              if (imageData != null) {
+                                return Image.memory(
+                                  imageData,
+                                  width: 50,
+                                  height: 50,
+                                  fit: BoxFit.cover,
+                                );
+                              } else {
+                                return Image.asset(
+                                  'assets/images/pp_kosong.jpg',
+                                  width: 50,
+                                  height: 50,
+                                  fit: BoxFit.cover,
+                                );
+                              }
                             },
+                            loading: () => const Center(
+                              child: CircularProgressIndicator(),
+                            ),
+                            error: (_, __) => const Center(
+                              child: Icon(Icons.error),
+                            ),
                           ),
-                        ],
-                      ),
+                    ),
+                    title: Text(guru.nama),
+                    subtitle: Text('Kelompok: ${guru.kelompok}'),
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.edit),
+                          onPressed: () {
+                            Navigator.push(context, EditGuruPage.route(guru));
+                          },
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.delete),
+                          onPressed: () {
+                            _showDeleteConfirmationDialog(context, ref, guru);
+                          },
+                        ),
+                      ],
                     ),
                   ),
                 )),
