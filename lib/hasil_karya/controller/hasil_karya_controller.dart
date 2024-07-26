@@ -87,8 +87,12 @@ class HkController extends StateNotifier<bool> {
   }) async {
     state = true;
     final user = _ref.read(currentUserDetailsProvider).value!;
-    final kelompok = _ref.read(searchUserProvider(muridId)).value!.kelompok;
-
+    final kelompok = _ref.read(searchUserProvider(muridId)).value?.kelompok;
+    if (kelompok == null) {
+      showSnackBar(context, 'Tekan lagi');
+      state = false;
+      return;
+    }
     String? imageId;
     if (image != null) {
       imageId = await _hkAPI.uploadFile(image, 'hk_${DateTime.now()}.jpg');

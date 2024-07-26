@@ -1,5 +1,8 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:sippa/add_user/controller/user_controller.dart';
 import 'package:sippa/anekdot/controller/anekdot_controller.dart';
@@ -26,6 +29,10 @@ class _AddAnekdotPageState extends ConsumerState<AddAnekdotPage> {
   final pengamatanController = TextEditingController();
   final muridIdController = TextEditingController();
   DateTime? _selectedDate;
+  File? _image;
+  String? _errorMessage;
+  static const int maxFileSize = 2 * 1024 * 1024;
+  final ImagePicker picker = ImagePicker();
 
   @override
   void dispose() {
@@ -55,6 +62,39 @@ class _AddAnekdotPageState extends ConsumerState<AddAnekdotPage> {
     }
   }
 
+  Future<void> _pickImage() async {
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+
+    if (pickedFile != null) {
+      final file = File(pickedFile.path);
+      final fileSize = await file.length();
+
+      if (fileSize > maxFileSize) {
+        setState(() {
+          _errorMessage =
+              'Ukuran file melebihi 2 MB. Silakan pilih file yang lebih kecil.';
+          _image = null;
+        });
+      } else {
+        setState(() {
+          _image = file;
+          _errorMessage = null;
+        });
+      }
+    } else {
+      setState(() {
+        _errorMessage = null;
+      });
+    }
+  }
+
+  void removeImage() {
+    setState(() {
+      _image = null;
+      _errorMessage = null;
+    });
+  }
+
   void addAnekdot() {
     if (_formKey.currentState!.validate()) {
       ref.read(anekdotControllerProvider.notifier).addAnekdot(
@@ -65,6 +105,7 @@ class _AddAnekdotPageState extends ConsumerState<AddAnekdotPage> {
           tanggal: tanggalController.text,
           pengamatan: pengamatanController.text,
           muridId: muridIdController.text,
+          image: _image,
           context: context);
     }
   }
@@ -79,205 +120,245 @@ class _AddAnekdotPageState extends ConsumerState<AddAnekdotPage> {
         title: 'Tambah Anekdot',
       ),
       backgroundColor: Colors.white,
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.only(
-            right: 31,
-            left: 31,
-            bottom: 40,
-          ),
-          child: Center(
-            child: Form(
-              key: _formKey,
-              child: Column(
-                children: [
-                  const SizedBox(
-                    height: 40,
+      body: Padding(
+        padding: const EdgeInsets.only(
+          right: 31,
+          left: 31,
+        ),
+        child: Form(
+          key: _formKey,
+          child: ListView(
+            children: [
+              if (_image != null)
+                Container(
+                  margin: const EdgeInsets.all(10),
+                  height: 200,
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.grey),
+                    borderRadius: BorderRadius.circular(8),
                   ),
-                  muridAsyncValue.when(
-                    data: (muridList) {
-                      return Padding(
-                        padding: const EdgeInsets.only(bottom: 22),
-                        child: DropdownButtonFormField<String>(
-                          decoration: const InputDecoration(
-                            labelText: "Murid",
-                            border: OutlineInputBorder(),
-                          ),
-                          items: muridList.map((murid) {
-                            return DropdownMenuItem<String>(
-                              value: murid.id,
-                              child: Text(murid.nama),
-                            );
-                          }).toList(),
-                          onChanged: (String? newValue) {
-                            muridIdController.text = newValue ?? '';
-                          },
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Pilih murid';
-                            }
-                            return null;
-                          },
-                        ),
-                      );
-                    },
-                    loading: () => const CircularProgressIndicator(),
-                    error: (error, stack) => Text('Error: $error'),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 22),
-                    child: TextFormField(
-                      controller: tanggalController,
-                      decoration: InputDecoration(
-                        border: const OutlineInputBorder(),
-                        labelText: 'Tanggal',
-                        suffixIcon: IconButton(
-                          icon: const Icon(Icons.calendar_today),
-                          onPressed: () => _selectDate(context),
-                        ),
-                      ),
-                      readOnly: true,
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Pilih tanggal';
-                        }
-                        return null;
-                      },
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: Image.file(
+                      _image!,
+                      fit: BoxFit.scaleDown,
                     ),
                   ),
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 22),
-                    child: TextFormField(
-                      keyboardType: TextInputType.multiline,
-                      maxLines: null,
-                      minLines: 3,
-                      controller: pengamatanController,
-                      maxLength: 1000,
-                      decoration: const InputDecoration(
-                        border: OutlineInputBorder(),
-                        labelText: 'Pengamatan',
-                      ),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Masukkan pengamatan';
-                        }
-                        return null;
-                      },
-                    ),
+                )
+              else
+                Container(
+                  margin: const EdgeInsets.all(10),
+                  height: 200,
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.grey),
+                    borderRadius: BorderRadius.circular(8),
                   ),
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 22),
-                    child: TextFormField(
-                      keyboardType: TextInputType.multiline,
-                      maxLines: null,
-                      minLines: 2,
-                      controller: nilaiController,
-                      maxLength: 500,
-                      decoration: const InputDecoration(
-                        border: OutlineInputBorder(),
-                        labelText: 'Nilai agama dan budi pekerti',
-                      ),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Masukkan Nilai agama dan budi pekerti';
-                        }
-                        return null;
-                      },
-                    ),
+                  child: const Center(
+                    child: Text('Belum ada gambar dipilih'),
                   ),
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 22),
-                    child: TextFormField(
-                      keyboardType: TextInputType.multiline,
-                      maxLines: null,
-                      minLines: 2,
-                      controller: jatiDiriController,
-                      maxLength: 500,
-                      decoration: const InputDecoration(
-                        border: OutlineInputBorder(),
-                        labelText: 'Jati diri',
-                      ),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Masukkan Jati diri';
-                        }
-                        return null;
-                      },
-                    ),
+                ),
+              if (_image != null)
+                ElevatedButton(
+                  onPressed: removeImage,
+                  child: const Text('Hapus Gambar'),
+                ),
+              if (_errorMessage != null)
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text(
+                    _errorMessage!,
+                    style: const TextStyle(color: Colors.red),
                   ),
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 22),
-                    child: TextFormField(
-                      keyboardType: TextInputType.multiline,
-                      maxLines: null,
-                      minLines: 2,
-                      controller: literasiController,
-                      maxLength: 500,
-                      decoration: const InputDecoration(
-                        border: OutlineInputBorder(),
-                        labelText: 'Literasi dan STEAM',
-                      ),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Masukkan Literasi dan STEAM';
-                        }
-                        return null;
-                      },
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 22),
-                    child: TextFormField(
-                      keyboardType: TextInputType.multiline,
-                      maxLines: null,
-                      minLines: 2,
-                      controller: umpanBalikController,
-                      maxLength: 500,
-                      decoration: const InputDecoration(
-                        border: OutlineInputBorder(),
-                        labelText: 'Umpan balik',
-                      ),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Masukkan Umpan balik';
-                        }
-                        return null;
-                      },
-                    ),
-                  ),
-                  ElevatedButton(
-                    onPressed: () {
-                      addAnekdot();
-                    },
-                    style: ButtonStyle(
-                      backgroundColor:
-                          MaterialStateProperty.all(const Color(0xff104993)),
-                      shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                        RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(6.0),
-                        ),
-                      ),
-                      fixedSize:
-                          MaterialStateProperty.all(const Size.fromHeight(45)),
-                    ),
-                    child: Container(
-                      width: double.infinity,
-                      alignment: Alignment.center,
-                      child: const Text(
-                        "Tambah Anekdot",
-                        style: TextStyle(
-                          fontFamily: 'inter',
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(
-                    height: 15,
-                  ),
-                ],
+                ),
+              ElevatedButton(
+                onPressed: _pickImage,
+                child: const Text('Pilih Gambar'),
               ),
-            ),
+              const SizedBox(height: 16),
+              muridAsyncValue.when(
+                data: (muridList) {
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 22),
+                    child: DropdownButtonFormField<String>(
+                      decoration: const InputDecoration(
+                        labelText: "Murid",
+                        border: OutlineInputBorder(),
+                      ),
+                      items: muridList.map((murid) {
+                        return DropdownMenuItem<String>(
+                          value: murid.id,
+                          child: Text(murid.nama),
+                        );
+                      }).toList(),
+                      onChanged: (String? newValue) {
+                        muridIdController.text = newValue ?? '';
+                      },
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Pilih murid';
+                        }
+                        return null;
+                      },
+                    ),
+                  );
+                },
+                loading: () => const CircularProgressIndicator(),
+                error: (error, stack) => Text('Error: $error'),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(bottom: 22),
+                child: TextFormField(
+                  controller: tanggalController,
+                  decoration: InputDecoration(
+                    border: const OutlineInputBorder(),
+                    labelText: 'Tanggal',
+                    suffixIcon: IconButton(
+                      icon: const Icon(Icons.calendar_today),
+                      onPressed: () => _selectDate(context),
+                    ),
+                  ),
+                  readOnly: true,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Pilih tanggal';
+                    }
+                    return null;
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(bottom: 22),
+                child: TextFormField(
+                  keyboardType: TextInputType.multiline,
+                  maxLines: null,
+                  minLines: 3,
+                  controller: pengamatanController,
+                  maxLength: 1000,
+                  decoration: const InputDecoration(
+                    border: OutlineInputBorder(),
+                    labelText: 'Pengamatan',
+                  ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Masukkan pengamatan';
+                    }
+                    return null;
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(bottom: 22),
+                child: TextFormField(
+                  keyboardType: TextInputType.multiline,
+                  maxLines: null,
+                  minLines: 2,
+                  controller: nilaiController,
+                  maxLength: 500,
+                  decoration: const InputDecoration(
+                    border: OutlineInputBorder(),
+                    labelText: 'Nilai agama dan budi pekerti',
+                  ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Masukkan Nilai agama dan budi pekerti';
+                    }
+                    return null;
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(bottom: 22),
+                child: TextFormField(
+                  keyboardType: TextInputType.multiline,
+                  maxLines: null,
+                  minLines: 2,
+                  controller: jatiDiriController,
+                  maxLength: 500,
+                  decoration: const InputDecoration(
+                    border: OutlineInputBorder(),
+                    labelText: 'Jati diri',
+                  ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Masukkan Jati diri';
+                    }
+                    return null;
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(bottom: 22),
+                child: TextFormField(
+                  keyboardType: TextInputType.multiline,
+                  maxLines: null,
+                  minLines: 2,
+                  controller: literasiController,
+                  maxLength: 500,
+                  decoration: const InputDecoration(
+                    border: OutlineInputBorder(),
+                    labelText: 'Literasi dan STEAM',
+                  ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Masukkan Literasi dan STEAM';
+                    }
+                    return null;
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(bottom: 22),
+                child: TextFormField(
+                  keyboardType: TextInputType.multiline,
+                  maxLines: null,
+                  minLines: 2,
+                  controller: umpanBalikController,
+                  maxLength: 500,
+                  decoration: const InputDecoration(
+                    border: OutlineInputBorder(),
+                    labelText: 'Umpan balik',
+                  ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Masukkan Umpan balik';
+                    }
+                    return null;
+                  },
+                ),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  addAnekdot();
+                },
+                style: ButtonStyle(
+                  backgroundColor:
+                      MaterialStateProperty.all(const Color(0xff104993)),
+                  shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                    RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(6.0),
+                    ),
+                  ),
+                  fixedSize:
+                      MaterialStateProperty.all(const Size.fromHeight(45)),
+                ),
+                child: Container(
+                  width: double.infinity,
+                  alignment: Alignment.center,
+                  child: const Text(
+                    "Tambah Anekdot",
+                    style: TextStyle(
+                      fontFamily: 'inter',
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(
+                height: 15,
+              ),
+            ],
           ),
         ),
       ),

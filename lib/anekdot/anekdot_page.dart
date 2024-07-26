@@ -26,7 +26,7 @@ class AnekdotPage extends ConsumerStatefulWidget {
 }
 
 class _AnekdotPageState extends ConsumerState<AnekdotPage> {
-  int _selectedIndex = 1;
+  int _selectedIndex = 0;
   List<AnekdotModel> _anekdotList = [];
 
   void _onItemSelected(int index) {
@@ -158,6 +158,11 @@ class _AnekdotPageState extends ConsumerState<AnekdotPage> {
                               columns: [
                                 const DataColumn(
                                     label: CustomText(
+                                  text: 'Foto',
+                                  fontWeight: FontWeight.w700,
+                                )),
+                                const DataColumn(
+                                    label: CustomText(
                                   text: 'Nama Murid',
                                   fontWeight: FontWeight.w700,
                                 )),
@@ -218,6 +223,34 @@ class _AnekdotPageState extends ConsumerState<AnekdotPage> {
                                     ref.watch(getUserDataProvider(anekdot.uid));
                                 return DataRow(
                                   cells: [
+                                    DataCell(
+                                      ConstrainedBox(
+                                        constraints: const BoxConstraints(
+                                          maxWidth: 150,
+                                          maxHeight: 150,
+                                        ),
+                                        child: ref
+                                            .watch(getAnekdotImageProvider(
+                                                anekdot.imageId))
+                                            .when(
+                                              data: (imageData) {
+                                                if (imageData != null) {
+                                                  return Image.memory(
+                                                    imageData,
+                                                    fit: BoxFit.cover,
+                                                  );
+                                                } else {
+                                                  return const Icon(Icons
+                                                      .image_not_supported);
+                                                }
+                                              },
+                                              loading: () =>
+                                                  const CircularProgressIndicator(),
+                                              error: (_, __) =>
+                                                  const Icon(Icons.error),
+                                            ),
+                                      ),
+                                    ),
                                     DataCell(
                                       ConstrainedBox(
                                         constraints: const BoxConstraints(

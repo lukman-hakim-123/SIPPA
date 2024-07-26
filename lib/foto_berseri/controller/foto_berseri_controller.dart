@@ -89,8 +89,12 @@ class FbController extends StateNotifier<bool> {
   }) async {
     state = true;
     final user = _ref.read(currentUserDetailsProvider).value!;
-    final kelompok = _ref.read(searchUserProvider(muridId)).value!.kelompok;
-
+final kelompok = _ref.read(searchUserProvider(muridId)).value?.kelompok;
+      if (kelompok == null) {
+        showSnackBar(context, 'Tekan lagi');
+        state = false;
+        return;
+      }
     String? imageId1;
     String? imageId2;
     String? imageId3;

@@ -19,7 +19,7 @@ class GuruListPage extends ConsumerStatefulWidget {
 }
 
 class _GuruListPageState extends ConsumerState<GuruListPage> {
-  int selectedIndex = 2;
+  int selectedIndex = 7;
   List<User> guruList = [];
 
   @override

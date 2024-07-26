@@ -7,11 +7,14 @@ import 'package:sippa/core/failure.dart';
 import 'package:sippa/core/providers.dart';
 import 'package:sippa/core/type_defs.dart';
 import 'package:sippa/models/anekdot.dart';
+import 'dart:io' as io;
+import 'dart:typed_data';
 
 final anekdotAPIProvider = Provider((ref) {
   return AnekdotAPI(
     db: ref.watch(appwriteDatabaseProvider),
     realtime: ref.watch(appwriteRealtimeProvider),
+    storage: ref.watch(appwriteStorageProvider),
   );
 });
 
@@ -24,14 +27,22 @@ abstract class IAnekdotAPI {
   FutureEither<Document> updateAnekdot(AnekdotModel anekdot);
   FutureVoid deleteAnekdot(AnekdotModel anekdot);
   FutureVoid deleteAll(String uid);
+  Future<Uint8List?> getImage(String imageId);
+  FutureVoid deleteImage(String imageId);
 }
 
 class AnekdotAPI implements IAnekdotAPI {
   final Databases _db;
   final Realtime _realtime;
-  AnekdotAPI({required Databases db, required Realtime realtime})
+  final Storage _storage;
+
+  AnekdotAPI(
+      {required Databases db,
+      required Realtime realtime,
+      required Storage storage})
       : _db = db,
-        _realtime = realtime;
+        _realtime = realtime,
+        _storage = storage;
 
   @override
   FutureEither<Document> addAnekdot(AnekdotModel anekdot) async {
@@ -52,6 +63,45 @@ class AnekdotAPI implements IAnekdotAPI {
       );
     } catch (e, st) {
       return left(Failure(e.toString(), st));
+    }
+  }
+
+  Future<String> uploadFile(io.File file, String fileName) async {
+    try {
+      final result = await _storage.createFile(
+        bucketId: AppwriteConstants.obsBucketId,
+        fileId: ID.unique(),
+        file: InputFile.fromPath(path: file.path, filename: fileName),
+      );
+      return result.$id;
+    } on AppwriteException catch (e) {
+      throw Exception('Failed to upload file: ${e.message}');
+    }
+  }
+
+  @override
+  Future<Uint8List?> getImage(String imageId) async {
+    try {
+      final res = await _storage.getFileView(
+        bucketId: AppwriteConstants.obsBucketId,
+        fileId: imageId,
+      );
+      return res;
+    } catch (e) {
+      print('Error getting image: $e');
+      return null;
+    }
+  }
+
+  @override
+  FutureVoid deleteImage(String imageId) async {
+    try {
+      await _storage.deleteFile(
+        bucketId: AppwriteConstants.obsBucketId,
+        fileId: imageId,
+      );
+    } catch (e) {
+      print(e.toString());
     }
   }
 
@@ -110,6 +160,7 @@ class AnekdotAPI implements IAnekdotAPI {
           'literasi': anekdot.literasi,
           'umpanBalik': anekdot.umpanBalik,
           'kelompok': anekdot.kelompok,
+          'imageId': anekdot.imageId,
           'muridId': anekdot.muridId,
         },
       );

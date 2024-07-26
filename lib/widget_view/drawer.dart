@@ -1,14 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:sippa/add_user/controller/user_controller.dart';
 import 'package:sippa/add_user/list_guru.dart';
 import 'package:sippa/add_user/list_murid.dart';
 import 'package:sippa/anekdot/anekdot_page.dart';
 import 'package:sippa/auth/controllers/auth_controller.dart';
 import 'package:sippa/capaian_pembelajaran/cp_page.dart';
 import 'package:sippa/common/loading.dart';
+import 'package:sippa/common/error.dart';
+import 'package:sippa/constant/appwrite.dart';
 import 'package:sippa/foto_berseri/foto_berseri_page.dart';
 import 'package:sippa/hasil_karya/hasil_karya_page.dart';
+import 'package:sippa/models/user.dart';
 import 'package:sippa/tanggapan_ortu/tanggapan_page.dart';
+import 'package:sippa/widget_view/edit_profil_page.dart';
 
 class CustomDrawer extends ConsumerWidget {
   final int selectedIndex;
@@ -23,77 +28,171 @@ class CustomDrawer extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final currentUserDetailAsyncValue = ref.watch(currentUserDetailsProvider);
-    return Drawer(
-        child: currentUserDetailAsyncValue.when(
+    final latestUsersAsyncValue = ref.watch(getLatestUsersProvider);
+
+    return currentUserDetailAsyncValue.when(
       data: (userDetails) {
         if (userDetails == null) {
-          return const Center(
-            child: Loader(),
-          );
+          return const Center(child: Loader());
         }
-        final levelUser = userDetails.levelUser;
-        final kelompok = userDetails.kelompok;
-        return ListView(
-          padding: EdgeInsets.zero,
-          children: [
-            DrawerHeader(
-              decoration: const BoxDecoration(
-                color: Colors.blue,
+
+        User copyOfUser = userDetails;
+
+        latestUsersAsyncValue.when(
+          data: (data) {
+            if (data.events.contains(
+                'databases.*.collections.${AppwriteConstants.collectionUserId}.documents.${userDetails.id}.update')) {
+              copyOfUser = User.fromMap(data.payload);
+            }
+          },
+          error: (error, st) => ErrorText(error: error.toString()),
+          loading: () => const SizedBox.shrink(), // No extra widget needed here
+        );
+
+        final levelUser = copyOfUser.levelUser;
+        final kelompok = copyOfUser.kelompok;
+
+        return Drawer(
+          child: ListView(
+            padding: EdgeInsets.zero,
+            children: [
+              DrawerHeader(
+                decoration: const BoxDecoration(
+                  color: Colors.blue,
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.only(left: 8.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        width: 80,
+                        height: 80,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.all(color: Colors.grey),
+                        ),
+                        child: ClipOval(
+                          child: ref
+                              .watch(getUserImageProvider(copyOfUser.imageId))
+                              .when(
+                                data: (imageData) {
+                                  if (imageData != null) {
+                                    return Image.memory(
+                                      imageData,
+                                      fit: BoxFit.cover,
+                                    );
+                                  } else {
+                                    return Image.asset(
+                                      'assets/images/pp_kosong.jpg',
+                                      fit: BoxFit.cover,
+                                    );
+                                  }
+                                },
+                                loading: () => const Center(
+                                  child: CircularProgressIndicator(
+                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                        Colors.white),
+                                  ),
+                                ),
+                                error: (_, __) => const Center(
+                                  child: Icon(Icons.error, color: Colors.white),
+                                ),
+                              ),
+                        ),
+                      ),
+                      const SizedBox(height: 7),
+                      Text(
+                        copyOfUser.nama,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 1),
+                      Text(
+                        copyOfUser.email,
+                        style: const TextStyle(
+                          color: Colors.white70,
+                          fontSize: 14,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ),
-              child: Text(userDetails.nama),
-            ),
-            ListTile(
-              title: const Text('Anekdot'),
-              selected: selectedIndex == 0,
-              onTap: () {
-                Navigator.pushReplacement(context, AnekdotPage.route());
-                onItemSelected(0);
-              },
-            ),
-            ListTile(
-              title: const Text('Capaian Pembelajaran'),
-              selected: selectedIndex == 1,
-              onTap: () {
-                Navigator.pushReplacement(context, CpPage.route());
-                onItemSelected(1);
-              },
-            ),
-            ListTile(
-              title: const Text('Hasil Karya'),
-              selected: selectedIndex == 2,
-              onTap: () {
-                Navigator.pushReplacement(context, HkPage.route());
-                onItemSelected(2);
-              },
-            ),
-            ListTile(
-              title: const Text('Foto Berseri'),
-              selected: selectedIndex == 2,
-              onTap: () {
-                Navigator.pushReplacement(context, FbPage.route());
-                onItemSelected(2);
-              },
-            ),
-            ListTile(
-              title: const Text('Tanggapan OrangTua'),
-              selected: selectedIndex == 2,
-              onTap: () {
-                Navigator.pushReplacement(context, TanggapanPage.route());
-                onItemSelected(2);
-              },
-            ),
-            ..._buildMenuItems(levelUser, selectedIndex, context, kelompok),
-            ListTile(
-              title: const Text(
-                'Logout',
-                style: TextStyle(color: Colors.red),
+              ListTile(
+                title: const Text('Anekdot'),
+                selected: selectedIndex == 0,
+                onTap: () {
+                  Navigator.pushReplacement(context, AnekdotPage.route());
+                  onItemSelected(0);
+                },
               ),
-              selected: selectedIndex == 4,
-              onTap: () {
-                ref.read(authControllerProvider.notifier).logout(context);
-              },
-            ),
-          ],
+              ListTile(
+                title: const Text('Observasi'),
+                selected: selectedIndex == 1,
+                onTap: () {
+                  onItemSelected(1);
+                },
+              ),
+              ListTile(
+                title: const Text('Capaian Pembelajaran'),
+                selected: selectedIndex == 2,
+                onTap: () {
+                  Navigator.pushReplacement(context, CpPage.route());
+                  onItemSelected(2);
+                },
+              ),
+              ListTile(
+                title: const Text('Penilaian Hasil Karya'),
+                selected: selectedIndex == 3,
+                onTap: () {
+                  Navigator.pushReplacement(context, HkPage.route());
+                  onItemSelected(3);
+                },
+              ),
+              ListTile(
+                title: const Text('Foto Berseri'),
+                selected: selectedIndex == 4,
+                onTap: () {
+                  Navigator.pushReplacement(context, FbPage.route());
+                  onItemSelected(4);
+                },
+              ),
+              ListTile(
+                title: const Text('Tanggapan OrangTua'),
+                selected: selectedIndex == 5,
+                onTap: () {
+                  Navigator.pushReplacement(context, TanggapanPage.route());
+                  onItemSelected(5);
+                },
+              ),
+              ListTile(
+                title: const Text(
+                  'Profil',
+                ),
+                selected: selectedIndex == 9,
+                onTap: () {
+                  Navigator.pushReplacement(
+                      context, EditProfilePage.route(userDetails: userDetails));
+                  onItemSelected(9);
+                },
+              ),
+              ..._buildMenuItems(levelUser, selectedIndex, context, kelompok),
+              ListTile(
+                title: const Text(
+                  'Logout',
+                  style: TextStyle(color: Colors.red),
+                ),
+                selected: selectedIndex == 9,
+                onTap: () {
+                  ref.read(authControllerProvider.notifier).logout(context);
+                },
+              ),
+            ],
+          ),
         );
       },
       loading: () => const Center(child: CircularProgressIndicator()),
@@ -102,11 +201,8 @@ class CustomDrawer extends ConsumerWidget {
           child: Loader(),
         );
       },
-    ));
+    );
   }
-  // WidgetsBinding.instance.addPostFrameCallback((_) async {
-  //   ref.read(authControllerProvider.notifier).logout(context);
-  // });
 
   List<Widget> _buildMenuItems(int? levelUser, int selectedIndex,
       BuildContext context, String? kelompok) {
@@ -115,19 +211,19 @@ class CustomDrawer extends ConsumerWidget {
       items.addAll([
         ListTile(
           title: const Text('List Murid'),
-          selected: selectedIndex == 2,
+          selected: selectedIndex == 6,
           onTap: () {
             Navigator.pushReplacement(
                 context, MuridListPage.route(kelompok: kelompok));
-            onItemSelected(2);
+            onItemSelected(6);
           },
         ),
         ListTile(
           title: const Text('List Guru'),
-          selected: selectedIndex == 3,
+          selected: selectedIndex == 7,
           onTap: () {
             Navigator.pushReplacement(context, GuruListPage.route());
-            onItemSelected(3);
+            onItemSelected(7);
           },
         ),
       ]);
@@ -135,11 +231,11 @@ class CustomDrawer extends ConsumerWidget {
       items.add(
         ListTile(
           title: const Text('List Murid'),
-          selected: selectedIndex == 2,
+          selected: selectedIndex == 6,
           onTap: () {
             Navigator.pushReplacement(
                 context, MuridListPage.route(kelompok: kelompok));
-            onItemSelected(2);
+            onItemSelected(6);
           },
         ),
       );

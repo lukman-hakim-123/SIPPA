@@ -17,6 +17,10 @@ abstract class IAuthApi {
     required String email,
     required String password,
   });
+  FutureEither<model.User> updateEmailPassword({
+    required String email,
+    required String password,
+  });
 
   FutureEither<model.Session> login({
     required String email,
@@ -48,6 +52,20 @@ class AuthAPI implements IAuthApi {
     try {
       final account = await _account.create(
           userId: ID.unique(), email: email, password: password);
+      return right(account);
+    } on AppwriteException catch (e, stackTrace) {
+      return left(Failure(e.toString(), stackTrace));
+    } catch (e, stackTrace) {
+      return left(Failure(e.toString(), stackTrace));
+    }
+  }
+
+  @override
+  FutureEither<model.User> updateEmailPassword(
+      {required String email, required String password}) async {
+    try {
+      final account =
+          await _account.updateEmail(email: email, password: password);
       return right(account);
     } on AppwriteException catch (e, stackTrace) {
       return left(Failure(e.toString(), stackTrace));

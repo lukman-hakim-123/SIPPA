@@ -21,7 +21,7 @@ class MuridListPage extends ConsumerStatefulWidget {
 }
 
 class _MuridListPageState extends ConsumerState<MuridListPage> {
-  int selectedIndex = 2;
+  int selectedIndex = 6;
   List<User> muridList = [];
 
   @override

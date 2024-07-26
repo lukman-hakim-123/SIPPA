@@ -9,6 +9,7 @@ class AnekdotModel {
   final String literasi;
   final String umpanBalik;
   final String kelompok;
+  final String imageId;
   final String uid;
   final String id;
   final String muridId;
@@ -20,6 +21,7 @@ class AnekdotModel {
     required this.literasi,
     required this.umpanBalik,
     required this.kelompok,
+    required this.imageId,
     required this.uid,
     required this.id,
     required this.muridId,
@@ -33,6 +35,7 @@ class AnekdotModel {
     String? literasi,
     String? umpanBalik,
     String? kelompok,
+    String? imageId,
     String? uid,
     String? id,
     String? muridId,
@@ -45,6 +48,7 @@ class AnekdotModel {
       literasi: literasi ?? this.literasi,
       umpanBalik: umpanBalik ?? this.umpanBalik,
       kelompok: kelompok ?? this.kelompok,
+      imageId: imageId ?? this.imageId,
       uid: uid ?? this.uid,
       id: id ?? this.id,
       muridId: muridId ?? this.muridId,
@@ -60,6 +64,7 @@ class AnekdotModel {
       'literasi': literasi,
       'umpanBalik': umpanBalik,
       'kelompok': kelompok,
+      'imageId': imageId,
       'uid': uid,
       'muridId': muridId,
     };
@@ -74,6 +79,7 @@ class AnekdotModel {
       literasi: map['literasi'] ?? '',
       umpanBalik: map['umpanBalik'] ?? '',
       kelompok: map['kelompok'] ?? '',
+      imageId: map['imageId'] ?? '',
       uid: map['uid'] ?? '',
       id: map['\$id'] ?? '',
       muridId: map['muridId'] ?? '',
@@ -87,7 +93,7 @@ class AnekdotModel {
 
   @override
   String toString() {
-    return 'AnekdotModel(pengamatan: $pengamatan, tanggal: $tanggal, nilai: $nilai, jatiDiri: $jatiDiri, literasi: $literasi, umpanBalik: $umpanBalik, kelompok: $kelompok, uid: $uid, id: $id, muridId: $muridId)';
+    return 'AnekdotModel(pengamatan: $pengamatan, tanggal: $tanggal, nilai: $nilai, jatiDiri: $jatiDiri, literasi: $literasi, umpanBalik: $umpanBalik, kelompok: $kelompok,imageId: $imageId, uid: $uid, id: $id, muridId: $muridId)';
   }
 
   @override
@@ -101,6 +107,7 @@ class AnekdotModel {
         other.literasi == literasi &&
         other.umpanBalik == umpanBalik &&
         other.kelompok == kelompok &&
+        other.imageId == imageId &&
         other.uid == uid &&
         other.id == id &&
         other.muridId == muridId;
@@ -115,6 +122,7 @@ class AnekdotModel {
         literasi.hashCode ^
         umpanBalik.hashCode ^
         kelompok.hashCode ^
+        imageId.hashCode ^
         uid.hashCode ^
         id.hashCode ^
         muridId.hashCode;

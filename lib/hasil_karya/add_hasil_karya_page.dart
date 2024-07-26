@@ -117,7 +117,9 @@ class _AddHkPageState extends ConsumerState<AddHkPage> {
         title: 'Tambah Hasil Karya',
       ),
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.only(
+          right: 31,
+          left: 31,),
         child: Form(
           key: _formKey,
           child: ListView(

@@ -23,7 +23,7 @@ class TanggapanPage extends ConsumerStatefulWidget {
 }
 
 class _TanggapanPageState extends ConsumerState<TanggapanPage> {
-  int _selectedIndex = 2;
+  int _selectedIndex = 5;
   List<TanggapanModel> _tanggapanList = [];
 
   void _onItemSelected(int index) {

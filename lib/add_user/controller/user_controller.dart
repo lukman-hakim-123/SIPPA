@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sippa/apis/users_api.dart';
 import 'package:sippa/auth/controllers/auth_controller.dart';
@@ -19,6 +21,12 @@ final getMuridByFiltersProvider =
     await muridController.fetchMurid(kelompok);
     return ref.watch(muridControllerProvider);
   }
+});
+
+final getUserImageProvider =
+    FutureProvider.family<Uint8List?, String>((ref, String imageId) async {
+  final userAPI = ref.watch(userAPIProvider);
+  return await userAPI.getImage(imageId);
 });
 
 final getLatestUsersProvider = StreamProvider((ref) {

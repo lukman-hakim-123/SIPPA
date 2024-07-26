@@ -25,7 +25,7 @@ class CpPage extends ConsumerStatefulWidget {
 }
 
 class _CpPageState extends ConsumerState<CpPage> {
-  int _selectedIndex = 1;
+  int _selectedIndex = 2;
   List<CpModel> _cpList = [];
 
   void _onItemSelected(int index) {

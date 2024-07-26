@@ -25,8 +25,8 @@ class FbPage extends ConsumerStatefulWidget {
 }
 
 class _FbPageState extends ConsumerState<FbPage> {
-  int _selectedIndex = 2;
   List<FbModel> _fbList = [];
+  int _selectedIndex = 4;
 
   void _onItemSelected(int index) {
     setState(() {

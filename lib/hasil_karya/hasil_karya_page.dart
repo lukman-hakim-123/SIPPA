@@ -25,7 +25,7 @@ class HkPage extends ConsumerStatefulWidget {
 }
 
 class _HkPageState extends ConsumerState<HkPage> {
-  int _selectedIndex = 2;
+  int _selectedIndex = 3;
   List<HkModel> _hkList = [];
 
   void _onItemSelected(int index) {

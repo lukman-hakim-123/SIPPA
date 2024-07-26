@@ -6,6 +6,7 @@ class User {
   final String email;
   final String nama;
   final String kelompok;
+  final String imageId;
   final int levelUser;
 
   User({
@@ -13,6 +14,7 @@ class User {
     required this.email,
     required this.nama,
     required this.kelompok,
+    required this.imageId,
     required this.levelUser,
   });
 
@@ -21,6 +23,7 @@ class User {
     String? email,
     String? nama,
     String? kelompok,
+    String? imageId,
     int? levelUser,
   }) {
     return User(
@@ -28,6 +31,7 @@ class User {
       email: email ?? this.email,
       nama: nama ?? this.nama,
       kelompok: kelompok ?? this.kelompok,
+      imageId: imageId ?? this.imageId,
       levelUser: levelUser ?? this.levelUser,
     );
   }
@@ -38,6 +42,7 @@ class User {
       'email': email,
       'nama': nama,
       'kelompok': kelompok,
+      'imageId': imageId,
       'levelUser': levelUser,
     });
     return result;
@@ -49,6 +54,7 @@ class User {
       email: map['email'] ?? '',
       nama: map['nama'] ?? '',
       kelompok: map['kelompok'] ?? '',
+      imageId: map['imageId'] ?? '',
       levelUser: map['levelUser'] ?? 0,
     );
   }
@@ -60,7 +66,7 @@ class User {
 
   @override
   String toString() {
-    return 'User(id: $id, email: $email, nama: $nama, kelompok: $kelompok, levelUser: $levelUser)';
+    return 'User(id: $id, email: $email, nama: $nama, imageId: $imageId,kelompok: $kelompok, levelUser: $levelUser)';
   }
 
   @override
@@ -70,11 +76,16 @@ class User {
     return other.email == email &&
         other.nama == nama &&
         other.kelompok == kelompok &&
+        other.imageId == imageId &&
         other.levelUser == levelUser;
   }
 
   @override
   int get hashCode {
-    return id.hashCode ^ email.hashCode ^ nama.hashCode ^ kelompok.hashCode;
+    return id.hashCode ^
+        email.hashCode ^
+        nama.hashCode ^
+        kelompok.hashCode ^
+        imageId.hashCode;
   }
 }

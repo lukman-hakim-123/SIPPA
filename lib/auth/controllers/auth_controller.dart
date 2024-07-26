@@ -1,4 +1,7 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
+import 'dart:io' as io;
+
+import 'package:appwrite/appwrite.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:appwrite/models.dart' as model;
@@ -9,6 +12,7 @@ import 'package:sippa/apis/auth_api.dart';
 import 'package:sippa/apis/users_api.dart';
 import 'package:sippa/auth/login_page.dart';
 import 'package:sippa/models/user.dart';
+import 'package:sippa/widget_view/edit_profil_page.dart';
 
 import '../../core/utils.dart';
 
@@ -57,13 +61,20 @@ class AuthController extends StateNotifier<bool> {
     required String password,
     required String nama,
     required String kelompok,
+    required io.File? image,
     required BuildContext context,
   }) async {
     state = true;
     final response = await _authAPI.signup(email: email, password: password);
     state = false;
     response.fold((l) => showSnackBar(context, l.message), (r) async {
+      String? imageId;
+      if (image != null) {
+        imageId = await _userAPI.uploadFile(image, 'pp_${DateTime.now()}.jpg');
+      }
+
       User userModel = User(
+          imageId: imageId ?? '',
           email: email,
           id: r.$id,
           nama: nama,
@@ -83,13 +94,21 @@ class AuthController extends StateNotifier<bool> {
     required String password,
     required String nama,
     required String kelompok,
+    required io.File? image,
     required BuildContext context,
   }) async {
     state = true;
+
     final response = await _authAPI.signup(email: email, password: password);
     state = false;
     response.fold((l) => showSnackBar(context, l.message), (r) async {
+      String? imageId;
+      if (image != null) {
+        imageId = await _userAPI.uploadFile(image, 'pp_${DateTime.now()}.jpg');
+      }
+
       User userModel = User(
+          imageId: imageId ?? '',
           email: email,
           id: r.$id,
           nama: nama,
@@ -110,12 +129,48 @@ class AuthController extends StateNotifier<bool> {
     required WidgetRef ref,
   }) async {
     state = true;
+
     final response = await _authAPI.login(email: email, password: password);
     state = false;
     response.fold((l) => showSnackBar(context, l.message), (r) {
       showSnackBar(context, "Login is Successfully");
       ref.refresh(currentUserAccountProvider);
       Navigator.pushReplacement(context, AnekdotPage.route());
+    });
+  }
+
+  void updateUser({
+    required String nama,
+    required String email,
+    required String password,
+    required io.File? image,
+    required BuildContext context,
+    required WidgetRef ref,
+  }) async {
+    state = true;
+
+    await _authAPI.updateEmailPassword(email: email, password: password);
+    final user = ref.read(currentUserDetailsProvider).value!;
+    String? imageId;
+    if (image != null) {
+      await _userAPI.deleteImage(user.imageId);
+      imageId = await _userAPI.uploadFile(image, 'pp_${DateTime.now()}.jpg');
+    }
+
+    User userModel = User(
+        id: user.id,
+        email: email,
+        imageId: imageId ?? user.imageId,
+        nama: nama,
+        kelompok: user.kelompok,
+        levelUser: user.levelUser);
+    final res = await _userAPI.updateUser(userModel);
+    state = false;
+    res.fold((l) => showSnackBar(context, l.message), (r) {
+      showSnackBar(context, 'User Updated');
+      User newUser = ref.refresh(currentUserDetailsProvider).value!;
+      Navigator.pushReplacement(
+          context, EditProfilePage.route(userDetails: newUser));
     });
   }
 
