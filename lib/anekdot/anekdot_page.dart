@@ -445,12 +445,12 @@ void _showDeleteDialog(BuildContext context, WidgetRef ref,
                 data: (data) {
                   final nama = data?.data['nama'] ?? 'Murid tidak ditemukan';
                   return Text(
-                    'Apakah Anda yakin ingin menghapus capaian pembelajaran $nama pada tanggal ${anekdot.tanggal}',
+                    'Apakah Anda yakin ingin menghapus anekdot $nama pada tanggal ${anekdot.tanggal}',
                   );
                 },
                 loading: () => const CircularProgressIndicator(),
                 error: (_, __) => Text(
-                  'Apakah Anda yakin ingin menghapus capaian pembelajaran pada tanggal ${anekdot.tanggal}?',
+                  'Apakah Anda yakin ingin menghapus anekdot pada tanggal ${anekdot.tanggal}?',
                 ),
               ),
             ],
@@ -472,7 +472,7 @@ void _showDeleteDialog(BuildContext context, WidgetRef ref,
                   .deleteAnekdot(anekdot, context);
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
-                  content: Text('Capaian Pembelajaran berhasil dihapus'),
+                  content: Text('Anekdot berhasil dihapus'),
                 ),
               );
             },

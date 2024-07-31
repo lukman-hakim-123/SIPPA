@@ -362,7 +362,7 @@ class _AddFbPageState extends ConsumerState<AddFbPage> {
                 child: Container(
                   width: double.infinity,
                   alignment: Alignment.center,
-                  child: const Text("Tambah",
+                  child: const Text("Tambah Foto Berseri",
                       style:
                           TextStyle(fontFamily: 'inter', color: Colors.white)),
                 ),

@@ -528,7 +528,7 @@ void _showDeleteDialog(BuildContext context, WidgetRef ref, FbModel fb,
               ref.read(fbControllerProvider.notifier).deleteFb(fb, context);
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
-                  content: Text('Hasil Karya berhasil dihapus'),
+                  content: Text('Foto berseri berhasil dihapus'),
                 ),
               );
             },

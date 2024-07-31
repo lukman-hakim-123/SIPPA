@@ -172,6 +172,7 @@ class CustomDrawer extends ConsumerWidget {
                   onItemSelected(5);
                 },
               ),
+              ..._buildMenuItems(levelUser, selectedIndex, context, kelompok),
               ListTile(
                 title: const Text(
                   'Profil',
@@ -183,7 +184,6 @@ class CustomDrawer extends ConsumerWidget {
                   onItemSelected(9);
                 },
               ),
-              ..._buildMenuItems(levelUser, selectedIndex, context, kelompok),
               ListTile(
                 title: const Text(
                   'Logout',

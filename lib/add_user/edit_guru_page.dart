@@ -228,7 +228,7 @@ class _EditGuruPageState extends ConsumerState<EditGuruPage> {
                 child: Container(
                   width: double.infinity,
                   alignment: Alignment.center,
-                  child: const Text("Update Murid",
+                  child: const Text("Update Guru",
                       style:
                           TextStyle(fontFamily: 'inter', color: Colors.white)),
                 ),

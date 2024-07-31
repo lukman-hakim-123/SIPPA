@@ -394,7 +394,7 @@ class _EditAnekdotPageState extends ConsumerState<EditAnekdotPage> {
                 child: Container(
                   width: double.infinity,
                   alignment: Alignment.center,
-                  child: const Text("Edit Anekdot",
+                  child: const Text("Simpan Perubahan",
                       style:
                           TextStyle(fontFamily: 'inter', color: Colors.white)),
                 ),

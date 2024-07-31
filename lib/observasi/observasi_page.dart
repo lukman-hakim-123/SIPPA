@@ -26,7 +26,7 @@ class ObservasiPage extends ConsumerStatefulWidget {
 }
 
 class _ObservasiPageState extends ConsumerState<ObservasiPage> {
-  int _selectedIndex = 0;
+  int _selectedIndex = 1;
   List<ObservasiModel> _observasiList = [];
 
   void _onItemSelected(int index) {
@@ -411,12 +411,12 @@ void _showDeleteDialog(BuildContext context, WidgetRef ref,
                 data: (data) {
                   final nama = data?.data['nama'] ?? 'Murid tidak ditemukan';
                   return Text(
-                    'Apakah Anda yakin ingin menghapus capaian pembelajaran $nama pada tanggal ${observasi.tanggal}',
+                    'Apakah Anda yakin ingin menghapus observasi $nama pada tanggal ${observasi.tanggal}',
                   );
                 },
                 loading: () => const CircularProgressIndicator(),
                 error: (_, __) => Text(
-                  'Apakah Anda yakin ingin menghapus capaian pembelajaran pada tanggal ${observasi.tanggal}?',
+                  'Apakah Anda yakin ingin menghapus observasi pada tanggal ${observasi.tanggal}?',
                 ),
               ),
             ],
@@ -438,7 +438,7 @@ void _showDeleteDialog(BuildContext context, WidgetRef ref,
                   .deleteObservasi(observasi, context);
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
-                  content: Text('Capaian Pembelajaran berhasil dihapus'),
+                  content: Text('observasi berhasil dihapus'),
                 ),
               );
             },

@@ -351,7 +351,7 @@ class _EditObservasiPageState extends ConsumerState<EditObservasiPage> {
                 child: Container(
                   width: double.infinity,
                   alignment: Alignment.center,
-                  child: const Text("Edit Observasi",
+                  child: const Text("Simpan Perubahan",
                       style:
                           TextStyle(fontFamily: 'inter', color: Colors.white)),
                 ),

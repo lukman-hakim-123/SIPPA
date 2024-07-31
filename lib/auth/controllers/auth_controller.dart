@@ -167,7 +167,7 @@ class AuthController extends StateNotifier<bool> {
     final res = await _userAPI.updateUser(userModel);
     state = false;
     res.fold((l) => showSnackBar(context, l.message), (r) {
-      showSnackBar(context, 'User Updated');
+      showSnackBar(context, 'Profile Updated');
       User newUser = ref.refresh(currentUserDetailsProvider).value!;
       Navigator.pushReplacement(
           context, EditProfilePage.route(userDetails: newUser));

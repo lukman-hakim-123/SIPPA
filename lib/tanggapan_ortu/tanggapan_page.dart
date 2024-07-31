@@ -165,7 +165,7 @@ class _TanggapanPageState extends ConsumerState<TanggapanPage> {
                                 )),
                                 DataColumn(
                                     label: CustomText(
-                                  text: 'Tanggal Tanggapan',
+                                  text: 'Tanggal',
                                   fontWeight: FontWeight.w700,
                                 )),
                                 DataColumn(
