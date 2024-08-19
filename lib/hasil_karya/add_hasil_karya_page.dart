@@ -32,6 +32,7 @@ class _AddHkPageState extends ConsumerState<AddHkPage> {
   final TextEditingController nilaiController = TextEditingController();
   final TextEditingController jatiDiriController = TextEditingController();
   final TextEditingController literasiController = TextEditingController();
+  final TextEditingController rekomendasiController = TextEditingController();
   final ImagePicker picker = ImagePicker();
   DateTime? _selectedDate;
   File? _image;
@@ -47,6 +48,7 @@ class _AddHkPageState extends ConsumerState<AddHkPage> {
     nilaiController.dispose();
     jatiDiriController.dispose();
     literasiController.dispose();
+    rekomendasiController.dispose();
     super.dispose();
   }
 
@@ -102,6 +104,7 @@ class _AddHkPageState extends ConsumerState<AddHkPage> {
           literasi: literasiController.text,
           tanggal: tanggalController.text,
           muridId: muridIdController.text,
+          rekomendasi: rekomendasiController.text,
           image: _image,
           context: context);
     }
@@ -119,7 +122,8 @@ class _AddHkPageState extends ConsumerState<AddHkPage> {
       body: Padding(
         padding: const EdgeInsets.only(
           right: 31,
-          left: 31,),
+          left: 31,
+        ),
         child: Form(
           key: _formKey,
           child: ListView(
@@ -308,6 +312,24 @@ class _AddHkPageState extends ConsumerState<AddHkPage> {
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Masukkan Analisis Literasi';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: rekomendasiController,
+                decoration: const InputDecoration(
+                  border: OutlineInputBorder(),
+                  labelText: 'Rekomendasi',
+                ),
+                maxLength: 500,
+                minLines: 2,
+                maxLines: null,
+                keyboardType: TextInputType.multiline,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Masukkan Rekomendasi';
                   }
                   return null;
                 },

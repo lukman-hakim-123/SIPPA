@@ -117,7 +117,7 @@ class AuthController extends StateNotifier<bool> {
       final res2 = await _userAPI.saveUserData(userModel);
       res2.fold((l) => showSnackBar(context, l.message), (r) {
         showSnackBar(context, "Account Guru Created Successfully");
-        Navigator.pushReplacement(context, GuruListPage.route());
+        Navigator.pop(context);
       });
     });
   }
@@ -132,7 +132,8 @@ class AuthController extends StateNotifier<bool> {
 
     final response = await _authAPI.login(email: email, password: password);
     state = false;
-    response.fold((l) => showSnackBar(context, l.message), (r) {
+    response.fold((l) => showSnackBar(context, 'Email atau Password Salah'),
+        (r) {
       showSnackBar(context, "Login is Successfully");
       ref.refresh(currentUserAccountProvider);
       Navigator.pushReplacement(context, AnekdotPage.route());

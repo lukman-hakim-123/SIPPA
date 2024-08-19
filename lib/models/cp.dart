@@ -11,6 +11,8 @@ class CpModel {
   final String id;
   final String muridId;
   final String kelompok;
+  final String rekomendasi;
+  final String tanggapan;
   CpModel({
     required this.tujuan,
     required this.konteks,
@@ -21,6 +23,8 @@ class CpModel {
     required this.id,
     required this.muridId,
     required this.kelompok,
+    required this.rekomendasi,
+    required this.tanggapan,
   });
 
   CpModel copyWith({
@@ -33,6 +37,8 @@ class CpModel {
     String? id,
     String? muridId,
     String? kelompok,
+    String? rekomendasi,
+    String? tanggapan,
   }) {
     return CpModel(
       tujuan: tujuan ?? this.tujuan,
@@ -44,6 +50,8 @@ class CpModel {
       muridId: muridId ?? this.muridId,
       tanggal: tanggal ?? this.tanggal,
       kelompok: kelompok ?? this.kelompok,
+      rekomendasi: rekomendasi ?? this.rekomendasi,
+      tanggapan: tanggapan ?? this.tanggapan,
     );
   }
 
@@ -57,6 +65,8 @@ class CpModel {
       'uid': uid,
       'muridId': muridId,
       'kelompok': kelompok,
+      'rekomendasi': rekomendasi,
+      'tanggapan': tanggapan,
     };
   }
 
@@ -71,6 +81,8 @@ class CpModel {
       id: map['\$id'] ?? '',
       muridId: map['muridId'] ?? '',
       kelompok: map['kelompok'] ?? '',
+      rekomendasi: map['rekomendasi'] ?? '',
+      tanggapan: map['tanggapan'] ?? '',
     );
   }
 
@@ -81,7 +93,7 @@ class CpModel {
 
   @override
   String toString() {
-    return 'CpModel(tujuan: $tujuan, konteks: $konteks, isDone: $isDone, teramati: $teramati, tanggal: $tanggal, uid: $uid, id: $id, muridId: $muridId,kelompok: $kelompok,)';
+    return 'CpModel(tujuan: $tujuan, konteks: $konteks, isDone: $isDone, teramati: $teramati, tanggal: $tanggal, uid: $uid, id: $id, muridId: $muridId,kelompok: $kelompok,rekomendasi: $rekomendasi,tanggapan: $tanggapan,)';
   }
 
   @override
@@ -96,6 +108,8 @@ class CpModel {
         other.uid == uid &&
         other.id == id &&
         other.muridId == muridId &&
+        other.rekomendasi == rekomendasi &&
+        other.tanggapan == tanggapan &&
         other.kelompok == kelompok;
   }
 
@@ -109,6 +123,8 @@ class CpModel {
         uid.hashCode ^
         id.hashCode ^
         muridId.hashCode ^
+        rekomendasi.hashCode ^
+        tanggapan.hashCode ^
         kelompok.hashCode;
   }
 }

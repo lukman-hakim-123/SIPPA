@@ -16,7 +16,7 @@ class AddGuruPage extends ConsumerStatefulWidget {
 }
 
 class _AddGuruPageState extends ConsumerState<AddGuruPage> {
-  final List<String> kelompokOptions = ['A', 'B', 'C', 'D', 'E', 'F'];
+  final List<String> kelompokOptions = ['A', 'B', 'C', 'D', 'E', 'F', 'G'];
   String? selectedKelompok;
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 

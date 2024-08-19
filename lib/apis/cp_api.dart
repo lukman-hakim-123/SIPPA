@@ -109,6 +109,8 @@ class CpAPI implements ICpAPI {
           'teramati': cp.teramati,
           'isDone': cp.isDone,
           'muridId': cp.muridId,
+          'rekomendasi': cp.rekomendasi,
+          'tanggapan': cp.tanggapan,
         },
       );
       return right(document);

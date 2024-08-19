@@ -9,18 +9,26 @@ import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 
 class EditAnekdotPage extends ConsumerStatefulWidget {
-  static route({required String kelompok, required AnekdotModel anekdot}) =>
+  static route(
+          {required String kelompok,
+          required AnekdotModel anekdot,
+          required int levelUser}) =>
       MaterialPageRoute(
           builder: (context) => EditAnekdotPage(
                 kelompok: kelompok,
                 anekdot: anekdot,
+                levelUser: levelUser,
               ));
 
   final String kelompok;
   final AnekdotModel anekdot;
+  final int levelUser;
 
   const EditAnekdotPage(
-      {super.key, required this.kelompok, required this.anekdot});
+      {super.key,
+      required this.kelompok,
+      required this.anekdot,
+      required this.levelUser});
 
   @override
   ConsumerState<ConsumerStatefulWidget> createState() =>
@@ -36,6 +44,8 @@ class _EditAnekdotPageState extends ConsumerState<EditAnekdotPage> {
   final tanggalController = TextEditingController();
   final pengamatanController = TextEditingController();
   final muridIdController = TextEditingController();
+  final tanggapanController = TextEditingController();
+
   DateTime? _selectedDate;
   final ImagePicker picker = ImagePicker();
   File? _image;
@@ -54,6 +64,7 @@ class _EditAnekdotPageState extends ConsumerState<EditAnekdotPage> {
     tanggalController.text = widget.anekdot.tanggal;
     pengamatanController.text = widget.anekdot.pengamatan;
     muridIdController.text = widget.anekdot.muridId;
+    tanggapanController.text = widget.anekdot.tanggapan;
     _selectedDate = DateFormat('dd MMMM yyyy').parse(widget.anekdot.tanggal);
   }
 
@@ -121,6 +132,7 @@ class _EditAnekdotPageState extends ConsumerState<EditAnekdotPage> {
           imageId: widget.anekdot.imageId,
           deleteId: _deleteImage,
           muridId: muridIdController.text,
+          tanggapan: tanggapanController.text,
           context: context);
     }
   }
@@ -145,7 +157,7 @@ class _EditAnekdotPageState extends ConsumerState<EditAnekdotPage> {
           child: ListView(
             children: [
               Column(
-                children: [
+                children: <Widget>[
                   Container(
                     margin: const EdgeInsets.all(10),
                     height: 200,
@@ -181,32 +193,33 @@ class _EditAnekdotPageState extends ConsumerState<EditAnekdotPage> {
                                       size: 50),
                     ),
                   ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      ElevatedButton(
-                        onPressed: _pickImage,
-                        child: const Text('Pilih Gambar'),
-                      ),
-                      const SizedBox(width: 10),
-                      ElevatedButton(
-                        onPressed: () {
-                          setState(() {
-                            if (_deleteImage) {
-                              _image = null;
-                            }
-                            _deleteImage = !_deleteImage;
-                          });
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor:
-                              _deleteImage ? Colors.red : Colors.grey,
+                  if (widget.levelUser != 3)
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        ElevatedButton(
+                          onPressed: _pickImage,
+                          child: const Text('Pilih Gambar'),
                         ),
-                        child:
-                            Text(_deleteImage ? 'Batal Hapus' : 'Hapus Gambar'),
-                      ),
-                    ],
-                  ),
+                        const SizedBox(width: 10),
+                        ElevatedButton(
+                          onPressed: () {
+                            setState(() {
+                              if (_deleteImage) {
+                                _image = null;
+                              }
+                              _deleteImage = !_deleteImage;
+                            });
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor:
+                                _deleteImage ? Colors.red : Colors.grey,
+                          ),
+                          child: Text(
+                              _deleteImage ? 'Batal Hapus' : 'Hapus Gambar'),
+                        ),
+                      ],
+                    ),
                   const SizedBox(height: 16),
                 ],
               ),
@@ -244,6 +257,7 @@ class _EditAnekdotPageState extends ConsumerState<EditAnekdotPage> {
                       items: muridList.map((murid) {
                         return DropdownMenuItem<String>(
                           value: murid.id,
+                          enabled: widget.levelUser != 3,
                           child: Text(murid.nama),
                         );
                       }).toList(),
@@ -270,10 +284,12 @@ class _EditAnekdotPageState extends ConsumerState<EditAnekdotPage> {
                   decoration: InputDecoration(
                     border: const OutlineInputBorder(),
                     labelText: 'Tanggal',
-                    suffixIcon: IconButton(
-                      icon: const Icon(Icons.calendar_today),
-                      onPressed: () => _selectDate(context),
-                    ),
+                    suffixIcon: widget.levelUser == 3
+                        ? null
+                        : IconButton(
+                            icon: const Icon(Icons.calendar_today),
+                            onPressed: () => _selectDate(context),
+                          ),
                   ),
                   readOnly: true,
                   validator: (value) {
@@ -300,6 +316,7 @@ class _EditAnekdotPageState extends ConsumerState<EditAnekdotPage> {
                     }
                     return null;
                   },
+                  readOnly: widget.levelUser == 3,
                 ),
               ),
               Padding(
@@ -319,6 +336,7 @@ class _EditAnekdotPageState extends ConsumerState<EditAnekdotPage> {
                     }
                     return null;
                   },
+                  readOnly: widget.levelUser == 3,
                 ),
               ),
               Padding(
@@ -337,6 +355,7 @@ class _EditAnekdotPageState extends ConsumerState<EditAnekdotPage> {
                     }
                     return null;
                   },
+                  readOnly: widget.levelUser == 3,
                 ),
               ),
               Padding(
@@ -356,6 +375,7 @@ class _EditAnekdotPageState extends ConsumerState<EditAnekdotPage> {
                     }
                     return null;
                   },
+                  readOnly: widget.levelUser == 3,
                 ),
               ),
               Padding(
@@ -367,13 +387,28 @@ class _EditAnekdotPageState extends ConsumerState<EditAnekdotPage> {
                   controller: umpanBalikController,
                   maxLength: 500,
                   decoration: const InputDecoration(
-                      border: OutlineInputBorder(), labelText: 'Umpan Balik'),
+                      border: OutlineInputBorder(), labelText: 'Rekomendasi'),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Umpan Balik tidak boleh kosong';
+                      return 'Rekomendasi tidak boleh kosong';
                     }
                     return null;
                   },
+                  readOnly: widget.levelUser == 3,
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(bottom: 22),
+                child: TextFormField(
+                  keyboardType: TextInputType.multiline,
+                  maxLines: null,
+                  minLines: 2,
+                  controller: tanggapanController,
+                  maxLength: 500,
+                  decoration: const InputDecoration(
+                      border: OutlineInputBorder(),
+                      labelText: 'Tanggapan Orang Tua'),
+                  readOnly: widget.levelUser != 3,
                 ),
               ),
               ElevatedButton(

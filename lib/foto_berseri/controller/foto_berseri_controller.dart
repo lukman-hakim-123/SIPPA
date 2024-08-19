@@ -89,12 +89,12 @@ class FbController extends StateNotifier<bool> {
   }) async {
     state = true;
     final user = _ref.read(currentUserDetailsProvider).value!;
-final kelompok = _ref.read(searchUserProvider(muridId)).value?.kelompok;
-      if (kelompok == null) {
-        showSnackBar(context, 'Tekan lagi');
-        state = false;
-        return;
-      }
+    final kelompok = _ref.read(searchUserProvider(muridId)).value?.kelompok;
+    if (kelompok == null) {
+      showSnackBar(context, 'Tekan lagi');
+      state = false;
+      return;
+    }
     String? imageId1;
     String? imageId2;
     String? imageId3;
@@ -122,6 +122,7 @@ final kelompok = _ref.read(searchUserProvider(muridId)).value?.kelompok;
       kelompok: kelompok,
       uid: user.id,
       id: '',
+      tanggapan: '',
     );
 
     final res = await _fbAPI.addFb(fb);
@@ -150,6 +151,7 @@ final kelompok = _ref.read(searchUserProvider(muridId)).value?.kelompok;
     required bool deleteId3,
     required String tanggal,
     required String muridId,
+    required String tanggapan,
     required BuildContext context,
   }) async {
     state = true;
@@ -202,6 +204,7 @@ final kelompok = _ref.read(searchUserProvider(muridId)).value?.kelompok;
       muridId: muridId,
       kelompok: kelompok,
       uid: user.id,
+      tanggapan: tanggapan,
     );
 
     final res = await _fbAPI.updateFb(fb);

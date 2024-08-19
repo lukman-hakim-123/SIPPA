@@ -155,63 +155,68 @@ class _AnekdotPageState extends ConsumerState<AnekdotPage> {
                                       (Set<MaterialState> states) {
                                 return Colors.grey;
                               }),
-                              columns: [
-                                const DataColumn(
+                              columns: const [
+                                DataColumn(
                                     label: CustomText(
                                   text: 'Foto',
                                   fontWeight: FontWeight.w700,
                                 )),
-                                const DataColumn(
+                                DataColumn(
                                     label: CustomText(
                                   text: 'Nama Murid',
                                   fontWeight: FontWeight.w700,
                                 )),
-                                const DataColumn(
+                                DataColumn(
                                     label: CustomText(
                                   text: 'Kelompok',
                                   fontWeight: FontWeight.w700,
                                 )),
-                                const DataColumn(
+                                DataColumn(
                                     label: CustomText(
                                   text: 'Tanggal',
                                   fontWeight: FontWeight.w700,
                                 )),
-                                const DataColumn(
+                                DataColumn(
                                     label: CustomText(
                                   text: 'Nama Guru',
                                   fontWeight: FontWeight.w700,
                                 )),
-                                const DataColumn(
+                                DataColumn(
                                     label: CustomText(
                                   text: 'Kejadian Yang Teramati',
                                   fontWeight: FontWeight.w700,
                                 )),
-                                const DataColumn(
+                                DataColumn(
                                     label: CustomText(
                                   text: 'Nilai agama dan budi pekerti',
                                   fontWeight: FontWeight.w700,
                                 )),
-                                const DataColumn(
+                                DataColumn(
                                     label: CustomText(
                                   text: 'Jati Diri',
                                   fontWeight: FontWeight.w700,
                                 )),
-                                const DataColumn(
+                                DataColumn(
                                     label: CustomText(
                                   text: 'Literasi dan STEAM',
                                   fontWeight: FontWeight.w700,
                                 )),
-                                const DataColumn(
+                                DataColumn(
                                     label: CustomText(
-                                  text: 'Umpan balik',
+                                  text: 'Rekomendasi',
                                   fontWeight: FontWeight.w700,
                                 )),
-                                if (levelUser != 3)
-                                  const DataColumn(
-                                      label: CustomText(
-                                    text: 'Action',
-                                    fontWeight: FontWeight.w700,
-                                  )),
+                                DataColumn(
+                                    label: CustomText(
+                                  text: 'Tanggapan Orang Tua',
+                                  fontWeight: FontWeight.w700,
+                                )),
+                                // if (levelUser != 3)
+                                DataColumn(
+                                    label: CustomText(
+                                  text: 'Action',
+                                  fontWeight: FontWeight.w700,
+                                )),
                               ],
                               rows: _anekdotList
                                   .where((anekdot) => !(levelUser == 2 &&
@@ -378,20 +383,34 @@ class _AnekdotPageState extends ConsumerState<AnekdotPage> {
                                         ),
                                       ),
                                     ),
-                                    if (levelUser != 3)
-                                      DataCell(
-                                        Row(
-                                          children: [
-                                            IconButton(
-                                              icon: const Icon(Icons.edit),
-                                              onPressed: () {
-                                                Navigator.push(
-                                                    context,
-                                                    EditAnekdotPage.route(
-                                                        anekdot: anekdot,
-                                                        kelompok: kelompok));
-                                              },
-                                            ),
+                                    DataCell(
+                                      ConstrainedBox(
+                                        constraints: const BoxConstraints(
+                                          maxWidth:
+                                              200, // Ubah sesuai kebutuhan
+                                        ), // Sesuaikan lebar sesuai kebutuhan
+                                        child: Text(
+                                          anekdot.tanggapan,
+                                          overflow: TextOverflow.visible,
+                                          softWrap: true,
+                                        ),
+                                      ),
+                                    ),
+                                    DataCell(
+                                      Row(
+                                        children: [
+                                          IconButton(
+                                            icon: const Icon(Icons.edit),
+                                            onPressed: () {
+                                              Navigator.push(
+                                                  context,
+                                                  EditAnekdotPage.route(
+                                                      anekdot: anekdot,
+                                                      kelompok: kelompok,
+                                                      levelUser: levelUser));
+                                            },
+                                          ),
+                                          if (levelUser != 3)
                                             IconButton(
                                               icon: const Icon(Icons.delete),
                                               onPressed: () {
@@ -399,9 +418,9 @@ class _AnekdotPageState extends ConsumerState<AnekdotPage> {
                                                     anekdot, muridData);
                                               },
                                             ),
-                                          ],
-                                        ),
+                                        ],
                                       ),
+                                    ),
                                   ],
                                 );
                               }).toList(),

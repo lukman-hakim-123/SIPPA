@@ -11,6 +11,7 @@ class ObservasiModel {
   final String uid;
   final String id;
   final String muridId;
+  final String tanggapan;
   ObservasiModel({
     required this.kegiatan,
     required this.hasilObservasi,
@@ -21,6 +22,7 @@ class ObservasiModel {
     required this.uid,
     required this.id,
     required this.muridId,
+    required this.tanggapan,
   });
 
   ObservasiModel copyWith({
@@ -33,6 +35,7 @@ class ObservasiModel {
     String? uid,
     String? id,
     String? muridId,
+    String? tanggapan,
   }) {
     return ObservasiModel(
       kegiatan: kegiatan ?? this.kegiatan,
@@ -44,6 +47,7 @@ class ObservasiModel {
       uid: uid ?? this.uid,
       id: id ?? this.id,
       muridId: muridId ?? this.muridId,
+      tanggapan: tanggapan ?? this.tanggapan,
     );
   }
 
@@ -57,6 +61,7 @@ class ObservasiModel {
       'imageId': imageId,
       'uid': uid,
       'muridId': muridId,
+      'tanggapan': tanggapan,
     };
   }
 
@@ -71,6 +76,7 @@ class ObservasiModel {
       uid: map['uid'] ?? '',
       id: map['\$id'] ?? '',
       muridId: map['muridId'] ?? '',
+      tanggapan: map['tanggapan'] ?? '',
     );
   }
 
@@ -81,7 +87,7 @@ class ObservasiModel {
 
   @override
   String toString() {
-    return 'ObservasiModel(kegiatan: $kegiatan, hasilObservasi: $hasilObservasi, rekomendasi: $rekomendasi, tanggal: $tanggal, kelompok: $kelompok, imageId: $imageId, uid: $uid, id: $id, muridId: $muridId)';
+    return 'ObservasiModel(kegiatan: $kegiatan, hasilObservasi: $hasilObservasi, rekomendasi: $rekomendasi, tanggal: $tanggal, kelompok: $kelompok, imageId: $imageId, uid: $uid, id: $id, muridId: $muridId, tanggapan: $tanggapan)';
   }
 
   @override
@@ -96,6 +102,7 @@ class ObservasiModel {
         other.imageId == imageId &&
         other.uid == uid &&
         other.id == id &&
+        other.tanggapan == tanggapan &&
         other.muridId == muridId;
   }
 
@@ -109,6 +116,7 @@ class ObservasiModel {
         imageId.hashCode ^
         uid.hashCode ^
         id.hashCode ^
+        tanggapan.hashCode ^
         muridId.hashCode;
   }
 }

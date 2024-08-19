@@ -15,6 +15,7 @@ class FbModel {
   final String uid;
   final String id;
   final String muridId;
+  final String tanggapan;
   FbModel({
     required this.tanggal,
     required this.keterangan,
@@ -29,6 +30,7 @@ class FbModel {
     required this.uid,
     required this.id,
     required this.muridId,
+    required this.tanggapan,
   });
 
   FbModel copyWith({
@@ -45,6 +47,7 @@ class FbModel {
     String? uid,
     String? id,
     String? muridId,
+    String? tanggapan,
   }) {
     return FbModel(
       tanggal: tanggal ?? this.tanggal,
@@ -60,6 +63,7 @@ class FbModel {
       uid: uid ?? this.uid,
       id: id ?? this.id,
       muridId: muridId ?? this.muridId,
+      tanggapan: tanggapan ?? this.tanggapan,
     );
   }
 
@@ -77,6 +81,7 @@ class FbModel {
       'kelompok': kelompok,
       'uid': uid,
       'muridId': muridId,
+      'tanggapan': tanggapan,
     };
   }
 
@@ -95,6 +100,7 @@ class FbModel {
       uid: map['uid'] ?? '',
       id: map['\$id'] ?? '',
       muridId: map['muridId'] ?? '',
+      tanggapan: map['tanggapan'] ?? '',
     );
   }
 
@@ -105,7 +111,7 @@ class FbModel {
 
   @override
   String toString() {
-    return 'FbModel(tanggal: $tanggal, keterangan: $keterangan, nilai: $nilai, jatiDiri: $jatiDiri, literasi: $literasi, umpanBalik: $umpanBalik, imageId1: $imageId1, imageId2: $imageId2, imageId3: $imageId3, kelompok: $kelompok, uid: $uid, id: $id, muridId: $muridId)';
+    return 'FbModel(tanggal: $tanggal, keterangan: $keterangan, nilai: $nilai, jatiDiri: $jatiDiri, literasi: $literasi, umpanBalik: $umpanBalik, imageId1: $imageId1, imageId2: $imageId2, imageId3: $imageId3, kelompok: $kelompok, uid: $uid, id: $id, muridId: $muridId, tanggapan: $tanggapan)';
   }
 
   @override
@@ -124,6 +130,7 @@ class FbModel {
         other.kelompok == kelompok &&
         other.uid == uid &&
         other.id == id &&
+        other.tanggapan == tanggapan &&
         other.muridId == muridId;
   }
 
@@ -141,6 +148,7 @@ class FbModel {
         kelompok.hashCode ^
         uid.hashCode ^
         id.hashCode ^
+        tanggapan.hashCode ^
         muridId.hashCode;
   }
 }

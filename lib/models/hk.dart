@@ -13,6 +13,8 @@ class HkModel {
   final String uid;
   final String id;
   final String muridId;
+  final String rekomendasi;
+  final String tanggapan;
   HkModel({
     required this.semester,
     required this.tanggal,
@@ -25,6 +27,8 @@ class HkModel {
     required this.uid,
     required this.id,
     required this.muridId,
+    required this.rekomendasi,
+    required this.tanggapan,
   });
 
   HkModel copyWith({
@@ -39,6 +43,8 @@ class HkModel {
     String? uid,
     String? id,
     String? muridId,
+    String? rekomendasi,
+    String? tanggapan,
   }) {
     return HkModel(
       semester: semester ?? this.semester,
@@ -52,6 +58,8 @@ class HkModel {
       uid: uid ?? this.uid,
       id: id ?? this.id,
       muridId: muridId ?? this.muridId,
+      rekomendasi: rekomendasi ?? this.rekomendasi,
+      tanggapan: tanggapan ?? this.tanggapan,
     );
   }
 
@@ -67,6 +75,8 @@ class HkModel {
       'kelompok': kelompok,
       'uid': uid,
       'muridId': muridId,
+      'rekomendasi': rekomendasi,
+      'tanggapan': tanggapan,
     };
   }
 
@@ -83,6 +93,8 @@ class HkModel {
       uid: map['uid'] ?? '',
       id: map['\$id'] ?? '',
       muridId: map['muridId'] ?? '',
+      rekomendasi: map['rekomendasi'] ?? '',
+      tanggapan: map['tanggapan'] ?? '',
     );
   }
 
@@ -93,7 +105,7 @@ class HkModel {
 
   @override
   String toString() {
-    return 'HkModel(semester: $semester, tanggal: $tanggal,  deskripsi: $deskripsi, nilai: $nilai, jatiDiri: $jatiDiri, literasi: $literasi, imageId: $imageId, kelompok: $kelompok, uid: $uid, id: $id, muridId: $muridId)';
+    return 'HkModel(semester: $semester, tanggal: $tanggal,  deskripsi: $deskripsi, nilai: $nilai, jatiDiri: $jatiDiri, literasi: $literasi, imageId: $imageId, kelompok: $kelompok, uid: $uid, id: $id, muridId: $muridId, ,rekomendasi: $rekomendasi,tanggapan: $tanggapan)';
   }
 
   @override
@@ -110,6 +122,8 @@ class HkModel {
         other.kelompok == kelompok &&
         other.uid == uid &&
         other.id == id &&
+        other.rekomendasi == rekomendasi &&
+        other.tanggapan == tanggapan &&
         other.muridId == muridId;
   }
 
@@ -125,6 +139,8 @@ class HkModel {
         kelompok.hashCode ^
         uid.hashCode ^
         id.hashCode ^
+        rekomendasi.hashCode ^
+        tanggapan.hashCode ^
         muridId.hashCode;
   }
 }

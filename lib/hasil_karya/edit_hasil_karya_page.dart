@@ -11,14 +11,18 @@ import 'package:sippa/widget_view/teks.dart';
 import 'package:sippa/models/hk.dart';
 
 class EditHkPage extends ConsumerStatefulWidget {
-  static route({required kelompok, required hk}) => MaterialPageRoute(
-      builder: (context) => EditHkPage(kelompok: kelompok, hk: hk));
+  static route({required kelompok, required hk, required levelUser}) =>
+      MaterialPageRoute(
+          builder: (context) =>
+              EditHkPage(kelompok: kelompok, hk: hk, levelUser: levelUser));
   final String kelompok;
   final HkModel hk;
+  final int levelUser;
   const EditHkPage({
     super.key,
     required this.kelompok,
     required this.hk,
+    required this.levelUser,
   });
 
   @override
@@ -34,6 +38,8 @@ class _EditHkPageState extends ConsumerState<EditHkPage> {
   late TextEditingController nilaiController;
   late TextEditingController jatiDiriController;
   late TextEditingController literasiController;
+  late TextEditingController rekomendasiController;
+  late TextEditingController tanggapanController;
   final ImagePicker picker = ImagePicker();
   DateTime? _selectedDate;
   File? _image;
@@ -52,6 +58,8 @@ class _EditHkPageState extends ConsumerState<EditHkPage> {
     nilaiController = TextEditingController(text: widget.hk.nilai);
     jatiDiriController = TextEditingController(text: widget.hk.jatiDiri);
     literasiController = TextEditingController(text: widget.hk.literasi);
+    rekomendasiController = TextEditingController(text: widget.hk.rekomendasi);
+    tanggapanController = TextEditingController(text: widget.hk.tanggapan);
     _selectedDate = DateFormat('dd MMMM yyyy').parse(widget.hk.tanggal);
     selectedSemester = widget.hk.semester;
   }
@@ -65,6 +73,8 @@ class _EditHkPageState extends ConsumerState<EditHkPage> {
     nilaiController.dispose();
     jatiDiriController.dispose();
     literasiController.dispose();
+    rekomendasiController.dispose();
+    tanggapanController.dispose();
   }
 
   Future<void> _selectDate(BuildContext context) async {
@@ -109,17 +119,20 @@ class _EditHkPageState extends ConsumerState<EditHkPage> {
   void editHasilKarya() {
     if (_formKey.currentState!.validate()) {
       ref.read(hkControllerProvider.notifier).updateHk(
-          hkId: widget.hk.id,
-          semester: selectedSemester!,
-          deskripsi: deskripsiController.text,
-          nilai: nilaiController.text,
-          jatiDiri: jatiDiriController.text,
-          literasi: literasiController.text,
-          tanggal: tanggalController.text,
-          muridId: muridIdController.text,
-          imageId: widget.hk.imageId,
-          image: _image,
-          context: context);
+            hkId: widget.hk.id,
+            semester: selectedSemester!,
+            deskripsi: deskripsiController.text,
+            nilai: nilaiController.text,
+            jatiDiri: jatiDiriController.text,
+            literasi: literasiController.text,
+            tanggal: tanggalController.text,
+            muridId: muridIdController.text,
+            imageId: widget.hk.imageId,
+            image: _image,
+            context: context,
+            rekomendasi: rekomendasiController.text,
+            tanggapan: tanggapanController.text,
+          );
     }
   }
 
@@ -174,10 +187,11 @@ class _EditHkPageState extends ConsumerState<EditHkPage> {
                     style: const TextStyle(color: Colors.red),
                   ),
                 ),
-              ElevatedButton(
-                onPressed: _pickImage,
-                child: const Text('Pilih Gambar'),
-              ),
+              if (widget.levelUser != 3)
+                ElevatedButton(
+                  onPressed: _pickImage,
+                  child: const Text('Pilih Gambar'),
+                ),
               const SizedBox(height: 16),
               muridAsyncValue.when(
                 data: (muridList) {
@@ -208,6 +222,7 @@ class _EditHkPageState extends ConsumerState<EditHkPage> {
                       items: muridList.map((murid) {
                         return DropdownMenuItem<String>(
                           value: murid.id,
+                          enabled: widget.levelUser != 3,
                           child: CustomText(text: murid.nama),
                         );
                       }).toList(),
@@ -233,10 +248,12 @@ class _EditHkPageState extends ConsumerState<EditHkPage> {
                 decoration: InputDecoration(
                   border: const OutlineInputBorder(),
                   labelText: 'Tanggal',
-                  suffixIcon: IconButton(
-                    icon: const Icon(Icons.calendar_today),
-                    onPressed: () => _selectDate(context),
-                  ),
+                  suffixIcon: widget.levelUser == 3
+                      ? null
+                      : IconButton(
+                          icon: const Icon(Icons.calendar_today),
+                          onPressed: () => _selectDate(context),
+                        ),
                 ),
                 readOnly: true,
                 validator: (value) {
@@ -253,11 +270,15 @@ class _EditHkPageState extends ConsumerState<EditHkPage> {
                   border: OutlineInputBorder(),
                   labelText: 'Semester',
                 ),
-                items: const [
+                items: [
                   DropdownMenuItem(
-                      value: "1 (gasal)", child: Text("1 (gasal)")),
+                      enabled: widget.levelUser != 3,
+                      value: "1 (gasal)",
+                      child: Text("1 (gasal)")),
                   DropdownMenuItem(
-                      value: "2 (genap)", child: Text("2 (genap)")),
+                      enabled: widget.levelUser != 3,
+                      value: "2 (genap)",
+                      child: Text("2 (genap)")),
                 ],
                 onChanged: (String? newValue) {
                   setState(() {
@@ -288,6 +309,7 @@ class _EditHkPageState extends ConsumerState<EditHkPage> {
                   }
                   return null;
                 },
+                readOnly: widget.levelUser == 3,
               ),
               const SizedBox(height: 16),
               const SizedBox(height: 16),
@@ -307,6 +329,7 @@ class _EditHkPageState extends ConsumerState<EditHkPage> {
                   }
                   return null;
                 },
+                readOnly: widget.levelUser == 3,
               ),
               const SizedBox(height: 16),
               TextFormField(
@@ -325,6 +348,7 @@ class _EditHkPageState extends ConsumerState<EditHkPage> {
                   }
                   return null;
                 },
+                readOnly: widget.levelUser == 3,
               ),
               const SizedBox(height: 16),
               TextFormField(
@@ -343,6 +367,39 @@ class _EditHkPageState extends ConsumerState<EditHkPage> {
                   }
                   return null;
                 },
+                readOnly: widget.levelUser == 3,
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: rekomendasiController,
+                decoration: const InputDecoration(
+                  border: OutlineInputBorder(),
+                  labelText: 'Analisis Rekomendasi',
+                ),
+                maxLength: 500,
+                minLines: 2,
+                maxLines: null,
+                keyboardType: TextInputType.multiline,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Masukkan Rekomendasi';
+                  }
+                  return null;
+                },
+                readOnly: widget.levelUser == 3,
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: tanggapanController,
+                decoration: const InputDecoration(
+                  border: OutlineInputBorder(),
+                  labelText: 'Tanggapan Orang Tua',
+                ),
+                maxLength: 500,
+                minLines: 2,
+                maxLines: null,
+                keyboardType: TextInputType.multiline,
+                readOnly: widget.levelUser != 3,
               ),
               const SizedBox(height: 16),
               ElevatedButton(

@@ -38,7 +38,7 @@ class _CpPageState extends ConsumerState<CpPage> {
   Widget build(BuildContext context) {
     final userDetailsAsync = ref.watch(currentUserDetailsProvider);
     return Scaffold(
-      appBar: const CustomAppBar(title: 'Capaian Penilaian'),
+      appBar: const CustomAppBar(title: 'Capaian Pembelajaran'),
       body: Padding(
         padding: const EdgeInsets.only(top: 12, left: 12, right: 12),
         child: userDetailsAsync.when(
@@ -150,54 +150,63 @@ class _CpPageState extends ConsumerState<CpPage> {
                                       (Set<MaterialState> states) {
                                 return Colors.grey;
                               }),
-                              columns: [
-                                const DataColumn(
+                              columns: const [
+                                DataColumn(
                                     label: CustomText(
                                   text: 'Nama Murid',
                                   fontWeight: FontWeight.w700,
                                 )),
-                                const DataColumn(
+                                DataColumn(
                                     label: CustomText(
                                   text: 'Nama Guru',
                                   fontWeight: FontWeight.w700,
                                 )),
-                                const DataColumn(
+                                DataColumn(
                                     label: CustomText(
                                   text: 'Kelompok',
                                   fontWeight: FontWeight.w700,
                                 )),
-                                const DataColumn(
+                                DataColumn(
                                     label: CustomText(
                                   text: 'Tanggal',
                                   fontWeight: FontWeight.w700,
                                 )),
-                                const DataColumn(
+                                DataColumn(
                                     label: CustomText(
                                   text: 'Tujuan',
                                   fontWeight: FontWeight.w700,
                                 )),
-                                const DataColumn(
+                                DataColumn(
                                     label: CustomText(
                                   text: 'Konteks',
                                   fontWeight: FontWeight.w700,
                                 )),
-                                const DataColumn(
+                                DataColumn(
                                     label: CustomText(
                                   text: 'Belum Muncul',
                                   fontWeight: FontWeight.w700,
                                 )),
-                                const DataColumn(
+                                DataColumn(
                                     label: CustomText(
                                   text: 'Sudah Muncul',
                                   fontWeight: FontWeight.w700,
                                 )),
-                                const DataColumn(
+                                DataColumn(
                                     label: CustomText(
                                   text: 'Kejadian Yang Teramati',
                                   fontWeight: FontWeight.w700,
                                 )),
-                                if (levelUser != 3)
-                                  const DataColumn(
+                                DataColumn(
+                                    label: CustomText(
+                                  text: 'Rekomendasi',
+                                  fontWeight: FontWeight.w700,
+                                )),
+                                DataColumn(
+                                    label: CustomText(
+                                  text: 'Tanggapan Orang Tua',
+                                  fontWeight: FontWeight.w700,
+                                )),
+                                  DataColumn(
                                       label: CustomText(
                                     text: 'Action',
                                     fontWeight: FontWeight.w700,
@@ -340,7 +349,32 @@ class _CpPageState extends ConsumerState<CpPage> {
                                         ),
                                       ),
                                     ),
-                                    if (levelUser != 3)
+                                    DataCell(
+                                      ConstrainedBox(
+                                        constraints: const BoxConstraints(
+                                          maxWidth:
+                                              200, // Ubah sesuai kebutuhan
+                                        ), // Sesuaikan lebar sesuai kebutuhan
+                                        child: Text(
+                                          cp.rekomendasi,
+                                          overflow: TextOverflow.visible,
+                                          softWrap: true,
+                                        ),
+                                      ),
+                                    ),
+                                    DataCell(
+                                      ConstrainedBox(
+                                        constraints: const BoxConstraints(
+                                          maxWidth:
+                                              200, // Ubah sesuai kebutuhan
+                                        ), // Sesuaikan lebar sesuai kebutuhan
+                                        child: Text(
+                                          cp.tanggapan,
+                                          overflow: TextOverflow.visible,
+                                          softWrap: true,
+                                        ),
+                                      ),
+                                    ),
                                       DataCell(
                                         Row(
                                           children: [
@@ -351,9 +385,11 @@ class _CpPageState extends ConsumerState<CpPage> {
                                                     context,
                                                     EditCpPage.route(
                                                         cp: cp,
-                                                        kelompok: kelompok));
+                                                        kelompok: kelompok, 
+                                                        levelUser: levelUser));
                                               },
                                             ),
+                                    if (levelUser != 3)
                                             IconButton(
                                               icon: const Icon(Icons.delete),
                                               onPressed: () {

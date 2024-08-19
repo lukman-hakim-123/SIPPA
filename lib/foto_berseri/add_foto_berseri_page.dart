@@ -335,14 +335,14 @@ class _AddFbPageState extends ConsumerState<AddFbPage> {
                 controller: umpanBalikController,
                 decoration: const InputDecoration(
                   border: OutlineInputBorder(),
-                  labelText: 'Umpan Balik',
+                  labelText: 'Rekomendasi',
                 ),
                 maxLength: 500,
                 minLines: 2,
                 maxLines: null,
                 keyboardType: TextInputType.multiline,
                 validator: (value) => value == null || value.isEmpty
-                    ? 'Masukkan Umpan Balik'
+                    ? 'Masukkan Rekomendasi'
                     : null,
               ),
               const SizedBox(height: 16),

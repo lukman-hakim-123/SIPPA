@@ -111,7 +111,7 @@ class _HkPageState extends ConsumerState<HkPage> {
                     child: Padding(
                       padding: EdgeInsets.only(bottom: 16),
                       child: CustomText(
-                        text: "Hasil Karya",
+                        text: "Penilaian Hasil Karya",
                         fontSize: 18,
                         fontWeight: FontWeight.w800,
                         textAlign: TextAlign.start,
@@ -150,58 +150,67 @@ class _HkPageState extends ConsumerState<HkPage> {
                                       (Set<MaterialState> states) {
                                 return Colors.grey;
                               }),
-                              columns: [
-                                const DataColumn(
+                              columns: const [
+                                DataColumn(
                                     label: CustomText(
                                   text: 'Gambar',
                                   fontWeight: FontWeight.w700,
                                 )),
-                                const DataColumn(
+                                DataColumn(
                                     label: CustomText(
                                   text: 'Nama Murid',
                                   fontWeight: FontWeight.w700,
                                 )),
-                                const DataColumn(
+                                DataColumn(
                                     label: CustomText(
                                   text: 'Nama Guru',
                                   fontWeight: FontWeight.w700,
                                 )),
-                                const DataColumn(
+                                DataColumn(
                                     label: CustomText(
                                   text: 'Kelompok',
                                   fontWeight: FontWeight.w700,
                                 )),
-                                const DataColumn(
+                                DataColumn(
                                     label: CustomText(
                                   text: 'Tanggal',
                                   fontWeight: FontWeight.w700,
                                 )),
-                                const DataColumn(
+                                DataColumn(
                                     label: CustomText(
                                   text: 'Deskripsi',
                                   fontWeight: FontWeight.w700,
                                 )),
-                                const DataColumn(
+                                DataColumn(
                                     label: CustomText(
                                   text: 'Analisis Nilai Agama dan budi pekerti',
                                   fontWeight: FontWeight.w700,
                                 )),
-                                const DataColumn(
+                                DataColumn(
                                     label: CustomText(
                                   text: 'Analisis Jati Diri',
                                   fontWeight: FontWeight.w700,
                                 )),
-                                const DataColumn(
+                                DataColumn(
                                     label: CustomText(
                                   text: 'Analisis Literasi',
                                   fontWeight: FontWeight.w700,
                                 )),
-                                if (levelUser != 3)
-                                  const DataColumn(
-                                      label: CustomText(
-                                    text: 'Action',
-                                    fontWeight: FontWeight.w700,
-                                  )),
+                                DataColumn(
+                                    label: CustomText(
+                                  text: 'Rekomendasi',
+                                  fontWeight: FontWeight.w700,
+                                )),
+                                DataColumn(
+                                    label: CustomText(
+                                  text: 'Tanggapan Orang Tua',
+                                  fontWeight: FontWeight.w700,
+                                )),
+                                DataColumn(
+                                    label: CustomText(
+                                  text: 'Action',
+                                  fontWeight: FontWeight.w700,
+                                )),
                               ],
                               rows: _hkList
                                   .where((hk) => !(levelUser == 2 &&
@@ -353,20 +362,45 @@ class _HkPageState extends ConsumerState<HkPage> {
                                             softWrap: true,
                                           )),
                                     ),
-                                    if (levelUser != 3)
-                                      DataCell(
-                                        Row(
-                                          children: [
-                                            IconButton(
-                                              icon: const Icon(Icons.edit),
-                                              onPressed: () {
-                                                Navigator.push(
-                                                    context,
-                                                    EditHkPage.route(
-                                                        hk: hk,
-                                                        kelompok: kelompok));
-                                              },
-                                            ),
+                                    DataCell(
+                                      ConstrainedBox(
+                                          constraints: const BoxConstraints(
+                                            maxWidth:
+                                                200, // Ubah sesuai kebutuhan
+                                          ),
+                                          child: Text(
+                                            hk.rekomendasi,
+                                            overflow: TextOverflow.visible,
+                                            softWrap: true,
+                                          )),
+                                    ),
+                                    DataCell(
+                                      ConstrainedBox(
+                                          constraints: const BoxConstraints(
+                                            maxWidth:
+                                                200, // Ubah sesuai kebutuhan
+                                          ),
+                                          child: Text(
+                                            hk.tanggapan,
+                                            overflow: TextOverflow.visible,
+                                            softWrap: true,
+                                          )),
+                                    ),
+                                    DataCell(
+                                      Row(
+                                        children: [
+                                          IconButton(
+                                            icon: const Icon(Icons.edit),
+                                            onPressed: () {
+                                              Navigator.push(
+                                                  context,
+                                                  EditHkPage.route(
+                                                      hk: hk,
+                                                      kelompok: kelompok,
+                                                      levelUser: levelUser));
+                                            },
+                                          ),
+                                          if (levelUser != 3)
                                             IconButton(
                                               icon: const Icon(Icons.delete),
                                               onPressed: () {
@@ -374,9 +408,9 @@ class _HkPageState extends ConsumerState<HkPage> {
                                                     hk, muridData);
                                               },
                                             ),
-                                          ],
-                                        ),
+                                        ],
                                       ),
+                                    ),
                                   ],
                                 );
                               }).toList(),

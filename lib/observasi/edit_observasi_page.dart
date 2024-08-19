@@ -9,18 +9,26 @@ import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 
 class EditObservasiPage extends ConsumerStatefulWidget {
-  static route({required String kelompok, required ObservasiModel observasi}) =>
+  static route(
+          {required String kelompok,
+          required ObservasiModel observasi,
+          required int levelUser}) =>
       MaterialPageRoute(
           builder: (context) => EditObservasiPage(
                 kelompok: kelompok,
                 observasi: observasi,
+                levelUser: levelUser,
               ));
 
   final String kelompok;
   final ObservasiModel observasi;
+  final int levelUser;
 
   const EditObservasiPage(
-      {super.key, required this.kelompok, required this.observasi});
+      {super.key,
+      required this.kelompok,
+      required this.observasi,
+      required this.levelUser});
 
   @override
   ConsumerState<ConsumerStatefulWidget> createState() =>
@@ -34,6 +42,7 @@ class _EditObservasiPageState extends ConsumerState<EditObservasiPage> {
   final tanggalController = TextEditingController();
   final kegiatanController = TextEditingController();
   final muridIdController = TextEditingController();
+  final tanggapanController = TextEditingController();
   DateTime? _selectedDate;
   final ImagePicker picker = ImagePicker();
   File? _image;
@@ -50,6 +59,7 @@ class _EditObservasiPageState extends ConsumerState<EditObservasiPage> {
     tanggalController.text = widget.observasi.tanggal;
     kegiatanController.text = widget.observasi.kegiatan;
     muridIdController.text = widget.observasi.muridId;
+    tanggapanController.text = widget.observasi.tanggapan;
     _selectedDate = DateFormat('dd MMMM yyyy').parse(widget.observasi.tanggal);
   }
 
@@ -111,6 +121,7 @@ class _EditObservasiPageState extends ConsumerState<EditObservasiPage> {
           rekomendasi: rekomendasiController.text,
           tanggal: tanggalController.text,
           kegiatan: kegiatanController.text,
+          tanggapan: tanggapanController.text,
           image: _image,
           imageId: widget.observasi.imageId,
           deleteId: _deleteImage,
@@ -175,32 +186,33 @@ class _EditObservasiPageState extends ConsumerState<EditObservasiPage> {
                                       size: 50),
                     ),
                   ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      ElevatedButton(
-                        onPressed: _pickImage,
-                        child: const Text('Pilih Gambar'),
-                      ),
-                      const SizedBox(width: 10),
-                      ElevatedButton(
-                        onPressed: () {
-                          setState(() {
-                            if (_deleteImage) {
-                              _image = null;
-                            }
-                            _deleteImage = !_deleteImage;
-                          });
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor:
-                              _deleteImage ? Colors.red : Colors.grey,
+                  if (widget.levelUser != 3)
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        ElevatedButton(
+                          onPressed: _pickImage,
+                          child: const Text('Pilih Gambar'),
                         ),
-                        child:
-                            Text(_deleteImage ? 'Batal Hapus' : 'Hapus Gambar'),
-                      ),
-                    ],
-                  ),
+                        const SizedBox(width: 10),
+                        ElevatedButton(
+                          onPressed: () {
+                            setState(() {
+                              if (_deleteImage) {
+                                _image = null;
+                              }
+                              _deleteImage = !_deleteImage;
+                            });
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor:
+                                _deleteImage ? Colors.red : Colors.grey,
+                          ),
+                          child: Text(
+                              _deleteImage ? 'Batal Hapus' : 'Hapus Gambar'),
+                        ),
+                      ],
+                    ),
                   const SizedBox(height: 16),
                 ],
               ),
@@ -238,6 +250,7 @@ class _EditObservasiPageState extends ConsumerState<EditObservasiPage> {
                       items: muridList.map((murid) {
                         return DropdownMenuItem<String>(
                           value: murid.id,
+                          enabled: widget.levelUser != 3,
                           child: Text(murid.nama),
                         );
                       }).toList(),
@@ -264,10 +277,12 @@ class _EditObservasiPageState extends ConsumerState<EditObservasiPage> {
                   decoration: InputDecoration(
                     border: const OutlineInputBorder(),
                     labelText: 'Tanggal',
-                    suffixIcon: IconButton(
-                      icon: const Icon(Icons.calendar_today),
-                      onPressed: () => _selectDate(context),
-                    ),
+                    suffixIcon: widget.levelUser == 3
+                        ? null
+                        : IconButton(
+                            icon: const Icon(Icons.calendar_today),
+                            onPressed: () => _selectDate(context),
+                          ),
                   ),
                   readOnly: true,
                   validator: (value) {
@@ -294,6 +309,7 @@ class _EditObservasiPageState extends ConsumerState<EditObservasiPage> {
                     }
                     return null;
                   },
+                  readOnly: widget.levelUser == 3,
                 ),
               ),
               Padding(
@@ -313,6 +329,7 @@ class _EditObservasiPageState extends ConsumerState<EditObservasiPage> {
                     }
                     return null;
                   },
+                  readOnly: widget.levelUser == 3,
                 ),
               ),
               Padding(
@@ -331,6 +348,21 @@ class _EditObservasiPageState extends ConsumerState<EditObservasiPage> {
                     }
                     return null;
                   },
+                  readOnly: widget.levelUser == 3,
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(bottom: 22),
+                child: TextFormField(
+                  keyboardType: TextInputType.multiline,
+                  maxLines: null,
+                  minLines: 2,
+                  controller: tanggapanController,
+                  maxLength: 500,
+                  decoration: const InputDecoration(
+                      border: OutlineInputBorder(),
+                      labelText: 'Tanggapan Orang Tua'),
+                  readOnly: widget.levelUser != 3,
                 ),
               ),
               ElevatedButton(

@@ -8,17 +8,26 @@ import 'package:sippa/widget_view/appbar.dart';
 import 'package:sippa/widget_view/teks.dart';
 
 class EditCpPage extends ConsumerStatefulWidget {
-  static route({required CpModel cp, required String kelompok}) =>
+  static route(
+          {required CpModel cp,
+          required String kelompok,
+          required int levelUser}) =>
       MaterialPageRoute(
-        builder: (context) => EditCpPage(cp: cp, kelompok: kelompok),
+        builder: (context) => EditCpPage(
+          cp: cp,
+          kelompok: kelompok,
+          levelUser: levelUser,
+        ),
       );
   final CpModel cp;
   final String kelompok;
-  const EditCpPage({
-    super.key,
-    required this.cp,
-    required this.kelompok,
-  });
+  final int levelUser;
+
+  const EditCpPage(
+      {super.key,
+      required this.cp,
+      required this.kelompok,
+      required this.levelUser});
 
   @override
   ConsumerState<ConsumerStatefulWidget> createState() => _EditCpPageState();
@@ -31,6 +40,8 @@ class _EditCpPageState extends ConsumerState<EditCpPage> {
   late TextEditingController teramatiController;
   late TextEditingController tanggalController;
   late TextEditingController muridIdController;
+  late TextEditingController rekomendasiController;
+  late TextEditingController tanggapanController;
   DateTime? _selectedDate;
   bool? isDone;
 
@@ -42,6 +53,8 @@ class _EditCpPageState extends ConsumerState<EditCpPage> {
     teramatiController = TextEditingController(text: widget.cp.teramati);
     tanggalController = TextEditingController(text: widget.cp.tanggal);
     muridIdController = TextEditingController(text: widget.cp.muridId);
+    rekomendasiController = TextEditingController(text: widget.cp.rekomendasi);
+    tanggapanController = TextEditingController(text: widget.cp.tanggapan);
     isDone = widget.cp.isDone;
     _selectedDate = DateFormat('dd MMMM yyyy').parse(widget.cp.tanggal);
   }
@@ -53,6 +66,8 @@ class _EditCpPageState extends ConsumerState<EditCpPage> {
     tanggalController.dispose();
     konteksController.dispose();
     teramatiController.dispose();
+    rekomendasiController.dispose();
+    tanggapanController.dispose();
   }
 
   Future<void> _selectDate(BuildContext context) async {
@@ -74,14 +89,17 @@ class _EditCpPageState extends ConsumerState<EditCpPage> {
   void editCp() {
     if (_formKey.currentState!.validate()) {
       ref.read(cpControllerProvider.notifier).updateCp(
-          cpId: widget.cp.id,
-          tujuan: tujuanController.text,
-          tanggal: tanggalController.text,
-          konteks: konteksController.text,
-          teramati: teramatiController.text,
-          isDone: isDone!,
-          muridId: muridIdController.text,
-          context: context);
+            cpId: widget.cp.id,
+            tujuan: tujuanController.text,
+            tanggal: tanggalController.text,
+            konteks: konteksController.text,
+            teramati: teramatiController.text,
+            isDone: isDone!,
+            muridId: muridIdController.text,
+            context: context,
+            rekomendasi: rekomendasiController.text,
+            tanggapan: tanggapanController.text,
+          );
     }
   }
 
@@ -129,6 +147,7 @@ class _EditCpPageState extends ConsumerState<EditCpPage> {
                       items: muridList.map((murid) {
                         return DropdownMenuItem<String>(
                           value: murid.id,
+                          enabled: widget.levelUser != 3,
                           child: CustomText(text: murid.nama),
                         );
                       }).toList(),
@@ -152,10 +171,12 @@ class _EditCpPageState extends ConsumerState<EditCpPage> {
                 decoration: InputDecoration(
                   border: const OutlineInputBorder(),
                   labelText: 'Tanggal',
-                  suffixIcon: IconButton(
-                    icon: const Icon(Icons.calendar_today),
-                    onPressed: () => _selectDate(context),
-                  ),
+                  suffixIcon: widget.levelUser == 3
+                      ? null
+                      : IconButton(
+                          icon: const Icon(Icons.calendar_today),
+                          onPressed: () => _selectDate(context),
+                        ),
                 ),
                 readOnly: true,
                 validator: (value) {
@@ -182,6 +203,7 @@ class _EditCpPageState extends ConsumerState<EditCpPage> {
                   }
                   return null;
                 },
+                readOnly: widget.levelUser == 3,
               ),
               const SizedBox(height: 16),
               TextFormField(
@@ -200,6 +222,7 @@ class _EditCpPageState extends ConsumerState<EditCpPage> {
                   }
                   return null;
                 },
+                readOnly: widget.levelUser == 3,
               ),
               const SizedBox(height: 16),
               TextFormField(
@@ -218,13 +241,16 @@ class _EditCpPageState extends ConsumerState<EditCpPage> {
                   }
                   return null;
                 },
+                readOnly: widget.levelUser == 3,
               ),
               Row(
                 children: [
                   InkWell(
                     onTap: () {
                       setState(() {
-                        isDone = false;
+                        if (widget.levelUser != 3) {
+                          isDone = false;
+                        }
                       });
                     },
                     child: Row(
@@ -234,7 +260,9 @@ class _EditCpPageState extends ConsumerState<EditCpPage> {
                           groupValue: isDone,
                           onChanged: (value) {
                             setState(() {
-                              isDone = value!;
+                              if (widget.levelUser != 3) {
+                                isDone = value!;
+                              }
                             });
                           },
                         ),
@@ -245,7 +273,9 @@ class _EditCpPageState extends ConsumerState<EditCpPage> {
                   InkWell(
                     onTap: () {
                       setState(() {
-                        isDone = true;
+                        if (widget.levelUser != 3) {
+                          isDone = true;
+                        }
                       });
                     },
                     child: Row(
@@ -255,7 +285,9 @@ class _EditCpPageState extends ConsumerState<EditCpPage> {
                           groupValue: isDone,
                           onChanged: (value) {
                             setState(() {
-                              isDone = value!;
+                              if (widget.levelUser != 3) {
+                                isDone = value!;
+                              }
                             });
                           },
                         ),
@@ -264,6 +296,38 @@ class _EditCpPageState extends ConsumerState<EditCpPage> {
                     ),
                   ),
                 ],
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                keyboardType: TextInputType.multiline,
+                maxLines: null,
+                minLines: 3,
+                controller: rekomendasiController,
+                maxLength: 500,
+                decoration: const InputDecoration(
+                  border: OutlineInputBorder(),
+                  labelText: 'Rekomendasi',
+                ),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Masukkan Rekomendasi';
+                  }
+                  return null;
+                },
+                readOnly: widget.levelUser == 3,
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                keyboardType: TextInputType.multiline,
+                maxLines: null,
+                minLines: 3,
+                controller: tanggapanController,
+                maxLength: 500,
+                decoration: const InputDecoration(
+                  border: OutlineInputBorder(),
+                  labelText: 'Tanggapan Orang Tua',
+                ),
+                readOnly: widget.levelUser != 3,
               ),
               const SizedBox(height: 16),
               ElevatedButton(

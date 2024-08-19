@@ -13,6 +13,7 @@ class AnekdotModel {
   final String uid;
   final String id;
   final String muridId;
+  final String tanggapan;
   AnekdotModel({
     required this.pengamatan,
     required this.tanggal,
@@ -25,6 +26,7 @@ class AnekdotModel {
     required this.uid,
     required this.id,
     required this.muridId,
+    required this.tanggapan,
   });
 
   AnekdotModel copyWith({
@@ -39,6 +41,7 @@ class AnekdotModel {
     String? uid,
     String? id,
     String? muridId,
+    String? tanggapan,
   }) {
     return AnekdotModel(
       pengamatan: pengamatan ?? this.pengamatan,
@@ -52,6 +55,7 @@ class AnekdotModel {
       uid: uid ?? this.uid,
       id: id ?? this.id,
       muridId: muridId ?? this.muridId,
+      tanggapan: tanggapan ?? this.tanggapan,
     );
   }
 
@@ -67,6 +71,7 @@ class AnekdotModel {
       'imageId': imageId,
       'uid': uid,
       'muridId': muridId,
+      'tanggapan': tanggapan,
     };
   }
 
@@ -83,6 +88,7 @@ class AnekdotModel {
       uid: map['uid'] ?? '',
       id: map['\$id'] ?? '',
       muridId: map['muridId'] ?? '',
+      tanggapan: map['tanggapan'] ?? '',
     );
   }
 
@@ -93,7 +99,7 @@ class AnekdotModel {
 
   @override
   String toString() {
-    return 'AnekdotModel(pengamatan: $pengamatan, tanggal: $tanggal, nilai: $nilai, jatiDiri: $jatiDiri, literasi: $literasi, umpanBalik: $umpanBalik, kelompok: $kelompok,imageId: $imageId, uid: $uid, id: $id, muridId: $muridId)';
+    return 'AnekdotModel(pengamatan: $pengamatan, tanggal: $tanggal, nilai: $nilai, jatiDiri: $jatiDiri, literasi: $literasi, umpanBalik: $umpanBalik, kelompok: $kelompok,imageId: $imageId, uid: $uid, id: $id, muridId: $muridId, tanggapan: $tanggapan, )';
   }
 
   @override
@@ -110,6 +116,7 @@ class AnekdotModel {
         other.imageId == imageId &&
         other.uid == uid &&
         other.id == id &&
+        other.tanggapan == tanggapan &&
         other.muridId == muridId;
   }
 
@@ -125,6 +132,7 @@ class AnekdotModel {
         imageId.hashCode ^
         uid.hashCode ^
         id.hashCode ^
+        tanggapan.hashCode ^
         muridId.hashCode;
   }
 }

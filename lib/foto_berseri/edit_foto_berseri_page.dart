@@ -1,9 +1,11 @@
+// ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
+
 import 'package:sippa/add_user/controller/user_controller.dart';
 import 'package:sippa/foto_berseri/controller/foto_berseri_controller.dart';
 import 'package:sippa/models/fb.dart';
@@ -11,14 +13,27 @@ import 'package:sippa/widget_view/appbar.dart';
 import 'package:sippa/widget_view/teks.dart';
 
 class EditFbPage extends ConsumerStatefulWidget {
-  static Route route({required FbModel fb, required String kelompok}) =>
+  static Route route(
+          {required FbModel fb,
+          required String kelompok,
+          required int levelUser}) =>
       MaterialPageRoute(
-          builder: (context) => EditFbPage(fb: fb, kelompok: kelompok));
+          builder: (context) => EditFbPage(
+                fb: fb,
+                kelompok: kelompok,
+                levelUser: levelUser,
+              ));
 
   final FbModel fb;
   final String kelompok;
+  final int levelUser;
 
-  const EditFbPage({super.key, required this.fb, required this.kelompok});
+  const EditFbPage({
+    super.key,
+    required this.fb,
+    required this.kelompok,
+    required this.levelUser,
+  });
 
   @override
   ConsumerState<ConsumerStatefulWidget> createState() => _EditFbPageState();
@@ -33,6 +48,7 @@ class _EditFbPageState extends ConsumerState<EditFbPage> {
   late TextEditingController nilaiController;
   late TextEditingController jatiDiriController;
   late TextEditingController literasiController;
+  late TextEditingController tanggapanController;
   final ImagePicker picker = ImagePicker();
 
   DateTime? _selectedDate;
@@ -58,6 +74,7 @@ class _EditFbPageState extends ConsumerState<EditFbPage> {
     nilaiController = TextEditingController(text: widget.fb.nilai);
     jatiDiriController = TextEditingController(text: widget.fb.jatiDiri);
     literasiController = TextEditingController(text: widget.fb.literasi);
+    tanggapanController = TextEditingController(text: widget.fb.tanggapan);
     _selectedDate = DateFormat('dd MMMM yyyy').parse(widget.fb.tanggal);
   }
 
@@ -69,6 +86,7 @@ class _EditFbPageState extends ConsumerState<EditFbPage> {
     nilaiController.dispose();
     jatiDiriController.dispose();
     literasiController.dispose();
+    tanggapanController.dispose();
     super.dispose();
   }
 
@@ -170,7 +188,8 @@ class _EditFbPageState extends ConsumerState<EditFbPage> {
             deleteId1: _deleteImage1,
             deleteId2: _deleteImage2,
             deleteId3: _deleteImage3,
-            context: context);
+            context: context,
+            tanggapan: tanggapanController.text);
       }
     }
   }
@@ -222,6 +241,7 @@ class _EditFbPageState extends ConsumerState<EditFbPage> {
                       items: muridList.map((murid) {
                         return DropdownMenuItem<String>(
                           value: murid.id,
+                          enabled: widget.levelUser != 3,
                           child: CustomText(text: murid.nama),
                         );
                       }).toList(),
@@ -241,10 +261,12 @@ class _EditFbPageState extends ConsumerState<EditFbPage> {
                 decoration: InputDecoration(
                   border: const OutlineInputBorder(),
                   labelText: 'Tanggal',
-                  suffixIcon: IconButton(
-                    icon: const Icon(Icons.calendar_today),
-                    onPressed: () => _selectDate(context),
-                  ),
+                  suffixIcon: widget.levelUser == 3
+                      ? null
+                      : IconButton(
+                          icon: const Icon(Icons.calendar_today),
+                          onPressed: () => _selectDate(context),
+                        ),
                 ),
                 readOnly: true,
                 validator: (value) =>
@@ -264,6 +286,7 @@ class _EditFbPageState extends ConsumerState<EditFbPage> {
                 validator: (value) => value == null || value.isEmpty
                     ? 'Masukkan Deskripsi Foto'
                     : null,
+                readOnly: widget.levelUser == 3,
               ),
               const SizedBox(height: 16),
               TextFormField(
@@ -279,6 +302,7 @@ class _EditFbPageState extends ConsumerState<EditFbPage> {
                 validator: (value) => value == null || value.isEmpty
                     ? 'Masukkan Analisis Nilai Agama dan Budi Pekerti'
                     : null,
+                readOnly: widget.levelUser == 3,
               ),
               const SizedBox(height: 16),
               TextFormField(
@@ -294,6 +318,7 @@ class _EditFbPageState extends ConsumerState<EditFbPage> {
                 validator: (value) => value == null || value.isEmpty
                     ? 'Masukkan Analisis Jati Diri'
                     : null,
+                readOnly: widget.levelUser == 3,
               ),
               const SizedBox(height: 16),
               TextFormField(
@@ -309,20 +334,36 @@ class _EditFbPageState extends ConsumerState<EditFbPage> {
                 validator: (value) => value == null || value.isEmpty
                     ? 'Masukkan Analisis Literasi'
                     : null,
+                readOnly: widget.levelUser == 3,
               ),
               const SizedBox(height: 16),
               TextFormField(
                 controller: umpanBalikController,
                 decoration: const InputDecoration(
                   border: OutlineInputBorder(),
-                  labelText: 'Umpan Balik',
+                  labelText: 'Rekomendasi',
                 ),
                 maxLength: 500,
                 minLines: 2,
                 maxLines: null,
                 keyboardType: TextInputType.multiline,
                 validator: (value) => value == null || value.isEmpty
-                    ? 'Masukkan Umpan Balik'
+                    ? 'Masukkan Rekomendasi'
+                    : null,
+                readOnly: widget.levelUser == 3,
+              ),
+              TextFormField(
+                controller: tanggapanController,
+                decoration: const InputDecoration(
+                  border: OutlineInputBorder(),
+                  labelText: 'Tanggapan Orang Tua',
+                ),
+                maxLength: 500,
+                minLines: 2,
+                maxLines: null,
+                keyboardType: TextInputType.multiline,
+                validator: (value) => value == null || value.isEmpty
+                    ? 'Masukkan Tanggapan Orang Tua'
                     : null,
               ),
               const SizedBox(height: 16),
@@ -411,40 +452,41 @@ class _EditFbPageState extends ConsumerState<EditFbPage> {
                         : const Icon(Icons.add_photo_alternate, size: 50),
           ),
         ),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            ElevatedButton(
-              onPressed: () => _pickImage(imageIndex),
-              child: Text('Pilih Gambar $imageIndex'),
-            ),
-            const SizedBox(width: 10),
-            ElevatedButton(
-              onPressed: () {
-                setState(() {
-                  switch (imageIndex) {
-                    case 1:
-                      _deleteImage1 = !_deleteImage1;
-                      _image1 = null;
-                      break;
-                    case 2:
-                      _deleteImage2 = !_deleteImage2;
-                      _image2 = null;
-                      break;
-                    case 3:
-                      _deleteImage3 = !_deleteImage3;
-                      _image3 = null;
-                      break;
-                  }
-                });
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: deleteImage ? Colors.red : Colors.grey,
+        if (widget.levelUser != 3)
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              ElevatedButton(
+                onPressed: () => _pickImage(imageIndex),
+                child: Text('Pilih Gambar $imageIndex'),
               ),
-              child: Text(deleteImage ? 'Batal Hapus' : 'Hapus Gambar'),
-            ),
-          ],
-        ),
+              const SizedBox(width: 10),
+              ElevatedButton(
+                onPressed: () {
+                  setState(() {
+                    switch (imageIndex) {
+                      case 1:
+                        _deleteImage1 = !_deleteImage1;
+                        _image1 = null;
+                        break;
+                      case 2:
+                        _deleteImage2 = !_deleteImage2;
+                        _image2 = null;
+                        break;
+                      case 3:
+                        _deleteImage3 = !_deleteImage3;
+                        _image3 = null;
+                        break;
+                    }
+                  });
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: deleteImage ? Colors.red : Colors.grey,
+                ),
+                child: Text(deleteImage ? 'Batal Hapus' : 'Hapus Gambar'),
+              ),
+            ],
+          ),
         const SizedBox(height: 16),
       ],
     );

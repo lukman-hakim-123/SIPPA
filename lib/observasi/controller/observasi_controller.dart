@@ -121,6 +121,7 @@ class ObservasiController extends StateNotifier<bool> {
         muridId: muridId,
         uid: user.id,
         id: '',
+        tanggapan: '',
       );
 
       // Add observasi to the API
@@ -139,7 +140,7 @@ class ObservasiController extends StateNotifier<bool> {
       );
     } catch (e) {
       // Handle unexpected errors
-      showSnackBar(context, 'Terjadi kesalahan: $e');
+      showSnackBar(context, 'Tekan lagi');
     } finally {
       // Set loading state back to false
       state = false;
@@ -156,6 +157,7 @@ class ObservasiController extends StateNotifier<bool> {
     required String? imageId,
     required bool deleteId,
     required String muridId,
+    required String tanggapan,
     required BuildContext context,
   }) async {
     state = true;
@@ -186,6 +188,7 @@ class ObservasiController extends StateNotifier<bool> {
         imageId: imageId ?? '',
         muridId: muridId,
         uid: user.id,
+        tanggapan: tanggapan,
       );
 
       // Update observasi
@@ -203,7 +206,7 @@ class ObservasiController extends StateNotifier<bool> {
       );
     } catch (e) {
       // Handle unexpected errors
-      showSnackBar(context, 'Terjadi kesalahan: $e');
+      showSnackBar(context, 'Tekan lagi');
     } finally {
       state = false;
     }

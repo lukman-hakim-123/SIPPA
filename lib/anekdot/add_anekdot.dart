@@ -106,6 +106,7 @@ class _AddAnekdotPageState extends ConsumerState<AddAnekdotPage> {
           pengamatan: pengamatanController.text,
           muridId: muridIdController.text,
           image: _image,
+          tanggapan: '',
           context: context);
     }
   }
@@ -318,11 +319,11 @@ class _AddAnekdotPageState extends ConsumerState<AddAnekdotPage> {
                   maxLength: 500,
                   decoration: const InputDecoration(
                     border: OutlineInputBorder(),
-                    labelText: 'Umpan balik',
+                    labelText: 'Rekomendasi',
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Masukkan Umpan balik';
+                      return 'Masukkan Rekomendasi';
                     }
                     return null;
                   },

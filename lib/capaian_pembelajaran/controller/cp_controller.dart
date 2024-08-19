@@ -68,6 +68,7 @@ class CpController extends StateNotifier<bool> {
     required String teramati,
     required bool isDone,
     required String muridId,
+    required String rekomendasi,
     required BuildContext context,
   }) async {
     state = true;
@@ -88,6 +89,8 @@ class CpController extends StateNotifier<bool> {
       kelompok: kelompok,
       uid: user.id,
       id: '',
+      rekomendasi: rekomendasi,
+      tanggapan: '',
     );
     final res = await _cpAPI.addCp(cp);
     state = false;
@@ -105,6 +108,8 @@ class CpController extends StateNotifier<bool> {
     required String teramati,
     required bool isDone,
     required String muridId,
+    required String rekomendasi,
+    required String tanggapan,
     required BuildContext context,
   }) async {
     state = true;
@@ -121,6 +126,8 @@ class CpController extends StateNotifier<bool> {
       muridId: muridId,
       kelompok: kelompok,
       uid: user.id,
+      rekomendasi: rekomendasi,
+      tanggapan: tanggapan,
     );
     final res = await _cpAPI.updateCp(cp);
     state = false;

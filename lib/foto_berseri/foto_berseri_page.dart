@@ -150,73 +150,77 @@ class _FbPageState extends ConsumerState<FbPage> {
                                       (Set<MaterialState> states) {
                                 return Colors.grey;
                               }),
-                              columns: [
-                                const DataColumn(
+                              columns: const [
+                                DataColumn(
                                     label: CustomText(
                                   text: 'Foto 1',
                                   fontWeight: FontWeight.w700,
                                 )),
-                                const DataColumn(
+                                DataColumn(
                                     label: CustomText(
                                   text: 'Foto 2',
                                   fontWeight: FontWeight.w700,
                                 )),
-                                const DataColumn(
+                                DataColumn(
                                     label: CustomText(
                                   text: 'Foto 3',
                                   fontWeight: FontWeight.w700,
                                 )),
-                                const DataColumn(
+                                DataColumn(
                                     label: CustomText(
                                   text: 'Nama Murid',
                                   fontWeight: FontWeight.w700,
                                 )),
-                                const DataColumn(
+                                DataColumn(
                                     label: CustomText(
                                   text: 'Nama Guru',
                                   fontWeight: FontWeight.w700,
                                 )),
-                                const DataColumn(
+                                DataColumn(
                                     label: CustomText(
                                   text: 'Kelompok',
                                   fontWeight: FontWeight.w700,
                                 )),
-                                const DataColumn(
+                                DataColumn(
                                     label: CustomText(
                                   text: 'Tanggal',
                                   fontWeight: FontWeight.w700,
                                 )),
-                                const DataColumn(
+                                DataColumn(
                                     label: CustomText(
                                   text: 'Keterangan',
                                   fontWeight: FontWeight.w700,
                                 )),
-                                const DataColumn(
+                                DataColumn(
                                     label: CustomText(
                                   text: 'Analisis Nilai Agama dan budi pekerti',
                                   fontWeight: FontWeight.w700,
                                 )),
-                                const DataColumn(
+                                DataColumn(
                                     label: CustomText(
                                   text: 'Analisis Jati Diri',
                                   fontWeight: FontWeight.w700,
                                 )),
-                                const DataColumn(
+                                DataColumn(
                                     label: CustomText(
                                   text: 'Analisis Literasi dan STEAM',
                                   fontWeight: FontWeight.w700,
                                 )),
-                                const DataColumn(
+                                DataColumn(
                                     label: CustomText(
-                                  text: 'Timbal Balik',
+                                  text: 'Rekomendasi',
                                   fontWeight: FontWeight.w700,
                                 )),
-                                if (levelUser != 3)
-                                  const DataColumn(
-                                      label: CustomText(
-                                    text: 'Action',
-                                    fontWeight: FontWeight.w700,
-                                  )),
+                                DataColumn(
+                                    label: CustomText(
+                                  text: 'Tanggapan Orang Tua',
+                                  fontWeight: FontWeight.w700,
+                                )),
+                                DataColumn(
+                                    label: CustomText(
+                                  text: 'Action',
+                                  fontWeight: FontWeight.w700,
+                                )),
                               ],
                               rows: _fbList
                                   .where((fb) => !(levelUser == 2 &&
@@ -419,6 +423,18 @@ class _FbPageState extends ConsumerState<FbPage> {
                                                 200, // Ubah sesuai kebutuhan
                                           ),
                                           child: Text(
+                                            fb.literasi,
+                                            overflow: TextOverflow.visible,
+                                            softWrap: true,
+                                          )),
+                                    ),
+                                    DataCell(
+                                      ConstrainedBox(
+                                          constraints: const BoxConstraints(
+                                            maxWidth:
+                                                200, // Ubah sesuai kebutuhan
+                                          ),
+                                          child: Text(
                                             fb.umpanBalik,
                                             overflow: TextOverflow.visible,
                                             softWrap: true,
@@ -431,25 +447,26 @@ class _FbPageState extends ConsumerState<FbPage> {
                                                 200, // Ubah sesuai kebutuhan
                                           ),
                                           child: Text(
-                                            fb.literasi,
+                                            fb.tanggapan,
                                             overflow: TextOverflow.visible,
                                             softWrap: true,
                                           )),
                                     ),
-                                    if (levelUser != 3)
-                                      DataCell(
-                                        Row(
-                                          children: [
-                                            IconButton(
-                                              icon: const Icon(Icons.edit),
-                                              onPressed: () {
-                                                Navigator.push(
-                                                    context,
-                                                    EditFbPage.route(
-                                                        fb: fb,
-                                                        kelompok: kelompok));
-                                              },
-                                            ),
+                                    DataCell(
+                                      Row(
+                                        children: [
+                                          IconButton(
+                                            icon: const Icon(Icons.edit),
+                                            onPressed: () {
+                                              Navigator.push(
+                                                  context,
+                                                  EditFbPage.route(
+                                                      fb: fb,
+                                                      kelompok: kelompok,
+                                                      levelUser: levelUser));
+                                            },
+                                          ),
+                                          if (levelUser != 3)
                                             IconButton(
                                               icon: const Icon(Icons.delete),
                                               onPressed: () {
@@ -457,9 +474,9 @@ class _FbPageState extends ConsumerState<FbPage> {
                                                     fb, muridData);
                                               },
                                             ),
-                                          ],
-                                        ),
+                                        ],
                                       ),
+                                    ),
                                   ],
                                 );
                               }).toList(),

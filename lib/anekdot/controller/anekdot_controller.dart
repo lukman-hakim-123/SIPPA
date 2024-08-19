@@ -87,6 +87,7 @@ class AnekdotController extends StateNotifier<bool> {
     required String umpanBalik,
     required io.File? image,
     required String muridId,
+    required String tanggapan,
     required BuildContext context,
   }) async {
     state = true;
@@ -114,18 +115,18 @@ class AnekdotController extends StateNotifier<bool> {
 
       // Create anekdot model
       AnekdotModel anekdot = AnekdotModel(
-        pengamatan: pengamatan,
-        tanggal: tanggal,
-        nilai: nilai,
-        jatiDiri: jatiDiri,
-        literasi: literasi,
-        umpanBalik: umpanBalik,
-        kelompok: kelompok,
-        imageId: imageId ?? '',
-        muridId: muridId,
-        uid: user.id,
-        id: '',
-      );
+          pengamatan: pengamatan,
+          tanggal: tanggal,
+          nilai: nilai,
+          jatiDiri: jatiDiri,
+          literasi: literasi,
+          umpanBalik: umpanBalik,
+          kelompok: kelompok,
+          imageId: imageId ?? '',
+          muridId: muridId,
+          uid: user.id,
+          id: '',
+          tanggapan: '');
 
       // Add anekdot to the API
       final res = await _anekdotAPI.addAnekdot(anekdot);
@@ -162,6 +163,7 @@ class AnekdotController extends StateNotifier<bool> {
     required String? imageId,
     required bool deleteId,
     required String muridId,
+    required String tanggapan,
     required BuildContext context,
   }) async {
     state = true;
@@ -194,6 +196,7 @@ class AnekdotController extends StateNotifier<bool> {
         imageId: imageId ?? '',
         muridId: muridId,
         uid: user.id,
+        tanggapan: tanggapan,
       );
 
       // Update anekdot
@@ -211,7 +214,7 @@ class AnekdotController extends StateNotifier<bool> {
       );
     } catch (e) {
       // Handle unexpected errors
-      showSnackBar(context, 'Terjadi kesalahan: $e');
+      showSnackBar(context, 'Tekan lagi');
     } finally {
       state = false;
     }

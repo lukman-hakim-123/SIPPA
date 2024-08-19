@@ -83,6 +83,7 @@ class HkController extends StateNotifier<bool> {
     required io.File? image,
     required String tanggal,
     required String muridId,
+    required String rekomendasi,
     required BuildContext context,
   }) async {
     state = true;
@@ -110,6 +111,8 @@ class HkController extends StateNotifier<bool> {
       kelompok: kelompok,
       uid: user.id,
       id: '',
+      rekomendasi: rekomendasi,
+      tanggapan: '',
     );
 
     final res = await _hkAPI.addHk(hk);
@@ -131,6 +134,8 @@ class HkController extends StateNotifier<bool> {
     required String tanggal,
     required String imageId,
     required String muridId,
+    required String rekomendasi,
+    required String tanggapan,
     required BuildContext context,
   }) async {
     state = true;
@@ -154,6 +159,8 @@ class HkController extends StateNotifier<bool> {
       tanggal: tanggal,
       muridId: muridId,
       kelompok: kelompok,
+      rekomendasi: rekomendasi,
+      tanggapan: tanggapan,
       uid: user.id,
     );
 

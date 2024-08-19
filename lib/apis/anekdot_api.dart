@@ -162,6 +162,7 @@ class AnekdotAPI implements IAnekdotAPI {
           'kelompok': anekdot.kelompok,
           'imageId': anekdot.imageId,
           'muridId': anekdot.muridId,
+          'tanggapan': anekdot.tanggapan,
         },
       );
       return right(document);

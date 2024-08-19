@@ -28,6 +28,7 @@ class _AddCpPageState extends ConsumerState<AddCpPage> {
   final TextEditingController teramatiController = TextEditingController();
   final TextEditingController tanggalController = TextEditingController();
   final TextEditingController muridIdController = TextEditingController();
+  final TextEditingController rekomendasiController = TextEditingController();
   DateTime? _selectedDate;
   bool isDone = false;
   @override
@@ -64,6 +65,7 @@ class _AddCpPageState extends ConsumerState<AddCpPage> {
           teramati: teramatiController.text,
           isDone: isDone,
           muridId: muridIdController.text,
+          rekomendasi: rekomendasiController.text,
           context: context);
     }
   }
@@ -231,6 +233,24 @@ class _AddCpPageState extends ConsumerState<AddCpPage> {
                     ),
                   ),
                 ],
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                keyboardType: TextInputType.multiline,
+                maxLines: null,
+                minLines: 3,
+                controller: rekomendasiController,
+                maxLength: 500,
+                decoration: const InputDecoration(
+                  border: OutlineInputBorder(),
+                  labelText: 'Rekomendasi',
+                ),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Masukkan Rekomendasi';
+                  }
+                  return null;
+                },
               ),
               const SizedBox(height: 16),
               ElevatedButton(

@@ -159,6 +159,7 @@ class ObservasiAPI implements IObservasiAPI {
           'kelompok': observasi.kelompok,
           'imageId': observasi.imageId,
           'muridId': observasi.muridId,
+          'tanggapan': observasi.tanggapan,
         },
       );
       return right(document);
