@@ -1,10 +1,10 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'dart:convert';
 
-class CpModel {
+class RubrikModel {
   final String tujuan;
-  final String konteks; //kegiatan
-  final bool isDone;
+  final String kegiatan; //kegiatan
+  final String skor;
   final String agama;
   final String jatidiri;
   final String literasi;
@@ -15,10 +15,10 @@ class CpModel {
   final String kelompok;
   final String rekomendasi; //umpan balik
   final String tanggapan;
-  CpModel({
+  RubrikModel({
     required this.tujuan,
-    required this.konteks,
-    required this.isDone,
+    required this.kegiatan,
+    required this.skor,
     required this.agama,
     required this.jatidiri,
     required this.literasi,
@@ -31,10 +31,10 @@ class CpModel {
     required this.tanggapan,
   });
 
-  CpModel copyWith({
+  RubrikModel copyWith({
     String? tujuan,
-    String? konteks,
-    bool? isDone,
+    String? kegiatan,
+    String? skor,
     String? agama,
     String? jatidiri,
     String? literasi,
@@ -46,10 +46,10 @@ class CpModel {
     String? rekomendasi,
     String? tanggapan,
   }) {
-    return CpModel(
+    return RubrikModel(
       tujuan: tujuan ?? this.tujuan,
-      konteks: konteks ?? this.konteks,
-      isDone: isDone ?? this.isDone,
+      kegiatan: kegiatan ?? this.kegiatan,
+      skor: skor ?? this.skor,
       agama: agama ?? this.agama,
       jatidiri: jatidiri ?? this.jatidiri,
       literasi: literasi ?? this.literasi,
@@ -66,8 +66,8 @@ class CpModel {
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
       'tujuan': tujuan,
-      'konteks': konteks,
-      'isDone': isDone,
+      'kegiatan': kegiatan,
+      'skor': skor,
       'agama': agama,
       'jatidiri': jatidiri,
       'literasi': literasi,
@@ -80,11 +80,11 @@ class CpModel {
     };
   }
 
-  factory CpModel.fromMap(Map<String, dynamic> map) {
-    return CpModel(
+  factory RubrikModel.fromMap(Map<String, dynamic> map) {
+    return RubrikModel(
       tujuan: map['tujuan'] ?? '',
-      konteks: map['konteks'] ?? '',
-      isDone: map['isDone'] ?? false,
+      kegiatan: map['kegiatan'] ?? '',
+      skor: map['skor'] ?? '',
       agama: map['agama'] ?? '',
       jatidiri: map['jatidiri'] ?? '',
       literasi: map['literasi'] ?? '',
@@ -100,21 +100,21 @@ class CpModel {
 
   String toJson() => json.encode(toMap());
 
-  factory CpModel.fromJson(String source) =>
-      CpModel.fromMap(json.decode(source) as Map<String, dynamic>);
+  factory RubrikModel.fromJson(String source) =>
+      RubrikModel.fromMap(json.decode(source) as Map<String, dynamic>);
 
   @override
   String toString() {
-    return 'CpModel(tujuan: $tujuan, konteks: $konteks, isDone: $isDone, agama: $agama, jatidiri: $jatidiri, literasi: $literasi, tanggal: $tanggal, uid: $uid, id: $id, muridId: $muridId, kelompok: $kelompok, rekomendasi: $rekomendasi, tanggapan: $tanggapan)';
+    return 'RubrikModel(tujuan: $tujuan, kegiatan: $kegiatan, skor: $skor, agama: $agama, jatidiri: $jatidiri, literasi: $literasi, tanggal: $tanggal, uid: $uid, id: $id, muridId: $muridId, kelompok: $kelompok, rekomendasi: $rekomendasi, tanggapan: $tanggapan)';
   }
 
   @override
-  bool operator ==(covariant CpModel other) {
+  bool operator ==(covariant RubrikModel other) {
     if (identical(this, other)) return true;
 
     return other.tujuan == tujuan &&
-        other.konteks == konteks &&
-        other.isDone == isDone &&
+        other.kegiatan == kegiatan &&
+        other.skor == skor &&
         other.agama == agama &&
         other.jatidiri == jatidiri &&
         other.literasi == literasi &&
@@ -130,8 +130,8 @@ class CpModel {
   @override
   int get hashCode {
     return tujuan.hashCode ^
-        konteks.hashCode ^
-        isDone.hashCode ^
+        kegiatan.hashCode ^
+        skor.hashCode ^
         agama.hashCode ^
         jatidiri.hashCode ^
         literasi.hashCode ^

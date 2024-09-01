@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:sippa/add_user/controller/user_controller.dart';
+import 'package:sippa/common/loading.dart';
 import 'package:sippa/hasil_karya/controller/hasil_karya_controller.dart';
 
 import 'package:sippa/widget_view/appbar.dart';
@@ -42,9 +43,6 @@ class _AddHkPageState extends ConsumerState<AddHkPage> {
 
   @override
   void dispose() {
-    deskripsiController.dispose();
-    tanggalController.dispose();
-    semesterController.dispose();
     nilaiController.dispose();
     jatiDiriController.dispose();
     literasiController.dispose();
@@ -75,18 +73,10 @@ class _AddHkPageState extends ConsumerState<AddHkPage> {
       final file = File(pickedFile.path);
       final fileSize = await file.length();
 
-      if (fileSize > maxFileSize) {
-        setState(() {
-          _errorMessage =
-              'Ukuran file melebihi 2 MB. Silakan pilih file yang lebih kecil.';
-          _image = null;
-        });
-      } else {
-        setState(() {
-          _image = file;
-          _errorMessage = null;
-        });
-      }
+      setState(() {
+        _image = file;
+        _errorMessage = null;
+      });
     } else {
       setState(() {
         _errorMessage = 'Tidak ada file yang dipilih.';
@@ -97,7 +87,7 @@ class _AddHkPageState extends ConsumerState<AddHkPage> {
   void addHasilKarya() {
     if (_formKey.currentState!.validate()) {
       ref.read(hkControllerProvider.notifier).addHk(
-          semester: selectedSemester!,
+          semester: semesterController.text,
           deskripsi: deskripsiController.text,
           nilai: nilaiController.text,
           jatiDiri: jatiDiriController.text,
@@ -114,6 +104,7 @@ class _AddHkPageState extends ConsumerState<AddHkPage> {
   Widget build(BuildContext context) {
     final muridAsyncValue =
         ref.watch(getMuridByFiltersProvider(widget.kelompok));
+    final isLoading = ref.watch(hkControllerProvider);
 
     return Scaffold(
       appBar: const CustomAppBar(
@@ -171,6 +162,61 @@ class _AddHkPageState extends ConsumerState<AddHkPage> {
                 child: const Text('Pilih Gambar'),
               ),
               const SizedBox(height: 16),
+              TextFormField(
+                controller: tanggalController,
+                decoration: InputDecoration(
+                  border: const OutlineInputBorder(),
+                  labelText: 'Tanggal',
+                  suffixIcon: IconButton(
+                    icon: const Icon(Icons.calendar_today),
+                    onPressed: () => _selectDate(context),
+                  ),
+                ),
+                readOnly: true,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Pilih tanggal';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: deskripsiController,
+                decoration: const InputDecoration(
+                  border: OutlineInputBorder(),
+                  labelText: 'Kegiatan',
+                ),
+                maxLength: 500,
+                minLines: 2,
+                maxLines: null,
+                keyboardType: TextInputType.multiline,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Masukkan Kegiatan';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: semesterController,
+                decoration: const InputDecoration(
+                  border: OutlineInputBorder(),
+                  labelText: 'Tujuan Pembelajaran',
+                ),
+                maxLength: 500,
+                minLines: 2,
+                maxLines: null,
+                keyboardType: TextInputType.multiline,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Masukkan Tujuan Pembelajaran';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 16),
               muridAsyncValue.when(
                 data: (muridList) {
                   return Padding(
@@ -198,76 +244,15 @@ class _AddHkPageState extends ConsumerState<AddHkPage> {
                     ),
                   );
                 },
-                loading: () => const CircularProgressIndicator(),
+                loading: () => const Loader(),
                 error: (error, stack) => CustomText(text: 'Error: $error'),
-              ),
-              TextFormField(
-                controller: tanggalController,
-                decoration: InputDecoration(
-                  border: const OutlineInputBorder(),
-                  labelText: 'Tanggal',
-                  suffixIcon: IconButton(
-                    icon: const Icon(Icons.calendar_today),
-                    onPressed: () => _selectDate(context),
-                  ),
-                ),
-                readOnly: true,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Pilih tanggal';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 16),
-              DropdownButtonFormField<String>(
-                value: selectedSemester,
-                decoration: const InputDecoration(
-                  border: OutlineInputBorder(),
-                  labelText: 'Semester',
-                ),
-                items: const [
-                  DropdownMenuItem(
-                      value: "1 (gasal)", child: Text("1 (gasal)")),
-                  DropdownMenuItem(
-                      value: "2 (genap)", child: Text("2 (genap)")),
-                ],
-                onChanged: (String? newValue) {
-                  setState(() {
-                    selectedSemester = newValue ?? '';
-                  });
-                },
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Pilih Semester';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: deskripsiController,
-                decoration: const InputDecoration(
-                  border: OutlineInputBorder(),
-                  labelText: 'Deskripsi Foto',
-                ),
-                maxLength: 500,
-                minLines: 2,
-                maxLines: null,
-                keyboardType: TextInputType.multiline,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Masukkan Deskripsi Foto';
-                  }
-                  return null;
-                },
               ),
               const SizedBox(height: 16),
               TextFormField(
                 controller: nilaiController,
                 decoration: const InputDecoration(
                   border: OutlineInputBorder(),
-                  labelText: 'Analisis Nilai Agama dan Budi Pekerti',
+                  labelText: 'Nilai Agama dan Budi Pekerti',
                 ),
                 maxLength: 500,
                 minLines: 2,
@@ -275,7 +260,7 @@ class _AddHkPageState extends ConsumerState<AddHkPage> {
                 keyboardType: TextInputType.multiline,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Masukkan Analisis Nilai Agama dan Budi Pekerti';
+                    return 'Masukkan Nilai Agama dan Budi Pekerti';
                   }
                   return null;
                 },
@@ -285,7 +270,7 @@ class _AddHkPageState extends ConsumerState<AddHkPage> {
                 controller: jatiDiriController,
                 decoration: const InputDecoration(
                   border: OutlineInputBorder(),
-                  labelText: 'Analisis Jati Diri',
+                  labelText: 'Jati Diri',
                 ),
                 maxLength: 500,
                 minLines: 2,
@@ -293,7 +278,7 @@ class _AddHkPageState extends ConsumerState<AddHkPage> {
                 keyboardType: TextInputType.multiline,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Masukkan Analisis Jati Diri';
+                    return 'Masukkan Jati Diri';
                   }
                   return null;
                 },
@@ -303,7 +288,7 @@ class _AddHkPageState extends ConsumerState<AddHkPage> {
                 controller: literasiController,
                 decoration: const InputDecoration(
                   border: OutlineInputBorder(),
-                  labelText: 'Analisis Literasi',
+                  labelText: 'Literasi dan STEAM',
                 ),
                 maxLength: 500,
                 minLines: 2,
@@ -311,7 +296,7 @@ class _AddHkPageState extends ConsumerState<AddHkPage> {
                 keyboardType: TextInputType.multiline,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Masukkan Analisis Literasi';
+                    return 'Masukkan Literasi dan STEAM';
                   }
                   return null;
                 },
@@ -321,7 +306,7 @@ class _AddHkPageState extends ConsumerState<AddHkPage> {
                 controller: rekomendasiController,
                 decoration: const InputDecoration(
                   border: OutlineInputBorder(),
-                  labelText: 'Rekomendasi',
+                  labelText: 'Umpan Balik',
                 ),
                 maxLength: 500,
                 minLines: 2,
@@ -329,13 +314,15 @@ class _AddHkPageState extends ConsumerState<AddHkPage> {
                 keyboardType: TextInputType.multiline,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Masukkan Rekomendasi';
+                    return 'Masukkan Umpan Balik';
                   }
                   return null;
                 },
               ),
               const SizedBox(height: 16),
-              ElevatedButton(
+              isLoading
+                  ? const Loader()
+                  : ElevatedButton(
                 onPressed: addHasilKarya,
                 style: ButtonStyle(
                   backgroundColor:

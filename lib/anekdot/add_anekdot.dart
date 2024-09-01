@@ -6,6 +6,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:sippa/add_user/controller/user_controller.dart';
 import 'package:sippa/anekdot/controller/anekdot_controller.dart';
+import 'package:sippa/common/loading.dart';
 import 'package:sippa/widget_view/appbar.dart';
 
 class AddAnekdotPage extends ConsumerStatefulWidget {
@@ -27,6 +28,7 @@ class _AddAnekdotPageState extends ConsumerState<AddAnekdotPage> {
   final umpanBalikController = TextEditingController();
   final tanggalController = TextEditingController();
   final pengamatanController = TextEditingController();
+  final tujuanController = TextEditingController();
   final muridIdController = TextEditingController();
   DateTime? _selectedDate;
   File? _image;
@@ -42,7 +44,6 @@ class _AddAnekdotPageState extends ConsumerState<AddAnekdotPage> {
     literasiController.dispose();
     umpanBalikController.dispose();
     tanggalController.dispose();
-    pengamatanController.dispose();
     muridIdController.dispose();
   }
 
@@ -69,18 +70,10 @@ class _AddAnekdotPageState extends ConsumerState<AddAnekdotPage> {
       final file = File(pickedFile.path);
       final fileSize = await file.length();
 
-      if (fileSize > maxFileSize) {
-        setState(() {
-          _errorMessage =
-              'Ukuran file melebihi 2 MB. Silakan pilih file yang lebih kecil.';
-          _image = null;
-        });
-      } else {
-        setState(() {
-          _image = file;
-          _errorMessage = null;
-        });
-      }
+      setState(() {
+        _image = file;
+        _errorMessage = null;
+      });
     } else {
       setState(() {
         _errorMessage = null;
@@ -104,6 +97,7 @@ class _AddAnekdotPageState extends ConsumerState<AddAnekdotPage> {
           umpanBalik: umpanBalikController.text,
           tanggal: tanggalController.text,
           pengamatan: pengamatanController.text,
+          tujuan: tujuanController.text,
           muridId: muridIdController.text,
           image: _image,
           tanggapan: '',
@@ -115,10 +109,11 @@ class _AddAnekdotPageState extends ConsumerState<AddAnekdotPage> {
   Widget build(BuildContext context) {
     final muridAsyncValue =
         ref.watch(getMuridByFiltersProvider(widget.kelompok));
+    final isLoading = ref.watch(anekdotControllerProvider);
 
     return Scaffold(
       appBar: const CustomAppBar(
-        title: 'Tambah Anekdot',
+        title: 'Tambah Anekdotal',
       ),
       backgroundColor: Colors.white,
       body: Padding(
@@ -178,6 +173,68 @@ class _AddAnekdotPageState extends ConsumerState<AddAnekdotPage> {
                 child: const Text('Pilih Gambar'),
               ),
               const SizedBox(height: 16),
+              Padding(
+                padding: const EdgeInsets.only(bottom: 22),
+                child: TextFormField(
+                  controller: tanggalController,
+                  decoration: InputDecoration(
+                    border: const OutlineInputBorder(),
+                    labelText: 'Tanggal',
+                    suffixIcon: IconButton(
+                      icon: const Icon(Icons.calendar_today),
+                      onPressed: () => _selectDate(context),
+                    ),
+                  ),
+                  readOnly: true,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Pilih tanggal';
+                    }
+                    return null;
+                  },
+                ),
+              ),
+              const SizedBox(height: 16),
+              Padding(
+                padding: const EdgeInsets.only(bottom: 22),
+                child: TextFormField(
+                  keyboardType: TextInputType.multiline,
+                  maxLines: null,
+                  minLines: 3,
+                  controller: pengamatanController,
+                  maxLength: 500,
+                  decoration: const InputDecoration(
+                    border: OutlineInputBorder(),
+                    labelText: 'Kegiatan',
+                  ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Masukkan Kegiatan';
+                    }
+                    return null;
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(bottom: 22),
+                child: TextFormField(
+                  keyboardType: TextInputType.multiline,
+                  maxLines: null,
+                  minLines: 3,
+                  controller: tujuanController,
+                  maxLength: 500,
+                  decoration: const InputDecoration(
+                    border: OutlineInputBorder(),
+                    labelText: 'Tujuan Pembelajaran',
+                  ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Masukkan Tujuan Pembelajaran';
+                    }
+                    return null;
+                  },
+                ),
+              ),
               muridAsyncValue.when(
                 data: (muridList) {
                   return Padding(
@@ -205,50 +262,10 @@ class _AddAnekdotPageState extends ConsumerState<AddAnekdotPage> {
                     ),
                   );
                 },
-                loading: () => const CircularProgressIndicator(),
+                loading: () => const Loader(),
                 error: (error, stack) => Text('Error: $error'),
               ),
-              Padding(
-                padding: const EdgeInsets.only(bottom: 22),
-                child: TextFormField(
-                  controller: tanggalController,
-                  decoration: InputDecoration(
-                    border: const OutlineInputBorder(),
-                    labelText: 'Tanggal',
-                    suffixIcon: IconButton(
-                      icon: const Icon(Icons.calendar_today),
-                      onPressed: () => _selectDate(context),
-                    ),
-                  ),
-                  readOnly: true,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Pilih tanggal';
-                    }
-                    return null;
-                  },
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(bottom: 22),
-                child: TextFormField(
-                  keyboardType: TextInputType.multiline,
-                  maxLines: null,
-                  minLines: 3,
-                  controller: pengamatanController,
-                  maxLength: 1000,
-                  decoration: const InputDecoration(
-                    border: OutlineInputBorder(),
-                    labelText: 'Pengamatan',
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Masukkan pengamatan';
-                    }
-                    return null;
-                  },
-                ),
-              ),
+              const SizedBox(height: 16),
               Padding(
                 padding: const EdgeInsets.only(bottom: 22),
                 child: TextFormField(
@@ -319,43 +336,46 @@ class _AddAnekdotPageState extends ConsumerState<AddAnekdotPage> {
                   maxLength: 500,
                   decoration: const InputDecoration(
                     border: OutlineInputBorder(),
-                    labelText: 'Rekomendasi',
+                    labelText: 'Umpan Balik',
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Masukkan Rekomendasi';
+                      return 'Masukkan Umpan Balik';
                     }
                     return null;
                   },
                 ),
               ),
-              ElevatedButton(
-                onPressed: () {
-                  addAnekdot();
-                },
-                style: ButtonStyle(
-                  backgroundColor:
-                      MaterialStateProperty.all(const Color(0xff104993)),
-                  shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                    RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(6.0),
+              isLoading
+                  ? const Loader()
+                  : ElevatedButton(
+                      onPressed: () {
+                        addAnekdot();
+                      },
+                      style: ButtonStyle(
+                        backgroundColor:
+                            MaterialStateProperty.all(const Color(0xff104993)),
+                        shape:
+                            MaterialStateProperty.all<RoundedRectangleBorder>(
+                          RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(6.0),
+                          ),
+                        ),
+                        fixedSize: MaterialStateProperty.all(
+                            const Size.fromHeight(45)),
+                      ),
+                      child: Container(
+                        width: double.infinity,
+                        alignment: Alignment.center,
+                        child: const Text(
+                          "Tambah Anekdotal",
+                          style: TextStyle(
+                            fontFamily: 'inter',
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
                     ),
-                  ),
-                  fixedSize:
-                      MaterialStateProperty.all(const Size.fromHeight(45)),
-                ),
-                child: Container(
-                  width: double.infinity,
-                  alignment: Alignment.center,
-                  child: const Text(
-                    "Tambah Anekdot",
-                    style: TextStyle(
-                      fontFamily: 'inter',
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
-              ),
               const SizedBox(
                 height: 15,
               ),

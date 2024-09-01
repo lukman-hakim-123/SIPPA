@@ -100,7 +100,6 @@ class AuthController extends StateNotifier<bool> {
     state = true;
 
     final response = await _authAPI.signup(email: email, password: password);
-    state = false;
     response.fold((l) => showSnackBar(context, l.message), (r) async {
       String? imageId;
       if (image != null) {
@@ -115,6 +114,7 @@ class AuthController extends StateNotifier<bool> {
           kelompok: kelompok,
           levelUser: 2);
       final res2 = await _userAPI.saveUserData(userModel);
+      state = false;
       res2.fold((l) => showSnackBar(context, l.message), (r) {
         showSnackBar(context, "Account Guru Created Successfully");
         Navigator.pop(context);
@@ -189,5 +189,50 @@ class AuthController extends StateNotifier<bool> {
               Navigator.pushAndRemoveUntil(
                   context, LoginPage.route(), (route) => false),
             });
+  }
+
+  void updateMurid({
+    required String muridId,
+    required String nama,
+    required String email,
+    required int levelUser,
+    required String
+        kelompok, // Nullable karena hanya level 1 yang bisa mengubahnya
+    required io.File? image,
+    required String imageId,
+    required BuildContext context,
+    required WidgetRef ref,
+  }) async {
+    state = true;
+    // Menghapus gambar lama jika ada gambar baru
+    if (image != null) {
+      if (imageId != '' && imageId.isNotEmpty) {
+        await _userAPI.deleteImage(imageId);
+      }
+      imageId = await _userAPI.uploadFile(image, 'pp_${DateTime.now()}.jpg');
+    }
+
+    // Membuat model User baru dengan data yang diperbarui
+    User userModel = User(
+      id: muridId,
+      email: email,
+      imageId: imageId,
+      nama: nama,
+      kelompok: kelompok,
+      levelUser: levelUser,
+    );
+
+    // Memperbarui data murid di API
+    final res = await _userAPI.updateMurid(userModel);
+    state = false;
+    res.fold(
+      (l) => showSnackBar(context, l.message),
+      (r) {
+        showSnackBar(context, 'Berhasil Terupdate');
+        Navigator.pop(
+          context,
+        );
+      },
+    );
   }
 }

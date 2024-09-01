@@ -74,21 +74,12 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
       final file = File(pickedFile.path);
       final fileSize = await file.length();
 
-      if (fileSize > maxFileSize) {
-        setState(() {
-          _errorMessage =
-              'Ukuran file melebihi 2 MB. Silakan pilih file yang lebih kecil.';
-          _image = null;
-          _isNewImage = false;
-        });
-      } else {
-        setState(() {
-          _image = file;
-          _isNewImage = true;
+      setState(() {
+        _image = file;
+        _isNewImage = true;
 
-          _errorMessage = null;
-        });
-      }
+        _errorMessage = null;
+      });
     } else {
       setState(() {
         _errorMessage = null;
@@ -112,6 +103,8 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
   Widget build(BuildContext context) {
     final currentUserDetailAsyncValue = ref.watch(currentUserDetailsProvider);
     final latestUsersAsyncValue = ref.watch(getLatestUsersProvider);
+    final isLoading = ref.watch(authControllerProvider);
+
     return currentUserDetailAsyncValue.when(
         data: (userDetails) {
           if (userDetails == null) {
@@ -170,13 +163,7 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
                                           );
                                         }
                                       },
-                                      loading: () => const Center(
-                                        child: CircularProgressIndicator(
-                                          valueColor:
-                                              AlwaysStoppedAnimation<Color>(
-                                                  Colors.white),
-                                        ),
-                                      ),
+                                      loading: () => const Loader(),
                                       error: (_, __) => const Center(
                                         child: Icon(Icons.error,
                                             color: Colors.white),
@@ -266,30 +253,33 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
                         },
                       ),
                     ),
-                    ElevatedButton(
-                      onPressed: () {
-                        onSaveChanges();
-                      },
-                      style: ButtonStyle(
-                        backgroundColor:
-                            MaterialStateProperty.all(const Color(0xff104993)),
-                        shape:
-                            MaterialStateProperty.all<RoundedRectangleBorder>(
-                          RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(6.0),
+                    isLoading
+                        ? const Loader()
+                        : ElevatedButton(
+                            onPressed: () {
+                              onSaveChanges();
+                            },
+                            style: ButtonStyle(
+                              backgroundColor: MaterialStateProperty.all(
+                                  const Color(0xff104993)),
+                              shape: MaterialStateProperty.all<
+                                  RoundedRectangleBorder>(
+                                RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(6.0),
+                                ),
+                              ),
+                              fixedSize: MaterialStateProperty.all(
+                                  const Size.fromHeight(45)),
+                            ),
+                            child: Container(
+                              width: double.infinity,
+                              alignment: Alignment.center,
+                              child: const Text("Simpan Perubahan",
+                                  style: TextStyle(
+                                      fontFamily: 'inter',
+                                      color: Colors.white)),
+                            ),
                           ),
-                        ),
-                        fixedSize: MaterialStateProperty.all(
-                            const Size.fromHeight(45)),
-                      ),
-                      child: Container(
-                        width: double.infinity,
-                        alignment: Alignment.center,
-                        child: const Text("Simpan Perubahan",
-                            style: TextStyle(
-                                fontFamily: 'inter', color: Colors.white)),
-                      ),
-                    ),
                     const SizedBox(height: 30),
                   ],
                 ),

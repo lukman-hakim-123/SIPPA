@@ -2,31 +2,35 @@ import 'package:appwrite/appwrite.dart';
 import 'package:appwrite/models.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 
 import 'package:sippa/auth/controllers/auth_controller.dart';
-import 'package:sippa/capaian_pembelajaran/add_cp_page.dart';
-import 'package:sippa/capaian_pembelajaran/controller/cp_controller.dart';
-import 'package:sippa/capaian_pembelajaran/edit_cp_page.dart';
 import 'package:sippa/common/loading.dart';
 import 'package:sippa/constant/appwrite.dart';
+import 'package:sippa/models/rubrik.dart';
+import 'package:sippa/rubrik/add_rubrik_page.dart';
+import 'package:sippa/rubrik/controller/rubrik_controller.dart';
+import 'package:sippa/rubrik/edit_rubrik_page.dart';
 
-import 'package:sippa/models/cp.dart';
 import 'package:sippa/widget_view/appbar.dart';
 import 'package:sippa/widget_view/drawer.dart';
 import 'package:sippa/widget_view/teks.dart';
+import 'package:sippa/widget_view/calendar.dart';
+import 'package:intl/date_symbol_data_local.dart';
 
-class CpPage extends ConsumerStatefulWidget {
-  static route() => MaterialPageRoute(builder: (context) => const CpPage());
+class RubrikPage extends ConsumerStatefulWidget {
+  static route() => MaterialPageRoute(builder: (context) => const RubrikPage());
 
-  const CpPage({super.key});
+  const RubrikPage({super.key});
 
   @override
-  ConsumerState<ConsumerStatefulWidget> createState() => _CpPageState();
+  ConsumerState<ConsumerStatefulWidget> createState() => _RubrikPageState();
 }
 
-class _CpPageState extends ConsumerState<CpPage> {
-  int _selectedIndex = 2;
-  List<CpModel> _cpList = [];
+class _RubrikPageState extends ConsumerState<RubrikPage> {
+  int _selectedIndex = 5;
+  List<RubrikModel> _rubrikList = [];
+  DateTime _selectedDate = DateTime.now();
 
   void _onItemSelected(int index) {
     setState(() {
@@ -34,11 +38,23 @@ class _CpPageState extends ConsumerState<CpPage> {
     });
   }
 
+  void _onDateSelected(DateTime date) {
+    setState(() {
+      _selectedDate = date;
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    initializeDateFormatting('id_ID', null);
+  }
+
   @override
   Widget build(BuildContext context) {
     final userDetailsAsync = ref.watch(currentUserDetailsProvider);
     return Scaffold(
-      appBar: const CustomAppBar(title: 'Ceklis'),
+      appBar: const CustomAppBar(title: 'Rubrik'),
       body: Padding(
         padding: const EdgeInsets.only(top: 12, left: 12, right: 12),
         child: userDetailsAsync.when(
@@ -49,53 +65,56 @@ class _CpPageState extends ConsumerState<CpPage> {
             final userId = userDetails.id;
             final kelompok = userDetails.kelompok;
             final levelUser = userDetails.levelUser;
-            final cpAsyncValue = ref.watch(getCpByUserIdProvider(userId));
-            ref.listen<AsyncValue<RealtimeMessage>>(getLatestCpProvider,
+            final rubrikAsyncValue =
+                ref.watch(getRubrikByUserIdProvider(userId));
+            ref.listen<AsyncValue<RealtimeMessage>>(getLatestRubrikProvider,
                 (_, next) {
               next.whenData((data) {
                 if (data.events.contains(
-                  'databases.*.collections.${AppwriteConstants.cpCollection}.documents.*.create',
+                  'databases.*.collections.${AppwriteConstants.rubrikCollection}.documents.*.create',
                 )) {
-                  final newCp = CpModel.fromMap(data.payload);
+                  final newRubrik = RubrikModel.fromMap(data.payload);
                   if ((levelUser == 1) ||
-                      (levelUser == 2 && newCp.uid == userId) ||
-                      (levelUser == 3 && newCp.muridId == userId)) {
-                    if (!_cpList.any((cp) => cp.id == newCp.id)) {
+                      (levelUser == 2 && newRubrik.uid == userId) ||
+                      (levelUser == 3 && newRubrik.muridId == userId)) {
+                    if (!_rubrikList
+                        .any((rubrik) => rubrik.id == newRubrik.id)) {
                       setState(() {
-                        _cpList.add(newCp);
+                        _rubrikList.add(newRubrik);
                       });
                     }
                   }
                 } else if (data.events.contains(
-                  'databases.*.collections.${AppwriteConstants.cpCollection}.documents.*.update',
+                  'databases.*.collections.${AppwriteConstants.rubrikCollection}.documents.*.update',
                 )) {
                   final startingPoint =
                       data.events[0].lastIndexOf('documents.');
                   final endPoint = data.events[0].lastIndexOf('.update');
-                  final cpId =
+                  final rubrikId =
                       data.events[0].substring(startingPoint + 10, endPoint);
-                  var cp = _cpList.firstWhere((element) => element.id == cpId);
-                  final cpIndex = _cpList.indexOf(cp);
+                  var rubrik = _rubrikList
+                      .firstWhere((element) => element.id == rubrikId);
+                  final rubrikIndex = _rubrikList.indexOf(rubrik);
                   setState(() {
-                    _cpList.removeAt(cpIndex);
-                    final updatedCp = CpModel.fromMap(data.payload);
+                    _rubrikList.removeAt(rubrikIndex);
+                    final updatedRubrik = RubrikModel.fromMap(data.payload);
                     if ((levelUser == 1) ||
-                        (levelUser == 2 && updatedCp.uid == userId) ||
-                        (levelUser == 3 && updatedCp.muridId == userId)) {
-                      _cpList.insert(cpIndex, updatedCp);
+                        (levelUser == 2 && updatedRubrik.uid == userId) ||
+                        (levelUser == 3 && updatedRubrik.muridId == userId)) {
+                      _rubrikList.insert(rubrikIndex, updatedRubrik);
                     }
                   });
                 } else if (data.events.contains(
-                  'databases.*.collections.${AppwriteConstants.cpCollection}.documents.*.delete',
+                  'databases.*.collections.${AppwriteConstants.rubrikCollection}.documents.*.delete',
                 )) {
                   final startingPoint =
                       data.events[0].lastIndexOf('documents.');
                   final endPoint = data.events[0].lastIndexOf('.delete');
-                  final cpId =
+                  final rubrikId =
                       data.events[0].substring(startingPoint + 10, endPoint);
 
                   setState(() {
-                    _cpList.removeWhere((cp) => cp.id == cpId);
+                    _rubrikList.removeWhere((rubrik) => rubrik.id == rubrikId);
                   });
                 }
               });
@@ -111,7 +130,7 @@ class _CpPageState extends ConsumerState<CpPage> {
                     child: Padding(
                       padding: EdgeInsets.only(bottom: 16),
                       child: CustomText(
-                        text: "Ceklis",
+                        text: "Rubrik",
                         fontSize: 18,
                         fontWeight: FontWeight.w800,
                         textAlign: TextAlign.start,
@@ -122,7 +141,7 @@ class _CpPageState extends ConsumerState<CpPage> {
                     ElevatedButton(
                       onPressed: () {
                         Navigator.push(
-                            context, AddCpPage.route(kelompok: kelompok));
+                            context, AddRubrikPage.route(kelompok: kelompok));
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.green,
@@ -133,9 +152,18 @@ class _CpPageState extends ConsumerState<CpPage> {
                           text: "Tambah Data", color: Colors.white),
                     ),
                   const SizedBox(height: 16),
-                  cpAsyncValue.when(
-                    data: (cpList) {
-                      _cpList = cpList;
+                  MonthlyCalendar(onDateSelected: _onDateSelected),
+                  const SizedBox(height: 16),
+                  rubrikAsyncValue.when(
+                    data: (rubrikList) {
+                      _rubrikList = rubrikList;
+                      // _rubrikList = _rubrikList.where((rubrik) {
+                      //   final rubrikDate = DateFormat("d MMMM yyyy", "id_ID")
+                      //       .parse(rubrik.tanggal);
+                      //   return rubrikDate.year == _selectedDate.year &&
+                      //       rubrikDate.month == _selectedDate.month &&
+                      //       rubrikDate.day == _selectedDate.day;
+                      // }).toList();
                       return Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -161,11 +189,11 @@ class _CpPageState extends ConsumerState<CpPage> {
                                   text: 'Kelompok',
                                   fontWeight: FontWeight.w700,
                                 )),
-                                DataColumn(
-                                    label: CustomText(
-                                  text: 'Kegiatan',
-                                  fontWeight: FontWeight.w700,
-                                )),
+                                // DataColumn(
+                                //     label: CustomText(
+                                //   text: 'Kegiatan',
+                                //   fontWeight: FontWeight.w700,
+                                // )),
                                 DataColumn(
                                     label: CustomText(
                                   text: 'Tujuan Pembelajaran',
@@ -178,7 +206,23 @@ class _CpPageState extends ConsumerState<CpPage> {
                                 )),
                                 DataColumn(
                                     label: CustomText(
-                                  text: 'Kemunculan',
+                                  textAlign: TextAlign.center,
+                                  text:
+                                      'Skor 1\n Belum Mencapai Tujuan Pembelajaran',
+                                  fontWeight: FontWeight.w700,
+                                )),
+                                DataColumn(
+                                    label: CustomText(
+                                  textAlign: TextAlign.center,
+                                  text:
+                                      'Skor 2\n Mencapai Tujuan Pembelajaran dengan Bantuan',
+                                  fontWeight: FontWeight.w700,
+                                )),
+                                DataColumn(
+                                    label: CustomText(
+                                  textAlign: TextAlign.center,
+                                  text:
+                                      'Skor 3\n Mencapai Tujuan Pembelajaran Secara Mandiri',
                                   fontWeight: FontWeight.w700,
                                 )),
                                 DataColumn(
@@ -212,14 +256,12 @@ class _CpPageState extends ConsumerState<CpPage> {
                                   fontWeight: FontWeight.w700,
                                 )),
                               ],
-                              rows: _cpList
-                                  .where((cp) => !(levelUser == 2 &&
-                                      cp.kelompok != kelompok))
-                                  .map((cp) {
-                                final muridData =
-                                    ref.watch(getUserDataProvider(cp.muridId));
-                                // final guruData =
-                                //     ref.watch(getUserDataProvider(cp.uid));
+                              rows: _rubrikList
+                                  .where((rubrik) => !(levelUser == 2 &&
+                                      rubrik.kelompok != kelompok))
+                                  .map((rubrik) {
+                                final muridData = ref
+                                    .watch(getUserDataProvider(rubrik.muridId));
                                 return DataRow(
                                   cells: [
                                     DataCell(
@@ -228,7 +270,7 @@ class _CpPageState extends ConsumerState<CpPage> {
                                           maxWidth: 100,
                                         ),
                                         child: Text(
-                                          cp.tanggal,
+                                          rubrik.tanggal,
                                           overflow: TextOverflow.visible,
                                           softWrap: true,
                                         ),
@@ -240,20 +282,31 @@ class _CpPageState extends ConsumerState<CpPage> {
                                           maxWidth: 100,
                                         ),
                                         child: Text(
-                                          cp.kelompok,
+                                          rubrik.kelompok,
                                           overflow: TextOverflow.visible,
                                           softWrap: true,
                                         ),
                                       ),
                                     ),
+                                    // DataCell(
+                                    //   ConstrainedBox(
+                                    //     constraints: const BoxConstraints(
+                                    //       maxWidth: 200,
+                                    //     ),
+                                    //     child: Text(
+                                    //       rubrik.kegiatan,
+                                    //       overflow: TextOverflow.visible,
+                                    //       softWrap: true,
+                                    //     ),
+                                    //   ),
+                                    // ),
                                     DataCell(
                                       ConstrainedBox(
                                         constraints: const BoxConstraints(
-                                          maxWidth:
-                                              200, // Ubah sesuai kebutuhan
+                                          maxWidth: 200,
                                         ),
                                         child: Text(
-                                          cp.konteks,
+                                          rubrik.tujuan,
                                           overflow: TextOverflow.visible,
                                           softWrap: true,
                                         ),
@@ -262,21 +315,7 @@ class _CpPageState extends ConsumerState<CpPage> {
                                     DataCell(
                                       ConstrainedBox(
                                         constraints: const BoxConstraints(
-                                          maxWidth:
-                                              200, // Ubah sesuai kebutuhan
-                                        ),
-                                        child: Text(
-                                          cp.tujuan,
-                                          overflow: TextOverflow.visible,
-                                          softWrap: true,
-                                        ),
-                                      ),
-                                    ),
-                                    DataCell(
-                                      ConstrainedBox(
-                                        constraints: const BoxConstraints(
-                                          maxWidth:
-                                              100, // Ubah sesuai kebutuhan
+                                          maxWidth: 100,
                                         ),
                                         child: muridData.when(
                                           data: (data) => Text(
@@ -293,29 +332,64 @@ class _CpPageState extends ConsumerState<CpPage> {
                                     DataCell(
                                       ConstrainedBox(
                                           constraints: const BoxConstraints(
-                                            maxWidth:
-                                                200, // Ubah sesuai kebutuhan
+                                            maxWidth: 200,
                                           ),
                                           child: Center(
-                                            child: cp.isDone
-                                                ? const Icon(
-                                                    Icons.check,
-                                                    color: Colors.green,
-                                                  )
-                                                : const Icon(
-                                                    Icons.close,
-                                                    color: Colors.red,
-                                                  ),
-                                          )),
+                                              child: (rubrik.skor == '1')
+                                                  ? const Icon(
+                                                      Icons.check,
+                                                      color: Colors.green,
+                                                    )
+                                                  : Container()
+                                              // const Icon(
+                                              //     Icons.close,
+                                              //     color: Colors.red,
+                                              //   ),
+                                              )),
+                                    ),
+                                    DataCell(
+                                      ConstrainedBox(
+                                          constraints: const BoxConstraints(
+                                            maxWidth: 200,
+                                          ),
+                                          child: Center(
+                                              child: (rubrik.skor == '2')
+                                                  ? const Icon(
+                                                      Icons.check,
+                                                      color: Colors.green,
+                                                    )
+                                                  : Container()
+                                              // const Icon(
+                                              //     Icons.close,
+                                              //     color: Colors.red,
+                                              //   ),
+                                              )),
+                                    ),
+                                    DataCell(
+                                      ConstrainedBox(
+                                          constraints: const BoxConstraints(
+                                            maxWidth: 200,
+                                          ),
+                                          child: Center(
+                                              child: (rubrik.skor == '3')
+                                                  ? const Icon(
+                                                      Icons.check,
+                                                      color: Colors.green,
+                                                    )
+                                                  : Container()
+                                              // const Icon(
+                                              //     Icons.close,
+                                              //     color: Colors.red,
+                                              //   ),
+                                              )),
                                     ),
                                     DataCell(
                                       ConstrainedBox(
                                         constraints: const BoxConstraints(
-                                          maxWidth:
-                                              200, // Ubah sesuai kebutuhan
-                                        ), // Sesuaikan lebar sesuai kebutuhan
+                                          maxWidth: 200,
+                                        ),
                                         child: Text(
-                                          cp.agama,
+                                          rubrik.agama,
                                           overflow: TextOverflow.visible,
                                           softWrap: true,
                                         ),
@@ -324,11 +398,10 @@ class _CpPageState extends ConsumerState<CpPage> {
                                     DataCell(
                                       ConstrainedBox(
                                         constraints: const BoxConstraints(
-                                          maxWidth:
-                                              200, // Ubah sesuai kebutuhan
-                                        ), // Sesuaikan lebar sesuai kebutuhan
+                                          maxWidth: 200,
+                                        ),
                                         child: Text(
-                                          cp.jatidiri,
+                                          rubrik.jatidiri,
                                           overflow: TextOverflow.visible,
                                           softWrap: true,
                                         ),
@@ -337,11 +410,10 @@ class _CpPageState extends ConsumerState<CpPage> {
                                     DataCell(
                                       ConstrainedBox(
                                         constraints: const BoxConstraints(
-                                          maxWidth:
-                                              200, // Ubah sesuai kebutuhan
-                                        ), // Sesuaikan lebar sesuai kebutuhan
+                                          maxWidth: 200,
+                                        ),
                                         child: Text(
-                                          cp.literasi,
+                                          rubrik.literasi,
                                           overflow: TextOverflow.visible,
                                           softWrap: true,
                                         ),
@@ -350,11 +422,10 @@ class _CpPageState extends ConsumerState<CpPage> {
                                     DataCell(
                                       ConstrainedBox(
                                         constraints: const BoxConstraints(
-                                          maxWidth:
-                                              200, // Ubah sesuai kebutuhan
-                                        ), // Sesuaikan lebar sesuai kebutuhan
+                                          maxWidth: 200,
+                                        ),
                                         child: Text(
-                                          cp.rekomendasi,
+                                          rubrik.rekomendasi,
                                           overflow: TextOverflow.visible,
                                           softWrap: true,
                                         ),
@@ -363,11 +434,10 @@ class _CpPageState extends ConsumerState<CpPage> {
                                     DataCell(
                                       ConstrainedBox(
                                         constraints: const BoxConstraints(
-                                          maxWidth:
-                                              200, // Ubah sesuai kebutuhan
-                                        ), // Sesuaikan lebar sesuai kebutuhan
+                                          maxWidth: 200,
+                                        ),
                                         child: Text(
-                                          cp.tanggapan,
+                                          rubrik.tanggapan,
                                           overflow: TextOverflow.visible,
                                           softWrap: true,
                                         ),
@@ -381,8 +451,8 @@ class _CpPageState extends ConsumerState<CpPage> {
                                             onPressed: () {
                                               Navigator.push(
                                                   context,
-                                                  EditCpPage.route(
-                                                      cp: cp,
+                                                  EditRubrikPage.route(
+                                                      rubrik: rubrik,
                                                       kelompok: kelompok,
                                                       levelUser: levelUser));
                                             },
@@ -392,7 +462,7 @@ class _CpPageState extends ConsumerState<CpPage> {
                                               icon: const Icon(Icons.delete),
                                               onPressed: () {
                                                 _showDeleteDialog(context, ref,
-                                                    cp, muridData);
+                                                    rubrik, muridData);
                                               },
                                             ),
                                         ],
@@ -427,7 +497,7 @@ class _CpPageState extends ConsumerState<CpPage> {
   }
 }
 
-void _showDeleteDialog(BuildContext context, WidgetRef ref, CpModel cp,
+void _showDeleteDialog(BuildContext context, WidgetRef ref, RubrikModel rubrik,
     AsyncValue<Document?> muridData) {
   showDialog(
     context: context,
@@ -441,12 +511,12 @@ void _showDeleteDialog(BuildContext context, WidgetRef ref, CpModel cp,
                 data: (data) {
                   final nama = data?.data['nama'] ?? 'Murid tidak ditemukan';
                   return Text(
-                    'Apakah Anda yakin ingin menghapus Ceklis $nama pada tanggal ${cp.tanggal}',
+                    'Apakah Anda yakin ingin menghapus Rubrik $nama pada tanggal ${rubrik.tanggal}',
                   );
                 },
                 loading: () => const CircularProgressIndicator(),
                 error: (_, __) => Text(
-                  'Apakah Anda yakin ingin menghapus Ceklis pada tanggal ${cp.tanggal}?',
+                  'Apakah Anda yakin ingin menghapus Rubrik pada tanggal ${rubrik.tanggal}?',
                 ),
               ),
             ],
@@ -463,10 +533,12 @@ void _showDeleteDialog(BuildContext context, WidgetRef ref, CpModel cp,
             child: const Text('Hapus'),
             onPressed: () {
               Navigator.of(context).pop();
-              ref.read(cpControllerProvider.notifier).deleteCp(cp, context);
+              ref
+                  .read(rubrikControllerProvider.notifier)
+                  .deleteRubrik(rubrik, context);
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
-                  content: Text('Ceklis berhasil dihapus'),
+                  content: Text('Rubrik berhasil dihapus'),
                 ),
               );
             },

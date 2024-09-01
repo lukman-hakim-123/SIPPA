@@ -39,7 +39,7 @@ class _AnekdotPageState extends ConsumerState<AnekdotPage> {
   Widget build(BuildContext context) {
     final userDetailsAsync = ref.watch(currentUserDetailsProvider);
     return Scaffold(
-      appBar: const CustomAppBar(title: 'Catatan Anekdot'),
+      appBar: const CustomAppBar(title: 'Catatan Anekdotal'),
       body: Padding(
         padding: const EdgeInsets.only(top: 12, left: 12, right: 12),
         child: userDetailsAsync.when(
@@ -116,7 +116,7 @@ class _AnekdotPageState extends ConsumerState<AnekdotPage> {
                     child: Padding(
                       padding: EdgeInsets.only(bottom: 16),
                       child: CustomText(
-                        text: "Catatan Anekdot",
+                        text: "Catatan Anekdotal",
                         fontSize: 18,
                         fontWeight: FontWeight.w800,
                         textAlign: TextAlign.start,
@@ -158,12 +158,7 @@ class _AnekdotPageState extends ConsumerState<AnekdotPage> {
                               columns: const [
                                 DataColumn(
                                     label: CustomText(
-                                  text: 'Foto',
-                                  fontWeight: FontWeight.w700,
-                                )),
-                                DataColumn(
-                                    label: CustomText(
-                                  text: 'Nama Murid',
+                                  text: 'Tanggal',
                                   fontWeight: FontWeight.w700,
                                 )),
                                 DataColumn(
@@ -173,22 +168,27 @@ class _AnekdotPageState extends ConsumerState<AnekdotPage> {
                                 )),
                                 DataColumn(
                                     label: CustomText(
-                                  text: 'Tanggal',
+                                  text: 'Kegiatan',
                                   fontWeight: FontWeight.w700,
                                 )),
                                 DataColumn(
                                     label: CustomText(
-                                  text: 'Nama Guru',
+                                  text: 'Tujuan Pembelajaran',
                                   fontWeight: FontWeight.w700,
                                 )),
                                 DataColumn(
                                     label: CustomText(
-                                  text: 'Kejadian Yang Teramati',
+                                  text: 'Nama Murid',
                                   fontWeight: FontWeight.w700,
                                 )),
                                 DataColumn(
                                     label: CustomText(
-                                  text: 'Nilai agama dan budi pekerti',
+                                  text: 'Foto',
+                                  fontWeight: FontWeight.w700,
+                                )),
+                                DataColumn(
+                                    label: CustomText(
+                                  text: 'Nilai Agama dan Budi Pekerti',
                                   fontWeight: FontWeight.w700,
                                 )),
                                 DataColumn(
@@ -203,7 +203,7 @@ class _AnekdotPageState extends ConsumerState<AnekdotPage> {
                                 )),
                                 DataColumn(
                                     label: CustomText(
-                                  text: 'Rekomendasi',
+                                  text: 'Umpan Balik',
                                   fontWeight: FontWeight.w700,
                                 )),
                                 DataColumn(
@@ -231,29 +231,53 @@ class _AnekdotPageState extends ConsumerState<AnekdotPage> {
                                     DataCell(
                                       ConstrainedBox(
                                         constraints: const BoxConstraints(
-                                          maxWidth: 150,
-                                          maxHeight: 150,
+                                          maxWidth:
+                                              100, // Ubah sesuai kebutuhan
                                         ),
-                                        child: ref
-                                            .watch(getAnekdotImageProvider(
-                                                anekdot.imageId))
-                                            .when(
-                                              data: (imageData) {
-                                                if (imageData != null) {
-                                                  return Image.memory(
-                                                    imageData,
-                                                    fit: BoxFit.cover,
-                                                  );
-                                                } else {
-                                                  return const Icon(Icons
-                                                      .image_not_supported);
-                                                }
-                                              },
-                                              loading: () =>
-                                                  const CircularProgressIndicator(),
-                                              error: (_, __) =>
-                                                  const Icon(Icons.error),
-                                            ),
+                                        child: Text(
+                                          anekdot.tanggal,
+                                          overflow: TextOverflow.visible,
+                                          softWrap: true,
+                                        ),
+                                      ),
+                                    ),
+                                    DataCell(
+                                      ConstrainedBox(
+                                        constraints: const BoxConstraints(
+                                          maxWidth:
+                                              100, // Ubah sesuai kebutuhan
+                                        ),
+                                        child: Text(
+                                          anekdot.kelompok,
+                                          overflow: TextOverflow.visible,
+                                          softWrap: true,
+                                        ),
+                                      ),
+                                    ),
+                                    DataCell(
+                                      ConstrainedBox(
+                                        constraints: const BoxConstraints(
+                                          maxWidth:
+                                              200, // Ubah sesuai kebutuhan
+                                        ),
+                                        child: Text(
+                                          anekdot.pengamatan,
+                                          overflow: TextOverflow.visible,
+                                          softWrap: true,
+                                        ),
+                                      ),
+                                    ),
+                                    DataCell(
+                                      ConstrainedBox(
+                                        constraints: const BoxConstraints(
+                                          maxWidth:
+                                              200, // Ubah sesuai kebutuhan
+                                        ),
+                                        child: Text(
+                                          anekdot.tujuan,
+                                          overflow: TextOverflow.visible,
+                                          softWrap: true,
+                                        ),
                                       ),
                                     ),
                                     DataCell(
@@ -277,58 +301,29 @@ class _AnekdotPageState extends ConsumerState<AnekdotPage> {
                                     DataCell(
                                       ConstrainedBox(
                                         constraints: const BoxConstraints(
-                                          maxWidth:
-                                              100, // Ubah sesuai kebutuhan
+                                          maxWidth: 150,
+                                          maxHeight: 150,
                                         ),
-                                        child: Text(
-                                          anekdot.kelompok,
-                                          overflow: TextOverflow.visible,
-                                          softWrap: true,
-                                        ),
-                                      ),
-                                    ),
-                                    DataCell(
-                                      ConstrainedBox(
-                                        constraints: const BoxConstraints(
-                                          maxWidth:
-                                              100, // Ubah sesuai kebutuhan
-                                        ),
-                                        child: Text(
-                                          anekdot.tanggal,
-                                          overflow: TextOverflow.visible,
-                                          softWrap: true,
-                                        ),
-                                      ),
-                                    ),
-                                    DataCell(
-                                      ConstrainedBox(
-                                        constraints: const BoxConstraints(
-                                          maxWidth:
-                                              100, // Ubah sesuai kebutuhan
-                                        ),
-                                        child: guruData.when(
-                                          data: (data) => Text(
-                                            data.data['nama'],
-                                            overflow: TextOverflow.visible,
-                                            softWrap: true,
-                                          ),
-                                          loading: () => const Loader(),
-                                          error: (error, stack) =>
-                                              const Text('Error'),
-                                        ),
-                                      ),
-                                    ),
-                                    DataCell(
-                                      ConstrainedBox(
-                                        constraints: const BoxConstraints(
-                                          maxWidth:
-                                              200, // Ubah sesuai kebutuhan
-                                        ),
-                                        child: Text(
-                                          anekdot.pengamatan,
-                                          overflow: TextOverflow.visible,
-                                          softWrap: true,
-                                        ),
+                                        child: ref
+                                            .watch(getAnekdotImageProvider(
+                                                anekdot.imageId))
+                                            .when(
+                                              data: (imageData) {
+                                                if (imageData != null) {
+                                                  return Image.memory(
+                                                    imageData,
+                                                    fit: BoxFit.cover,
+                                                  );
+                                                } else {
+                                                  return const Icon(Icons
+                                                      .image_not_supported);
+                                                }
+                                              },
+                                              loading: () =>
+                                                  const CircularProgressIndicator(),
+                                              error: (_, __) =>
+                                                  const Icon(Icons.error),
+                                            ),
                                       ),
                                     ),
                                     DataCell(
@@ -464,12 +459,12 @@ void _showDeleteDialog(BuildContext context, WidgetRef ref,
                 data: (data) {
                   final nama = data?.data['nama'] ?? 'Murid tidak ditemukan';
                   return Text(
-                    'Apakah Anda yakin ingin menghapus anekdot $nama pada tanggal ${anekdot.tanggal}',
+                    'Apakah Anda yakin ingin menghapus catatan anekdotal $nama pada tanggal ${anekdot.tanggal}',
                   );
                 },
                 loading: () => const CircularProgressIndicator(),
                 error: (_, __) => Text(
-                  'Apakah Anda yakin ingin menghapus anekdot pada tanggal ${anekdot.tanggal}?',
+                  'Apakah Anda yakin ingin menghapus catatan anekdotal pada tanggal ${anekdot.tanggal}?',
                 ),
               ),
             ],
@@ -491,7 +486,7 @@ void _showDeleteDialog(BuildContext context, WidgetRef ref,
                   .deleteAnekdot(anekdot, context);
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
-                  content: Text('Anekdot berhasil dihapus'),
+                  content: Text('Catatan Anekdotal berhasil dihapus'),
                 ),
               );
             },

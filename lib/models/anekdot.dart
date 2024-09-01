@@ -3,6 +3,7 @@ import 'dart:convert';
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 class AnekdotModel {
   final String pengamatan;
+  final String tujuan;
   final String tanggal;
   final String nilai;
   final String jatiDiri;
@@ -16,6 +17,7 @@ class AnekdotModel {
   final String tanggapan;
   AnekdotModel({
     required this.pengamatan,
+    required this.tujuan,
     required this.tanggal,
     required this.nilai,
     required this.jatiDiri,
@@ -31,6 +33,7 @@ class AnekdotModel {
 
   AnekdotModel copyWith({
     String? pengamatan,
+    String? tujuan,
     String? tanggal,
     String? nilai,
     String? jatiDiri,
@@ -45,6 +48,7 @@ class AnekdotModel {
   }) {
     return AnekdotModel(
       pengamatan: pengamatan ?? this.pengamatan,
+      tujuan: tujuan ?? this.tujuan,
       tanggal: tanggal ?? this.tanggal,
       nilai: nilai ?? this.nilai,
       jatiDiri: jatiDiri ?? this.jatiDiri,
@@ -62,6 +66,7 @@ class AnekdotModel {
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
       'pengamatan': pengamatan,
+      'tujuan': tujuan,
       'tanggal': tanggal,
       'nilai': nilai,
       'jatiDiri': jatiDiri,
@@ -78,6 +83,7 @@ class AnekdotModel {
   factory AnekdotModel.fromMap(Map<String, dynamic> map) {
     return AnekdotModel(
       pengamatan: map['pengamatan'] ?? '',
+      tujuan: map['tujuan'] ?? '',
       tanggal: map['tanggal'] ?? '',
       nilai: map['nilai'] ?? '',
       jatiDiri: map['jatiDiri'] ?? '',
@@ -99,7 +105,7 @@ class AnekdotModel {
 
   @override
   String toString() {
-    return 'AnekdotModel(pengamatan: $pengamatan, tanggal: $tanggal, nilai: $nilai, jatiDiri: $jatiDiri, literasi: $literasi, umpanBalik: $umpanBalik, kelompok: $kelompok,imageId: $imageId, uid: $uid, id: $id, muridId: $muridId, tanggapan: $tanggapan, )';
+    return 'AnekdotModel(pengamatan: $pengamatan, tujuan: $tujuan, tanggal: $tanggal, nilai: $nilai, jatiDiri: $jatiDiri, literasi: $literasi, umpanBalik: $umpanBalik, kelompok: $kelompok, imageId: $imageId, uid: $uid, id: $id, muridId: $muridId, tanggapan: $tanggapan)';
   }
 
   @override
@@ -107,6 +113,7 @@ class AnekdotModel {
     if (identical(this, other)) return true;
 
     return other.pengamatan == pengamatan &&
+        other.tujuan == tujuan &&
         other.tanggal == tanggal &&
         other.nilai == nilai &&
         other.jatiDiri == jatiDiri &&
@@ -116,13 +123,14 @@ class AnekdotModel {
         other.imageId == imageId &&
         other.uid == uid &&
         other.id == id &&
-        other.tanggapan == tanggapan &&
-        other.muridId == muridId;
+        other.muridId == muridId &&
+        other.tanggapan == tanggapan;
   }
 
   @override
   int get hashCode {
     return pengamatan.hashCode ^
+        tujuan.hashCode ^
         tanggal.hashCode ^
         nilai.hashCode ^
         jatiDiri.hashCode ^
@@ -132,7 +140,7 @@ class AnekdotModel {
         imageId.hashCode ^
         uid.hashCode ^
         id.hashCode ^
-        tanggapan.hashCode ^
-        muridId.hashCode;
+        muridId.hashCode ^
+        tanggapan.hashCode;
   }
 }

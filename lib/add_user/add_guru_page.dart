@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:sippa/common/loading.dart';
 import 'package:sippa/widget_view/appbar.dart';
 import 'package:sippa/widget_view/field.dart';
 import '../auth/controllers/auth_controller.dart';
@@ -43,18 +44,10 @@ class _AddGuruPageState extends ConsumerState<AddGuruPage> {
       final file = File(pickedFile.path);
       final fileSize = await file.length();
 
-      if (fileSize > maxFileSize) {
-        setState(() {
-          _errorMessage =
-              'Ukuran file melebihi 2 MB. Silakan pilih file yang lebih kecil.';
-          _image = null;
-        });
-      } else {
-        setState(() {
-          _image = file;
-          _errorMessage = null;
-        });
-      }
+      setState(() {
+        _image = file;
+        _errorMessage = null;
+      });
     } else {
       setState(() {
         _errorMessage = null;
@@ -78,6 +71,8 @@ class _AddGuruPageState extends ConsumerState<AddGuruPage> {
 
   @override
   Widget build(BuildContext context) {
+    final isLoading = ref.watch(authControllerProvider);
+
     return Scaffold(
       appBar: const CustomAppBar(
         title: 'Tambah Guru',
@@ -201,27 +196,30 @@ class _AddGuruPageState extends ConsumerState<AddGuruPage> {
                   },
                 ),
               ),
-              ElevatedButton(
-                onPressed: onSignup,
-                style: ButtonStyle(
-                  backgroundColor:
-                      MaterialStateProperty.all(const Color(0xff104993)),
-                  shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                    RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(6.0),
+              isLoading
+                  ? const Loader()
+                  : ElevatedButton(
+                      onPressed: onSignup,
+                      style: ButtonStyle(
+                        backgroundColor:
+                            MaterialStateProperty.all(const Color(0xff104993)),
+                        shape:
+                            MaterialStateProperty.all<RoundedRectangleBorder>(
+                          RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(6.0),
+                          ),
+                        ),
+                        fixedSize: MaterialStateProperty.all(
+                            const Size.fromHeight(45)),
+                      ),
+                      child: Container(
+                        width: double.infinity,
+                        alignment: Alignment.center,
+                        child: const Text("Tambah Guru",
+                            style: TextStyle(
+                                fontFamily: 'inter', color: Colors.white)),
+                      ),
                     ),
-                  ),
-                  fixedSize:
-                      MaterialStateProperty.all(const Size.fromHeight(45)),
-                ),
-                child: Container(
-                  width: double.infinity,
-                  alignment: Alignment.center,
-                  child: const Text("Tambah Guru",
-                      style:
-                          TextStyle(fontFamily: 'inter', color: Colors.white)),
-                ),
-              ),
               const SizedBox(height: 15),
             ],
           ),

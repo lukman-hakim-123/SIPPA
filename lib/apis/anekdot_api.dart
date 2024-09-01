@@ -154,6 +154,7 @@ class AnekdotAPI implements IAnekdotAPI {
         documentId: anekdot.id,
         data: {
           'pengamatan': anekdot.pengamatan,
+          'tujuan': anekdot.tujuan,
           'tanggal': anekdot.tanggal,
           'nilai': anekdot.nilai,
           'jatiDiri': anekdot.jatiDiri,

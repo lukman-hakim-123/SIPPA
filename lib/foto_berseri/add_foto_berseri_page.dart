@@ -74,22 +74,14 @@ class _AddFbPageState extends ConsumerState<AddFbPage> {
       final file = File(pickedFile.path);
       final fileSize = await file.length();
 
-      if (fileSize > maxFileSize) {
-        setState(() {
-          _errorMessage =
-              'Ukuran file melebihi 2 MB. Silakan pilih file yang lebih kecil.';
-          if (imageIndex == 1) _image1 = null;
-          if (imageIndex == 2) _image2 = null;
-          if (imageIndex == 3) _image3 = null;
-        });
-      } else {
+      
         setState(() {
           if (imageIndex == 1) _image1 = file;
           if (imageIndex == 2) _image2 = file;
           if (imageIndex == 3) _image3 = file;
           _errorMessage = null;
         });
-      }
+      
     } else {
       setState(() {
         _errorMessage = 'Tidak ada file yang dipilih.';

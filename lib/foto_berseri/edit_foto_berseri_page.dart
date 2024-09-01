@@ -115,12 +115,7 @@ class _EditFbPageState extends ConsumerState<EditFbPage> {
         final file = File(pickedFile.path);
         final fileSize = await file.length();
 
-        if (fileSize > maxFileSize) {
-          setState(() {
-            _errorMessage =
-                'Ukuran file melebihi 2 MB. Silakan pilih file yang lebih kecil.';
-          });
-        } else {
+        
           setState(() {
             switch (imageIndex) {
               case 1:
@@ -138,7 +133,7 @@ class _EditFbPageState extends ConsumerState<EditFbPage> {
             }
             _errorMessage = null;
           });
-        }
+        
       } else {
         setState(() {
           _errorMessage = null;

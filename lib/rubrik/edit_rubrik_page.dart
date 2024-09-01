@@ -2,42 +2,42 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:sippa/add_user/controller/user_controller.dart';
-import 'package:sippa/capaian_pembelajaran/controller/cp_controller.dart';
 import 'package:sippa/common/loading.dart';
-import 'package:sippa/models/cp.dart';
+import 'package:sippa/models/rubrik.dart';
+import 'package:sippa/rubrik/controller/rubrik_controller.dart';
 import 'package:sippa/widget_view/appbar.dart';
 import 'package:sippa/widget_view/teks.dart';
 
-class EditCpPage extends ConsumerStatefulWidget {
+class EditRubrikPage extends ConsumerStatefulWidget {
   static route(
-          {required CpModel cp,
+          {required RubrikModel rubrik,
           required String kelompok,
           required int levelUser}) =>
       MaterialPageRoute(
-        builder: (context) => EditCpPage(
-          cp: cp,
+        builder: (context) => EditRubrikPage(
+          rubrik: rubrik,
           kelompok: kelompok,
           levelUser: levelUser,
         ),
       );
-  final CpModel cp;
+  final RubrikModel rubrik;
   final String kelompok;
   final int levelUser;
 
-  const EditCpPage(
+  const EditRubrikPage(
       {super.key,
-      required this.cp,
+      required this.rubrik,
       required this.kelompok,
       required this.levelUser});
 
   @override
-  ConsumerState<ConsumerStatefulWidget> createState() => _EditCpPageState();
+  ConsumerState<ConsumerStatefulWidget> createState() => _EditRubrikPageState();
 }
 
-class _EditCpPageState extends ConsumerState<EditCpPage> {
+class _EditRubrikPageState extends ConsumerState<EditRubrikPage> {
   final _formKey = GlobalKey<FormState>();
   late TextEditingController tujuanController;
-  late TextEditingController konteksController;
+  late TextEditingController kegiatanController;
   late TextEditingController agamaController;
   late TextEditingController jatidiriController;
   late TextEditingController literasiController;
@@ -46,22 +46,23 @@ class _EditCpPageState extends ConsumerState<EditCpPage> {
   late TextEditingController rekomendasiController;
   late TextEditingController tanggapanController;
   DateTime? _selectedDate;
-  bool? isDone;
+  String? score;
 
   @override
   void initState() {
     super.initState();
-    tujuanController = TextEditingController(text: widget.cp.tujuan);
-    konteksController = TextEditingController(text: widget.cp.konteks);
-    agamaController = TextEditingController(text: widget.cp.agama);
-    jatidiriController = TextEditingController(text: widget.cp.jatidiri);
-    literasiController = TextEditingController(text: widget.cp.literasi);
-    tanggalController = TextEditingController(text: widget.cp.tanggal);
-    muridIdController = TextEditingController(text: widget.cp.muridId);
-    rekomendasiController = TextEditingController(text: widget.cp.rekomendasi);
-    tanggapanController = TextEditingController(text: widget.cp.tanggapan);
-    isDone = widget.cp.isDone;
-    _selectedDate = DateFormat('dd MMMM yyyy').parse(widget.cp.tanggal);
+    tujuanController = TextEditingController(text: widget.rubrik.tujuan);
+    kegiatanController = TextEditingController(text: widget.rubrik.kegiatan);
+    agamaController = TextEditingController(text: widget.rubrik.agama);
+    jatidiriController = TextEditingController(text: widget.rubrik.jatidiri);
+    literasiController = TextEditingController(text: widget.rubrik.literasi);
+    tanggalController = TextEditingController(text: widget.rubrik.tanggal);
+    muridIdController = TextEditingController(text: widget.rubrik.muridId);
+    rekomendasiController =
+        TextEditingController(text: widget.rubrik.rekomendasi);
+    tanggapanController = TextEditingController(text: widget.rubrik.tanggapan);
+    score = widget.rubrik.skor;
+    _selectedDate = DateFormat('dd MMMM yyyy').parse(widget.rubrik.tanggal);
   }
 
   @override
@@ -69,7 +70,7 @@ class _EditCpPageState extends ConsumerState<EditCpPage> {
     super.dispose();
     tujuanController.dispose();
     tanggalController.dispose();
-    konteksController.dispose();
+    kegiatanController.dispose();
     agamaController.dispose();
     jatidiriController.dispose();
     literasiController.dispose();
@@ -93,17 +94,17 @@ class _EditCpPageState extends ConsumerState<EditCpPage> {
     }
   }
 
-  void editCp() {
+  void editRubrik() {
     if (_formKey.currentState!.validate()) {
-      ref.read(cpControllerProvider.notifier).updateCp(
-            cpId: widget.cp.id,
+      ref.read(rubrikControllerProvider.notifier).updateRubrik(
+            rubrikId: widget.rubrik.id,
             tujuan: tujuanController.text,
             tanggal: tanggalController.text,
-            konteks: konteksController.text,
+            // kegiatan: kegiatanController.text,
             agama: agamaController.text,
             jatidiri: jatidiriController.text,
             literasi: literasiController.text,
-            isDone: isDone!,
+            skor: score!,
             muridId: muridIdController.text,
             context: context,
             rekomendasi: rekomendasiController.text,
@@ -116,11 +117,11 @@ class _EditCpPageState extends ConsumerState<EditCpPage> {
   Widget build(BuildContext context) {
     final muridAsyncValue =
         ref.watch(getMuridByFiltersProvider(widget.kelompok));
-    final isLoading = ref.watch(cpControllerProvider);
+    final isLoading = ref.watch(rubrikControllerProvider);
 
     return Scaffold(
       appBar: const CustomAppBar(
-        title: 'Edit Ceklis',
+        title: 'Edit Rubrik',
       ),
       body: Padding(
         padding: const EdgeInsets.only(left: 31, right: 31),
@@ -149,26 +150,25 @@ class _EditCpPageState extends ConsumerState<EditCpPage> {
                   return null;
                 },
               ),
-              const SizedBox(height: 16),
-
-              TextFormField(
-                keyboardType: TextInputType.multiline,
-                maxLines: null,
-                minLines: 3,
-                controller: konteksController,
-                maxLength: 500,
-                decoration: const InputDecoration(
-                  border: OutlineInputBorder(),
-                  labelText: 'Kegiatan',
-                ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Masukkan Kegiatan';
-                  }
-                  return null;
-                },
-                readOnly: widget.levelUser == 3,
-              ),
+              // const SizedBox(height: 16),
+              // TextFormField(
+              //   keyboardType: TextInputType.multiline,
+              //   maxLines: null,
+              //   minLines: 3,
+              //   controller: kegiatanController,
+              //   maxLength: 500,
+              //   decoration: const InputDecoration(
+              //     border: OutlineInputBorder(),
+              //     labelText: 'Kegiatan',
+              //   ),
+              //   validator: (value) {
+              //     if (value == null || value.isEmpty) {
+              //       return 'Masukkan Kegiatan';
+              //     }
+              //     return null;
+              //   },
+              //   readOnly: widget.levelUser == 3,
+              // ),
               const SizedBox(height: 16),
               TextFormField(
                 keyboardType: TextInputType.multiline,
@@ -236,82 +236,52 @@ class _EditCpPageState extends ConsumerState<EditCpPage> {
                 loading: () => const Loader(),
                 error: (error, stack) => CustomText(text: 'Error: $error'),
               ),
+
               const SizedBox(height: 16),
-              TextFormField(
-                keyboardType: TextInputType.multiline,
-                maxLines: null,
-                minLines: 3,
-                controller: tujuanController,
-                maxLength: 500,
+              DropdownButtonFormField<String>(
+                isExpanded: true,
+                value: score,
                 decoration: const InputDecoration(
                   border: OutlineInputBorder(),
-                  labelText: 'Tujuan',
+                  labelText: 'Skor',
                 ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Masukkan Tujuan';
-                  }
-                  return null;
-                },
-                readOnly: widget.levelUser == 3,
-              ),
-              // const SizedBox(height: 16),
-              Row(
-                children: [
-                  InkWell(
-                    onTap: () {
-                      setState(() {
-                        if (widget.levelUser != 3) {
-                          isDone = false;
-                        }
-                      });
-                    },
-                    child: Row(
-                      children: [
-                        Radio(
-                          value: false,
-                          groupValue: isDone,
-                          onChanged: (value) {
-                            setState(() {
-                              if (widget.levelUser != 3) {
-                                isDone = value!;
-                              }
-                            });
-                          },
-                        ),
-                        const CustomText(text: 'Belum Muncul'),
-                      ],
+                items: const [
+                  DropdownMenuItem(
+                    value: '1',
+                    child: CustomText(
+                      text: 'Skor 1: Belum Mencapai Tujuan Pembelajaran',
                     ),
                   ),
-                  InkWell(
-                    onTap: () {
-                      setState(() {
-                        if (widget.levelUser != 3) {
-                          isDone = true;
-                        }
-                      });
-                    },
-                    child: Row(
-                      children: [
-                        Radio(
-                          value: true,
-                          groupValue: isDone,
-                          onChanged: (value) {
-                            setState(() {
-                              if (widget.levelUser != 3) {
-                                isDone = value!;
-                              }
-                            });
-                          },
-                        ),
-                        const CustomText(text: 'Sudah Muncul'),
-                      ],
+                  DropdownMenuItem(
+                    value: '2',
+                    child: CustomText(
+                      text:
+                          'Skor 2: Mencapai Tujuan Pembelajaran dengan Bantuan',
+                    ),
+                  ),
+                  DropdownMenuItem(
+                    value: '3',
+                    child: CustomText(
+                      text:
+                          'Skor 3: Mencapai Tujuan Pembelajaran Secara Mandiri',
                     ),
                   ),
                 ],
+                onChanged: widget.levelUser != 3
+                    ? (value) {
+                        setState(() {
+                          score = value!;
+                        });
+                      }
+                    : null,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Pilih Skor';
+                  }
+                  return null;
+                },
               ),
-              const SizedBox(height: 16),
-
+              const SizedBox(height: 24),
               TextFormField(
                 keyboardType: TextInputType.multiline,
                 maxLines: null,
@@ -405,7 +375,7 @@ class _EditCpPageState extends ConsumerState<EditCpPage> {
                   ? const Loader()
                   : ElevatedButton(
                       onPressed: () {
-                        editCp();
+                        editRubrik();
                       },
                       style: ButtonStyle(
                         backgroundColor:

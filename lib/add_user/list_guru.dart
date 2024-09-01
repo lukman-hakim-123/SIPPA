@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sippa/add_user/controller/user_controller.dart';
 import 'package:sippa/add_user/edit_guru_page.dart';
+import 'package:sippa/common/loading.dart';
 import 'package:sippa/constant/appwrite.dart';
 import 'package:sippa/models/user.dart';
 import 'package:sippa/widget_view/appbar.dart';
@@ -112,9 +113,7 @@ class _GuruListPageState extends ConsumerState<GuruListPage> {
                                 );
                               }
                             },
-                            loading: () => const Center(
-                              child: CircularProgressIndicator(),
-                            ),
+                            loading: () => const Loader(),
                             error: (_, __) => const Center(
                               child: Icon(Icons.error),
                             ),

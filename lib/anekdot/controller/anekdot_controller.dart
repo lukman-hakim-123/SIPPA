@@ -80,6 +80,7 @@ class AnekdotController extends StateNotifier<bool> {
 
   void addAnekdot({
     required String pengamatan,
+    required String tujuan,
     required String tanggal,
     required String nilai,
     required String jatiDiri,
@@ -126,7 +127,8 @@ class AnekdotController extends StateNotifier<bool> {
           muridId: muridId,
           uid: user.id,
           id: '',
-          tanggapan: '');
+          tanggapan: '',
+          tujuan: tujuan);
 
       // Add anekdot to the API
       final res = await _anekdotAPI.addAnekdot(anekdot);
@@ -154,6 +156,7 @@ class AnekdotController extends StateNotifier<bool> {
   void updateAnekdot({
     required String anekdotId,
     required String pengamatan,
+    required String tujuan,
     required String tanggal,
     required String nilai,
     required String jatiDiri,
@@ -197,6 +200,7 @@ class AnekdotController extends StateNotifier<bool> {
         muridId: muridId,
         uid: user.id,
         tanggapan: tanggapan,
+        tujuan: tujuan,
       );
 
       // Update anekdot

@@ -108,47 +108,4 @@ class UserController extends StateNotifier<List<User>> {
       print('Gagal menghapus guru: $e');
     }
   }
-
-  void updateMurid({
-    required String muridId,
-    required String nama,
-    required String email,
-    required int levelUser,
-    required String
-        kelompok, // Nullable karena hanya level 1 yang bisa mengubahnya
-    required io.File? image,
-    required String imageId,
-    required BuildContext context,
-    required WidgetRef ref,
-  }) async {
-    // Menghapus gambar lama jika ada gambar baru
-    if (image != null) {
-      if (imageId != '' && imageId.isNotEmpty) {
-        await _userAPI.deleteImage(imageId);
-      }
-      imageId = await _userAPI.uploadFile(image, 'pp_${DateTime.now()}.jpg');
-    }
-
-    // Membuat model User baru dengan data yang diperbarui
-    User userModel = User(
-      id: muridId,
-      email: email,
-      imageId: imageId,
-      nama: nama,
-      kelompok: kelompok,
-      levelUser: levelUser,
-    );
-
-    // Memperbarui data murid di API
-    final res = await _userAPI.updateMurid(userModel);
-    res.fold(
-      (l) => showSnackBar(context, l.message),
-      (r) {
-        showSnackBar(context, 'Berhasil Terupdate');
-        Navigator.pop(
-          context,
-        );
-      },
-    );
-  }
 }

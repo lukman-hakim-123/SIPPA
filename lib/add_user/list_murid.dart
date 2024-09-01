@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sippa/add_user/add_murid_page.dart';
 import 'package:sippa/add_user/controller/user_controller.dart';
 import 'package:sippa/add_user/edit_murid_page.dart';
+import 'package:sippa/common/loading.dart';
 import 'package:sippa/constant/appwrite.dart';
 import 'package:sippa/models/user.dart';
 import 'package:sippa/widget_view/appbar.dart';
@@ -127,12 +128,7 @@ class _MuridListPageState extends ConsumerState<MuridListPage> {
                                 );
                               }
                             },
-                            loading: () => const Center(
-                              child: CircularProgressIndicator(
-                                valueColor:
-                                    AlwaysStoppedAnimation<Color>(Colors.white),
-                              ),
-                            ),
+                            loading: () => const Loader(),
                             error: (_, __) => const Center(
                               child: Icon(Icons.error, color: Colors.white),
                             ),

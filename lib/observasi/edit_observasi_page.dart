@@ -88,19 +88,12 @@ class _EditObservasiPageState extends ConsumerState<EditObservasiPage> {
         final file = File(pickedFile.path);
         final fileSize = await file.length();
 
-        if (fileSize > maxFileSize) {
-          setState(() {
-            _errorMessage =
-                'Ukuran file melebihi 2 MB. Silakan pilih file yang lebih kecil.';
-          });
-        } else {
-          setState(() {
-            _image = file;
-            _isNewImage = true;
+        setState(() {
+          _image = file;
+          _isNewImage = true;
 
-            _errorMessage = null;
-          });
-        }
+          _errorMessage = null;
+        });
       } else {
         setState(() {
           _errorMessage = null;

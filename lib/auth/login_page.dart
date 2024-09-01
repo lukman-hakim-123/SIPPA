@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:sippa/common/loading.dart';
 import 'package:sippa/widget_view/field.dart';
 import 'controllers/auth_controller.dart';
 
@@ -35,6 +36,8 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
+    final isLoading = ref.watch(authControllerProvider);
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Masuk',
@@ -103,27 +106,30 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                       icon: true,
                     ),
                   ),
-                  ElevatedButton(
-                    onPressed: onLogin,
-                    style: ButtonStyle(
-                      backgroundColor:
-                          MaterialStateProperty.all(const Color(0xff104993)),
-                      shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                        RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(6.0),
+                  isLoading
+                      ? const Loader()
+                      : ElevatedButton(
+                          onPressed: onLogin,
+                          style: ButtonStyle(
+                            backgroundColor: MaterialStateProperty.all(
+                                const Color(0xff104993)),
+                            shape: MaterialStateProperty.all<
+                                RoundedRectangleBorder>(
+                              RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(6.0),
+                              ),
+                            ),
+                            fixedSize: MaterialStateProperty.all(
+                                const Size.fromHeight(45)),
+                          ),
+                          child: Container(
+                            width: double.infinity,
+                            alignment: Alignment.center,
+                            child: const Text("Masuk",
+                                style: TextStyle(
+                                    fontFamily: 'inter', color: Colors.white)),
+                          ),
                         ),
-                      ),
-                      fixedSize:
-                          MaterialStateProperty.all(const Size.fromHeight(45)),
-                    ),
-                    child: Container(
-                      width: double.infinity,
-                      alignment: Alignment.center,
-                      child: const Text("Masuk",
-                          style: TextStyle(
-                              fontFamily: 'inter', color: Colors.white)),
-                    ),
-                  ),
                   const SizedBox(height: 15),
                 ],
               ),

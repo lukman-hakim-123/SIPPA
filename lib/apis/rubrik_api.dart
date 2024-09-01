@@ -6,41 +6,41 @@ import 'package:sippa/constant/appwrite.dart';
 import 'package:sippa/core/failure.dart';
 import 'package:sippa/core/providers.dart';
 import 'package:sippa/core/type_defs.dart';
-import 'package:sippa/models/cp.dart';
+import 'package:sippa/models/rubrik.dart';
 
-final cpAPIProvider = Provider((ref) {
-  return CpAPI(
+final rubrikAPIProvider = Provider((ref) {
+  return RubrikAPI(
     db: ref.watch(appwriteDatabaseProvider),
     realtime: ref.watch(appwriteRealtimeProvider),
   );
 });
 
-abstract class ICpAPI {
-  FutureEither<Document> addCp(CpModel cp);
-  Future<List<Document>> getUserCp(String uid);
-  Stream<RealtimeMessage> getLatestCp();
-  Future<List<Document>> getKelompokCp(String kelompok);
-  Future<List<Document>> getAllCp();
-  FutureEither<Document> updateCp(CpModel cp);
-  FutureVoid deleteCp(CpModel cp);
+abstract class IRubrikAPI {
+  FutureEither<Document> addRubrik(RubrikModel rubrik);
+  Future<List<Document>> getUserRubrik(String uid);
+  Stream<RealtimeMessage> getLatestRubrik();
+  Future<List<Document>> getKelompokRubrik(String kelompok);
+  Future<List<Document>> getAllRubrik();
+  FutureEither<Document> updateRubrik(RubrikModel rubrik);
+  FutureVoid deleteRubrik(RubrikModel rubrik);
   FutureVoid deleteAll(String uid);
 }
 
-class CpAPI implements ICpAPI {
+class RubrikAPI implements IRubrikAPI {
   final Databases _db;
   final Realtime _realtime;
-  CpAPI({required Databases db, required Realtime realtime})
+  RubrikAPI({required Databases db, required Realtime realtime})
       : _db = db,
         _realtime = realtime;
 
   @override
-  FutureEither<Document> addCp(CpModel cp) async {
+  FutureEither<Document> addRubrik(RubrikModel rubrik) async {
     try {
       final document = await _db.createDocument(
         databaseId: AppwriteConstants.databaseId,
-        collectionId: AppwriteConstants.cpCollection,
+        collectionId: AppwriteConstants.rubrikCollection,
         documentId: ID.unique(),
-        data: cp.toMap(),
+        data: rubrik.toMap(),
       );
       return right(document);
     } on AppwriteException catch (e, st) {
@@ -56,10 +56,10 @@ class CpAPI implements ICpAPI {
   }
 
   @override
-  Future<List<Document>> getUserCp(String muridId) async {
+  Future<List<Document>> getUserRubrik(String muridId) async {
     final documents = await _db.listDocuments(
       databaseId: AppwriteConstants.databaseId,
-      collectionId: AppwriteConstants.cpCollection,
+      collectionId: AppwriteConstants.rubrikCollection,
       queries: [
         Query.equal('muridId', muridId),
       ],
@@ -68,10 +68,10 @@ class CpAPI implements ICpAPI {
   }
 
   @override
-  Future<List<Document>> getKelompokCp(String uid) async {
+  Future<List<Document>> getKelompokRubrik(String uid) async {
     final documents = await _db.listDocuments(
       databaseId: AppwriteConstants.databaseId,
-      collectionId: AppwriteConstants.cpCollection,
+      collectionId: AppwriteConstants.rubrikCollection,
       queries: [
         Query.equal('uid', uid),
       ],
@@ -80,39 +80,39 @@ class CpAPI implements ICpAPI {
   }
 
   @override
-  Future<List<Document>> getAllCp() async {
+  Future<List<Document>> getAllRubrik() async {
     final documents = await _db.listDocuments(
       databaseId: AppwriteConstants.databaseId,
-      collectionId: AppwriteConstants.cpCollection,
+      collectionId: AppwriteConstants.rubrikCollection,
     );
     return documents.documents;
   }
 
   @override
-  Stream<RealtimeMessage> getLatestCp() {
+  Stream<RealtimeMessage> getLatestRubrik() {
     return _realtime.subscribe([
-      'databases.${AppwriteConstants.databaseId}.collections.${AppwriteConstants.cpCollection}.documents',
+      'databases.${AppwriteConstants.databaseId}.collections.${AppwriteConstants.rubrikCollection}.documents',
     ]).stream;
   }
 
   @override
-  FutureEither<Document> updateCp(CpModel cp) async {
+  FutureEither<Document> updateRubrik(RubrikModel rubrik) async {
     try {
       final document = await _db.updateDocument(
         databaseId: AppwriteConstants.databaseId,
-        collectionId: AppwriteConstants.cpCollection,
-        documentId: cp.id,
+        collectionId: AppwriteConstants.rubrikCollection,
+        documentId: rubrik.id,
         data: {
-          'tujuan': cp.tujuan,
-          'tanggal': cp.tanggal,
-          'konteks': cp.konteks, //kegiatan
-          'agama': cp.agama,
-          'jatidiri': cp.jatidiri,
-          'literasi': cp.literasi,
-          'isDone': cp.isDone,
-          'muridId': cp.muridId,
-          'rekomendasi': cp.rekomendasi, //umpan balik
-          'tanggapan': cp.tanggapan,
+          'tujuan': rubrik.tujuan,
+          'tanggal': rubrik.tanggal,
+          'kegiatan': rubrik.kegiatan, //kegiatan
+          'agama': rubrik.agama,
+          'jatidiri': rubrik.jatidiri,
+          'literasi': rubrik.literasi,
+          'skor': rubrik.skor,
+          'muridId': rubrik.muridId,
+          'rekomendasi': rubrik.rekomendasi, //umpan balik
+          'tanggapan': rubrik.tanggapan,
         },
       );
       return right(document);
@@ -129,12 +129,12 @@ class CpAPI implements ICpAPI {
   }
 
   @override
-  FutureVoid deleteCp(CpModel cp) async {
+  FutureVoid deleteRubrik(RubrikModel rubrik) async {
     try {
       await _db.deleteDocument(
         databaseId: AppwriteConstants.databaseId,
-        collectionId: AppwriteConstants.cpCollection,
-        documentId: cp.id,
+        collectionId: AppwriteConstants.rubrikCollection,
+        documentId: rubrik.id,
       );
     } catch (e) {
       print(e.toString());
@@ -145,7 +145,7 @@ class CpAPI implements ICpAPI {
   FutureVoid deleteAll(String uid) async {
     final documents = await _db.listDocuments(
       databaseId: AppwriteConstants.databaseId,
-      collectionId: AppwriteConstants.cpCollection,
+      collectionId: AppwriteConstants.rubrikCollection,
       queries: [
         Query.equal('uid', uid),
       ],
@@ -154,7 +154,7 @@ class CpAPI implements ICpAPI {
     for (int i = 0; i < documents.documents.length; i++) {
       await _db.deleteDocument(
         databaseId: AppwriteConstants.databaseId,
-        collectionId: AppwriteConstants.cpCollection,
+        collectionId: AppwriteConstants.rubrikCollection,
         documentId: documents.documents[i].$id,
       );
     }

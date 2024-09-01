@@ -13,6 +13,7 @@ import 'package:sippa/foto_berseri/foto_berseri_page.dart';
 import 'package:sippa/hasil_karya/hasil_karya_page.dart';
 import 'package:sippa/models/user.dart';
 import 'package:sippa/observasi/observasi_page.dart';
+import 'package:sippa/rubrik/rubrik_page.dart';
 import 'package:sippa/tanggapan_ortu/tanggapan_page.dart';
 import 'package:sippa/widget_view/edit_profil_page.dart';
 
@@ -34,7 +35,7 @@ class CustomDrawer extends ConsumerWidget {
     return currentUserDetailAsyncValue.when(
       data: (userDetails) {
         if (userDetails == null) {
-          return const Center(child: Loader());
+          return const Loader();
         }
 
         User copyOfUser = userDetails;
@@ -90,12 +91,7 @@ class CustomDrawer extends ConsumerWidget {
                                     );
                                   }
                                 },
-                                loading: () => const Center(
-                                  child: CircularProgressIndicator(
-                                    valueColor: AlwaysStoppedAnimation<Color>(
-                                        Colors.white),
-                                  ),
-                                ),
+                                loading: () => const Loader(),
                                 error: (_, __) => const Center(
                                   child: Icon(Icons.error, color: Colors.white),
                                 ),
@@ -124,24 +120,24 @@ class CustomDrawer extends ConsumerWidget {
                 ),
               ),
               ListTile(
-                title: const Text('Anekdot'),
+                title: const Text('Catatan Anekdotal'),
                 selected: selectedIndex == 0,
                 onTap: () {
                   Navigator.pushReplacement(context, AnekdotPage.route());
                   onItemSelected(0);
                 },
               ),
-              ListTile(
-                title: const Text('Observasi'),
-                selected: selectedIndex == 1,
-                onTap: () {
-                  Navigator.pushReplacement(context, ObservasiPage.route());
+              // ListTile(
+              //   title: const Text('Observasi'),
+              //   selected: selectedIndex == 1,
+              //   onTap: () {
+              //     Navigator.pushReplacement(context, ObservasiPage.route());
 
-                  onItemSelected(1);
-                },
-              ),
+              //     onItemSelected(1);
+              //   },
+              // ),
               ListTile(
-                title: const Text('Capaian Pembelajaran'),
+                title: const Text('Ceklis'),
                 selected: selectedIndex == 2,
                 onTap: () {
                   Navigator.pushReplacement(context, CpPage.route());
@@ -149,21 +145,21 @@ class CustomDrawer extends ConsumerWidget {
                 },
               ),
               ListTile(
-                title: const Text('Penilaian Hasil Karya'),
+                title: const Text('Dokumentasi Hasil Karya'),
                 selected: selectedIndex == 3,
                 onTap: () {
                   Navigator.pushReplacement(context, HkPage.route());
                   onItemSelected(3);
                 },
               ),
-              ListTile(
-                title: const Text('Foto Berseri'),
-                selected: selectedIndex == 4,
-                onTap: () {
-                  Navigator.pushReplacement(context, FbPage.route());
-                  onItemSelected(4);
-                },
-              ),
+              // ListTile(
+              //   title: const Text('Foto Berseri'),
+              //   selected: selectedIndex == 4,
+              //   onTap: () {
+              //     Navigator.pushReplacement(context, FbPage.route());
+              //     onItemSelected(4);
+              //   },
+              // ),
               // ListTile(
               //   title: const Text('Tanggapan OrangTua'),
               //   selected: selectedIndex == 5,
@@ -172,6 +168,14 @@ class CustomDrawer extends ConsumerWidget {
               //     onItemSelected(5);
               //   },
               // ),
+              ListTile(
+                title: const Text('Rubrik'),
+                selected: selectedIndex == 5,
+                onTap: () {
+                  Navigator.pushReplacement(context, RubrikPage.route());
+                  onItemSelected(5);
+                },
+              ),
               ..._buildMenuItems(levelUser, selectedIndex, context, kelompok),
               ListTile(
                 title: const Text(

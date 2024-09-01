@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sippa/add_user/controller/user_controller.dart';
+import 'package:sippa/common/loading.dart';
 import 'package:sippa/models/user.dart';
 import 'package:sippa/widget_view/appbar.dart';
 import 'package:sippa/widget_view/field.dart';
@@ -52,20 +53,11 @@ class _EditMuridPageState extends ConsumerState<EditMuridPage> {
       final file = File(pickedFile.path);
       final fileSize = await file.length();
 
-      if (fileSize > maxFileSize) {
-        setState(() {
-          _errorMessage =
-              'Ukuran file melebihi 2 MB. Silakan pilih file yang lebih kecil.';
-          _image = null;
-          _isNewImage = false;
-        });
-      } else {
-        setState(() {
-          _image = file;
-          _isNewImage = true;
-          _errorMessage = null;
-        });
-      }
+      setState(() {
+        _image = file;
+        _isNewImage = true;
+        _errorMessage = null;
+      });
     } else {
       setState(() {
         _errorMessage = null;
@@ -75,7 +67,7 @@ class _EditMuridPageState extends ConsumerState<EditMuridPage> {
   }
 
   void onUpdate() {
-    ref.read(muridControllerProvider.notifier).updateMurid(
+    ref.read(authControllerProvider.notifier).updateMurid(
         image: _image,
         email: emailController.text,
         nama: nameController.text,
@@ -90,6 +82,7 @@ class _EditMuridPageState extends ConsumerState<EditMuridPage> {
   @override
   Widget build(BuildContext context) {
     final levelUser = ref.watch(currentUserDetailsProvider).value!.levelUser;
+    final isLoading = ref.watch(authControllerProvider);
 
     return Scaffold(
       appBar: const CustomAppBar(
@@ -130,7 +123,7 @@ class _EditMuridPageState extends ConsumerState<EditMuridPage> {
                                       fit: BoxFit.cover);
                                 }
                               },
-                              loading: () => const CircularProgressIndicator(),
+                              loading: () => const Loader(),
                               error: (_, __) => const Icon(Icons.error),
                             ),
                   ),
@@ -210,31 +203,34 @@ class _EditMuridPageState extends ConsumerState<EditMuridPage> {
                   },
                 ),
               ),
-              ElevatedButton(
-                onPressed: () {
-                  if (_formKey.currentState?.validate() ?? false) {
-                    onUpdate();
-                  }
-                },
-                style: ButtonStyle(
-                  backgroundColor:
-                      MaterialStateProperty.all(const Color(0xff104993)),
-                  shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                    RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(6.0),
+              isLoading
+                  ? const Loader()
+                  : ElevatedButton(
+                      onPressed: () {
+                        if (_formKey.currentState?.validate() ?? false) {
+                          onUpdate();
+                        }
+                      },
+                      style: ButtonStyle(
+                        backgroundColor:
+                            MaterialStateProperty.all(const Color(0xff104993)),
+                        shape:
+                            MaterialStateProperty.all<RoundedRectangleBorder>(
+                          RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(6.0),
+                          ),
+                        ),
+                        fixedSize: MaterialStateProperty.all(
+                            const Size.fromHeight(45)),
+                      ),
+                      child: Container(
+                        width: double.infinity,
+                        alignment: Alignment.center,
+                        child: const Text("Update Murid",
+                            style: TextStyle(
+                                fontFamily: 'inter', color: Colors.white)),
+                      ),
                     ),
-                  ),
-                  fixedSize:
-                      MaterialStateProperty.all(const Size.fromHeight(45)),
-                ),
-                child: Container(
-                  width: double.infinity,
-                  alignment: Alignment.center,
-                  child: const Text("Update Murid",
-                      style:
-                          TextStyle(fontFamily: 'inter', color: Colors.white)),
-                ),
-              ),
               const SizedBox(height: 30),
             ],
           ),

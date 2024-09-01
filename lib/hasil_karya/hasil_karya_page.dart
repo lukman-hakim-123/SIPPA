@@ -38,7 +38,7 @@ class _HkPageState extends ConsumerState<HkPage> {
   Widget build(BuildContext context) {
     final userDetailsAsync = ref.watch(currentUserDetailsProvider);
     return Scaffold(
-      appBar: const CustomAppBar(title: 'Penilaian Hasil Karya'),
+      appBar: const CustomAppBar(title: 'Deskripsi Hasil Karya'),
       body: Padding(
         padding: const EdgeInsets.only(top: 12, left: 12, right: 12),
         child: userDetailsAsync.when(
@@ -111,7 +111,7 @@ class _HkPageState extends ConsumerState<HkPage> {
                     child: Padding(
                       padding: EdgeInsets.only(bottom: 16),
                       child: CustomText(
-                        text: "Penilaian Hasil Karya",
+                        text: "Deskripsi Hasil Karya",
                         fontSize: 18,
                         fontWeight: FontWeight.w800,
                         textAlign: TextAlign.start,
@@ -153,17 +153,7 @@ class _HkPageState extends ConsumerState<HkPage> {
                               columns: const [
                                 DataColumn(
                                     label: CustomText(
-                                  text: 'Gambar',
-                                  fontWeight: FontWeight.w700,
-                                )),
-                                DataColumn(
-                                    label: CustomText(
-                                  text: 'Nama Murid',
-                                  fontWeight: FontWeight.w700,
-                                )),
-                                DataColumn(
-                                    label: CustomText(
-                                  text: 'Nama Guru',
+                                  text: 'Tanggal',
                                   fontWeight: FontWeight.w700,
                                 )),
                                 DataColumn(
@@ -173,32 +163,42 @@ class _HkPageState extends ConsumerState<HkPage> {
                                 )),
                                 DataColumn(
                                     label: CustomText(
-                                  text: 'Tanggal',
+                                  text: 'Kegiatan',
                                   fontWeight: FontWeight.w700,
                                 )),
                                 DataColumn(
                                     label: CustomText(
-                                  text: 'Deskripsi',
+                                  text: 'Tujuan Pembelajaran',
                                   fontWeight: FontWeight.w700,
                                 )),
                                 DataColumn(
                                     label: CustomText(
-                                  text: 'Analisis Nilai Agama dan budi pekerti',
+                                  text: 'Nama Murid',
                                   fontWeight: FontWeight.w700,
                                 )),
                                 DataColumn(
                                     label: CustomText(
-                                  text: 'Analisis Jati Diri',
+                                  text: 'Foto Karya',
                                   fontWeight: FontWeight.w700,
                                 )),
                                 DataColumn(
                                     label: CustomText(
-                                  text: 'Analisis Literasi',
+                                  text: 'Nilai Agama dan Budi Pekerti',
                                   fontWeight: FontWeight.w700,
                                 )),
                                 DataColumn(
                                     label: CustomText(
-                                  text: 'Rekomendasi',
+                                  text: 'Jati Diri',
+                                  fontWeight: FontWeight.w700,
+                                )),
+                                DataColumn(
+                                    label: CustomText(
+                                  text: 'Literasi dan STREAM',
+                                  fontWeight: FontWeight.w700,
+                                )),
+                                DataColumn(
+                                    label: CustomText(
+                                  text: 'Umpan Balik',
                                   fontWeight: FontWeight.w700,
                                 )),
                                 DataColumn(
@@ -218,10 +218,80 @@ class _HkPageState extends ConsumerState<HkPage> {
                                   .map((hk) {
                                 final muridData =
                                     ref.watch(getUserDataProvider(hk.muridId));
-                                final guruData =
-                                    ref.watch(getUserDataProvider(hk.uid));
+                                // final guruData =
+                                //     ref.watch(getUserDataProvider(hk.uid));
                                 return DataRow(
                                   cells: [
+                                    DataCell(
+                                      ConstrainedBox(
+                                        constraints: const BoxConstraints(
+                                          maxWidth:
+                                              100, // Ubah sesuai kebutuhan
+                                        ),
+                                        child: Text(
+                                          hk.tanggal,
+                                          overflow: TextOverflow.visible,
+                                          softWrap: true,
+                                        ),
+                                      ),
+                                    ),
+                                    DataCell(
+                                      ConstrainedBox(
+                                        constraints: const BoxConstraints(
+                                          maxWidth:
+                                              100, // Ubah sesuai kebutuhan
+                                        ),
+                                        child: Text(
+                                          hk.kelompok,
+                                          overflow: TextOverflow.visible,
+                                          softWrap: true,
+                                        ),
+                                      ),
+                                    ),
+                                    DataCell(
+                                      ConstrainedBox(
+                                        constraints: const BoxConstraints(
+                                          maxWidth:
+                                              200, // Ubah sesuai kebutuhan
+                                        ),
+                                        child: Text(
+                                          hk.deskripsi, //kegiatan
+                                          overflow: TextOverflow.visible,
+                                          softWrap: true,
+                                        ),
+                                      ),
+                                    ),
+                                    DataCell(
+                                      ConstrainedBox(
+                                        constraints: const BoxConstraints(
+                                          maxWidth:
+                                              200, // Ubah sesuai kebutuhan
+                                        ),
+                                        child: Text(
+                                          hk.semester, //tujuan pembelajaran
+                                          overflow: TextOverflow.visible,
+                                          softWrap: true,
+                                        ),
+                                      ),
+                                    ),
+                                    DataCell(
+                                      ConstrainedBox(
+                                        constraints: const BoxConstraints(
+                                          maxWidth:
+                                              100, // Ubah sesuai kebutuhan
+                                        ),
+                                        child: muridData.when(
+                                          data: (data) => Text(
+                                            data.data['nama'],
+                                            overflow: TextOverflow.visible,
+                                            softWrap: true,
+                                          ),
+                                          loading: () => const Loader(),
+                                          error: (error, stack) =>
+                                              const Text('Error'),
+                                        ),
+                                      ),
+                                    ),
                                     DataCell(
                                       ConstrainedBox(
                                         constraints: const BoxConstraints(
@@ -248,81 +318,6 @@ class _HkPageState extends ConsumerState<HkPage> {
                                               error: (_, __) =>
                                                   const Icon(Icons.error),
                                             ),
-                                      ),
-                                    ),
-                                    DataCell(
-                                      ConstrainedBox(
-                                        constraints: const BoxConstraints(
-                                          maxWidth:
-                                              100, // Ubah sesuai kebutuhan
-                                        ),
-                                        child: muridData.when(
-                                          data: (data) => Text(
-                                            data.data['nama'],
-                                            overflow: TextOverflow.visible,
-                                            softWrap: true,
-                                          ),
-                                          loading: () => const Loader(),
-                                          error: (error, stack) =>
-                                              const Text('Error'),
-                                        ),
-                                      ),
-                                    ),
-                                    DataCell(
-                                      ConstrainedBox(
-                                        constraints: const BoxConstraints(
-                                          maxWidth:
-                                              100, // Ubah sesuai kebutuhan
-                                        ),
-                                        child: guruData.when(
-                                          data: (data) => Text(
-                                            data.data['nama'],
-                                            overflow: TextOverflow.visible,
-                                            softWrap: true,
-                                          ),
-                                          loading: () => const Loader(),
-                                          error: (error, stack) =>
-                                              const Text('Error'),
-                                        ),
-                                      ),
-                                    ),
-                                    DataCell(
-                                      ConstrainedBox(
-                                        constraints: const BoxConstraints(
-                                          maxWidth:
-                                              100, // Ubah sesuai kebutuhan
-                                        ),
-                                        child: Text(
-                                          hk.kelompok,
-                                          overflow: TextOverflow.visible,
-                                          softWrap: true,
-                                        ),
-                                      ),
-                                    ),
-                                    DataCell(
-                                      ConstrainedBox(
-                                        constraints: const BoxConstraints(
-                                          maxWidth:
-                                              100, // Ubah sesuai kebutuhan
-                                        ),
-                                        child: Text(
-                                          hk.tanggal,
-                                          overflow: TextOverflow.visible,
-                                          softWrap: true,
-                                        ),
-                                      ),
-                                    ),
-                                    DataCell(
-                                      ConstrainedBox(
-                                        constraints: const BoxConstraints(
-                                          maxWidth:
-                                              200, // Ubah sesuai kebutuhan
-                                        ),
-                                        child: Text(
-                                          hk.deskripsi,
-                                          overflow: TextOverflow.visible,
-                                          softWrap: true,
-                                        ),
                                       ),
                                     ),
                                     DataCell(
