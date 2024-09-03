@@ -30,6 +30,7 @@ class RubrikPage extends ConsumerStatefulWidget {
 class _RubrikPageState extends ConsumerState<RubrikPage> {
   int _selectedIndex = 5;
   List<RubrikModel> _rubrikList = [];
+  List<RubrikModel> _filteredRubrikList = [];
   DateTime _selectedDate = DateTime.now();
 
   void _onItemSelected(int index) {
@@ -41,7 +42,17 @@ class _RubrikPageState extends ConsumerState<RubrikPage> {
   void _onDateSelected(DateTime date) {
     setState(() {
       _selectedDate = date;
+      _filterRubrikList();
     });
+  }
+
+  void _filterRubrikList() {
+    _filteredRubrikList = _rubrikList.where((rubrik) {
+      final rubrikDate = DateFormat("d MMMM yyyy").parse(rubrik.tanggal);
+      return rubrikDate.year == _selectedDate.year &&
+          rubrikDate.month == _selectedDate.month &&
+          rubrikDate.day == _selectedDate.day;
+    }).toList();
   }
 
   @override
@@ -81,6 +92,7 @@ class _RubrikPageState extends ConsumerState<RubrikPage> {
                         .any((rubrik) => rubrik.id == newRubrik.id)) {
                       setState(() {
                         _rubrikList.add(newRubrik);
+                        _filterRubrikList();
                       });
                     }
                   }
@@ -103,6 +115,7 @@ class _RubrikPageState extends ConsumerState<RubrikPage> {
                         (levelUser == 3 && updatedRubrik.muridId == userId)) {
                       _rubrikList.insert(rubrikIndex, updatedRubrik);
                     }
+                    _filterRubrikList();
                   });
                 } else if (data.events.contains(
                   'databases.*.collections.${AppwriteConstants.rubrikCollection}.documents.*.delete',
@@ -115,6 +128,7 @@ class _RubrikPageState extends ConsumerState<RubrikPage> {
 
                   setState(() {
                     _rubrikList.removeWhere((rubrik) => rubrik.id == rubrikId);
+                    _filterRubrikList();
                   });
                 }
               });
@@ -151,19 +165,12 @@ class _RubrikPageState extends ConsumerState<RubrikPage> {
                       child: const CustomText(
                           text: "Tambah Data", color: Colors.white),
                     ),
-                  const SizedBox(height: 16),
                   MonthlyCalendar(onDateSelected: _onDateSelected),
                   const SizedBox(height: 16),
                   rubrikAsyncValue.when(
                     data: (rubrikList) {
                       _rubrikList = rubrikList;
-                      // _rubrikList = _rubrikList.where((rubrik) {
-                      //   final rubrikDate = DateFormat("d MMMM yyyy", "id_ID")
-                      //       .parse(rubrik.tanggal);
-                      //   return rubrikDate.year == _selectedDate.year &&
-                      //       rubrikDate.month == _selectedDate.month &&
-                      //       rubrikDate.day == _selectedDate.day;
-                      // }).toList();
+                      _filterRubrikList();
                       return Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -256,7 +263,7 @@ class _RubrikPageState extends ConsumerState<RubrikPage> {
                                   fontWeight: FontWeight.w700,
                                 )),
                               ],
-                              rows: _rubrikList
+                              rows: _filteredRubrikList
                                   .where((rubrik) => !(levelUser == 2 &&
                                       rubrik.kelompok != kelompok))
                                   .map((rubrik) {

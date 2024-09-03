@@ -175,7 +175,7 @@ class _EditMuridPageState extends ConsumerState<EditMuridPage> {
                       }
                       return null;
                     },
-                    items: ['A', 'B', 'C', 'D', 'E', 'F', 'G']
+                    items: ['Pra1', 'A1', 'A2', 'A3', 'B1', 'B2', 'B3']
                         .map((String option) {
                       return DropdownMenuItem<String>(
                         value: option,

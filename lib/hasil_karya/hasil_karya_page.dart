@@ -2,6 +2,8 @@ import 'package:appwrite/appwrite.dart';
 import 'package:appwrite/models.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/date_symbol_data_local.dart';
+import 'package:intl/intl.dart';
 
 import 'package:sippa/auth/controllers/auth_controller.dart';
 import 'package:sippa/common/loading.dart';
@@ -12,6 +14,7 @@ import 'package:sippa/hasil_karya/edit_hasil_karya_page.dart';
 
 import 'package:sippa/models/hk.dart';
 import 'package:sippa/widget_view/appbar.dart';
+import 'package:sippa/widget_view/calendar.dart';
 import 'package:sippa/widget_view/drawer.dart';
 import 'package:sippa/widget_view/teks.dart';
 
@@ -27,11 +30,35 @@ class HkPage extends ConsumerStatefulWidget {
 class _HkPageState extends ConsumerState<HkPage> {
   int _selectedIndex = 3;
   List<HkModel> _hkList = [];
+  List<HkModel> _filteredList = [];
+  DateTime _selectedDate = DateTime.now();
 
   void _onItemSelected(int index) {
     setState(() {
       _selectedIndex = index;
     });
+  }
+
+  void _onDateSelected(DateTime date) {
+    setState(() {
+      _selectedDate = date;
+      _filterList();
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    initializeDateFormatting('id_ID', null);
+  }
+
+  void _filterList() {
+    _filteredList = _hkList.where((hk) {
+      final hkDate = DateFormat("d MMMM yyyy").parse(hk.tanggal);
+      return hkDate.year == _selectedDate.year &&
+          hkDate.month == _selectedDate.month &&
+          hkDate.day == _selectedDate.day;
+    }).toList();
   }
 
   @override
@@ -63,6 +90,7 @@ class _HkPageState extends ConsumerState<HkPage> {
                     if (!_hkList.any((hk) => hk.id == newHk.id)) {
                       setState(() {
                         _hkList.add(newHk);
+                        _filterList();
                       });
                     }
                   }
@@ -84,6 +112,7 @@ class _HkPageState extends ConsumerState<HkPage> {
                         (levelUser == 3 && updatedHk.muridId == userId)) {
                       _hkList.insert(hkIndex, updatedHk);
                     }
+                    _filterList();
                   });
                 } else if (data.events.contains(
                   'databases.*.collections.${AppwriteConstants.hkCollection}.documents.*.delete',
@@ -96,6 +125,7 @@ class _HkPageState extends ConsumerState<HkPage> {
 
                   setState(() {
                     _hkList.removeWhere((hk) => hk.id == hkId);
+                    _filterList();
                   });
                 }
               });
@@ -132,10 +162,12 @@ class _HkPageState extends ConsumerState<HkPage> {
                       child: const CustomText(
                           text: "Tambah Data", color: Colors.white),
                     ),
+                  MonthlyCalendar(onDateSelected: _onDateSelected),
                   const SizedBox(height: 16),
                   hkAsyncValue.when(
                     data: (hkList) {
                       _hkList = hkList;
+                      _filterList();
                       return Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -212,7 +244,7 @@ class _HkPageState extends ConsumerState<HkPage> {
                                   fontWeight: FontWeight.w700,
                                 )),
                               ],
-                              rows: _hkList
+                              rows: _filteredList
                                   .where((hk) => !(levelUser == 2 &&
                                       hk.kelompok != kelompok))
                                   .map((hk) {

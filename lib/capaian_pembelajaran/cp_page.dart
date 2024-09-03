@@ -2,6 +2,8 @@ import 'package:appwrite/appwrite.dart';
 import 'package:appwrite/models.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/date_symbol_data_local.dart';
+import 'package:intl/intl.dart';
 
 import 'package:sippa/auth/controllers/auth_controller.dart';
 import 'package:sippa/capaian_pembelajaran/add_cp_page.dart';
@@ -12,6 +14,7 @@ import 'package:sippa/constant/appwrite.dart';
 
 import 'package:sippa/models/cp.dart';
 import 'package:sippa/widget_view/appbar.dart';
+import 'package:sippa/widget_view/calendar.dart';
 import 'package:sippa/widget_view/drawer.dart';
 import 'package:sippa/widget_view/teks.dart';
 
@@ -27,11 +30,35 @@ class CpPage extends ConsumerStatefulWidget {
 class _CpPageState extends ConsumerState<CpPage> {
   int _selectedIndex = 2;
   List<CpModel> _cpList = [];
+  List<CpModel> _filteredList = [];
+  DateTime _selectedDate = DateTime.now();
 
   void _onItemSelected(int index) {
     setState(() {
       _selectedIndex = index;
     });
+  }
+
+  void _onDateSelected(DateTime date) {
+    setState(() {
+      _selectedDate = date;
+      _filterList();
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    initializeDateFormatting('id_ID', null);
+  }
+
+  void _filterList() {
+    _filteredList = _cpList.where((cp) {
+      final cpDate = DateFormat("d MMMM yyyy").parse(cp.tanggal);
+      return cpDate.year == _selectedDate.year &&
+          cpDate.month == _selectedDate.month &&
+          cpDate.day == _selectedDate.day;
+    }).toList();
   }
 
   @override
@@ -63,6 +90,7 @@ class _CpPageState extends ConsumerState<CpPage> {
                     if (!_cpList.any((cp) => cp.id == newCp.id)) {
                       setState(() {
                         _cpList.add(newCp);
+                        _filterList();
                       });
                     }
                   }
@@ -84,6 +112,7 @@ class _CpPageState extends ConsumerState<CpPage> {
                         (levelUser == 3 && updatedCp.muridId == userId)) {
                       _cpList.insert(cpIndex, updatedCp);
                     }
+                    _filterList();
                   });
                 } else if (data.events.contains(
                   'databases.*.collections.${AppwriteConstants.cpCollection}.documents.*.delete',
@@ -96,6 +125,7 @@ class _CpPageState extends ConsumerState<CpPage> {
 
                   setState(() {
                     _cpList.removeWhere((cp) => cp.id == cpId);
+                    _filterList();
                   });
                 }
               });
@@ -132,10 +162,12 @@ class _CpPageState extends ConsumerState<CpPage> {
                       child: const CustomText(
                           text: "Tambah Data", color: Colors.white),
                     ),
+                  MonthlyCalendar(onDateSelected: _onDateSelected),
                   const SizedBox(height: 16),
                   cpAsyncValue.when(
                     data: (cpList) {
                       _cpList = cpList;
+                      _filterList();
                       return Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -212,7 +244,7 @@ class _CpPageState extends ConsumerState<CpPage> {
                                   fontWeight: FontWeight.w700,
                                 )),
                               ],
-                              rows: _cpList
+                              rows: _filteredList
                                   .where((cp) => !(levelUser == 2 &&
                                       cp.kelompok != kelompok))
                                   .map((cp) {

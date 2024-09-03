@@ -13,6 +13,7 @@ import 'package:sippa/foto_berseri/foto_berseri_page.dart';
 import 'package:sippa/hasil_karya/hasil_karya_page.dart';
 import 'package:sippa/models/user.dart';
 import 'package:sippa/observasi/observasi_page.dart';
+import 'package:sippa/pertumbuhan/pertumbuhan_page.dart';
 import 'package:sippa/rubrik/rubrik_page.dart';
 import 'package:sippa/tanggapan_ortu/tanggapan_page.dart';
 import 'package:sippa/widget_view/edit_profil_page.dart';
@@ -68,8 +69,8 @@ class CustomDrawer extends ConsumerWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Container(
-                        width: 80,
-                        height: 80,
+                        width: 70,
+                        height: 70,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           border: Border.all(color: Colors.grey),
@@ -98,7 +99,7 @@ class CustomDrawer extends ConsumerWidget {
                               ),
                         ),
                       ),
-                      const SizedBox(height: 7),
+                      const SizedBox(height: 4),
                       Text(
                         copyOfUser.nama,
                         style: const TextStyle(
@@ -174,6 +175,14 @@ class CustomDrawer extends ConsumerWidget {
                 onTap: () {
                   Navigator.pushReplacement(context, RubrikPage.route());
                   onItemSelected(5);
+                },
+              ),
+              ListTile(
+                title: const Text('Catatan Pertumbuhan'),
+                selected: selectedIndex == 8,
+                onTap: () {
+                  Navigator.pushReplacement(context, PertumbuhanPage.route());
+                  onItemSelected(8);
                 },
               ),
               ..._buildMenuItems(levelUser, selectedIndex, context, kelompok),

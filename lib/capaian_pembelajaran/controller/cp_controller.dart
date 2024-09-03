@@ -120,8 +120,12 @@ class CpController extends StateNotifier<bool> {
   }) async {
     state = true;
     final user = _ref.read(currentUserDetailsProvider).value!;
-    final kelompok = _ref.read(searchUserProvider(muridId)).value!.kelompok;
-
+    final kelompok = _ref.read(searchUserProvider(muridId)).value?.kelompok;
+    if (kelompok == null) {
+      showSnackBar(context, 'Tekan lagi');
+      state = false;
+      return;
+    }
     CpModel cp = CpModel(
       id: cpId,
       tujuan: tujuan,

@@ -6,41 +6,44 @@ import 'package:sippa/constant/appwrite.dart';
 import 'package:sippa/core/failure.dart';
 import 'package:sippa/core/providers.dart';
 import 'package:sippa/core/type_defs.dart';
-import 'package:sippa/models/cp.dart';
+import 'package:sippa/models/pertumbuhan.dart';
 
-final cpAPIProvider = Provider((ref) {
-  return CpAPI(
+final pertumbuhanAPIProvider = Provider((ref) {
+  return PertumbuhanAPI(
     db: ref.watch(appwriteDatabaseProvider),
     realtime: ref.watch(appwriteRealtimeProvider),
   );
 });
 
-abstract class ICpAPI {
-  FutureEither<Document> addCp(CpModel cp);
-  Future<List<Document>> getUserCp(String uid);
-  Stream<RealtimeMessage> getLatestCp();
-  Future<List<Document>> getKelompokCp(String kelompok);
-  Future<List<Document>> getAllCp();
-  FutureEither<Document> updateCp(CpModel cp);
-  FutureVoid deleteCp(CpModel cp);
+abstract class IPertumbuhanAPI {
+  FutureEither<Document> addPertumbuhan(PertumbuhanModel pertumbuhan);
+  Future<List<Document>> getUserPertumbuhan(String uid);
+  Stream<RealtimeMessage> getLatestPertumbuhan();
+  Future<List<Document>> getKelompokPertumbuhan(String kelompok);
+  Future<List<Document>> getAllPertumbuhan();
+  FutureEither<Document> updatePertumbuhan(PertumbuhanModel pertumbuhan);
+  FutureVoid deletePertumbuhan(PertumbuhanModel pertumbuhan);
   FutureVoid deleteAll(String uid);
 }
 
-class CpAPI implements ICpAPI {
+class PertumbuhanAPI implements IPertumbuhanAPI {
   final Databases _db;
   final Realtime _realtime;
-  CpAPI({required Databases db, required Realtime realtime})
-      : _db = db,
+
+  PertumbuhanAPI({
+    required Databases db,
+    required Realtime realtime,
+  })  : _db = db,
         _realtime = realtime;
 
   @override
-  FutureEither<Document> addCp(CpModel cp) async {
+  FutureEither<Document> addPertumbuhan(PertumbuhanModel pertumbuhan) async {
     try {
       final document = await _db.createDocument(
         databaseId: AppwriteConstants.databaseId,
-        collectionId: AppwriteConstants.cpCollection,
+        collectionId: AppwriteConstants.pertumbuhanCollection,
         documentId: ID.unique(),
-        data: cp.toMap(),
+        data: pertumbuhan.toMap(),
       );
       return right(document);
     } on AppwriteException catch (e, st) {
@@ -56,22 +59,10 @@ class CpAPI implements ICpAPI {
   }
 
   @override
-  Future<List<Document>> getUserCp(String muridId) async {
+  Future<List<Document>> getUserPertumbuhan(String uid) async {
     final documents = await _db.listDocuments(
       databaseId: AppwriteConstants.databaseId,
-      collectionId: AppwriteConstants.cpCollection,
-      queries: [
-        Query.equal('muridId', muridId),
-      ],
-    );
-    return documents.documents;
-  }
-
-  @override
-  Future<List<Document>> getKelompokCp(String uid) async {
-    final documents = await _db.listDocuments(
-      databaseId: AppwriteConstants.databaseId,
-      collectionId: AppwriteConstants.cpCollection,
+      collectionId: AppwriteConstants.pertumbuhanCollection,
       queries: [
         Query.equal('uid', uid),
       ],
@@ -80,41 +71,41 @@ class CpAPI implements ICpAPI {
   }
 
   @override
-  Future<List<Document>> getAllCp() async {
+  Future<List<Document>> getKelompokPertumbuhan(String kelompok) async {
     final documents = await _db.listDocuments(
       databaseId: AppwriteConstants.databaseId,
-      collectionId: AppwriteConstants.cpCollection,
+      collectionId: AppwriteConstants.pertumbuhanCollection,
+      queries: [
+        Query.equal('kelompok', kelompok),
+      ],
     );
     return documents.documents;
   }
 
   @override
-  Stream<RealtimeMessage> getLatestCp() {
+  Future<List<Document>> getAllPertumbuhan() async {
+    final documents = await _db.listDocuments(
+      databaseId: AppwriteConstants.databaseId,
+      collectionId: AppwriteConstants.pertumbuhanCollection,
+    );
+    return documents.documents;
+  }
+
+  @override
+  Stream<RealtimeMessage> getLatestPertumbuhan() {
     return _realtime.subscribe([
-      'databases.${AppwriteConstants.databaseId}.collections.${AppwriteConstants.cpCollection}.documents',
+      'databases.${AppwriteConstants.databaseId}.collections.${AppwriteConstants.pertumbuhanCollection}.documents',
     ]).stream;
   }
 
   @override
-  FutureEither<Document> updateCp(CpModel cp) async {
+  FutureEither<Document> updatePertumbuhan(PertumbuhanModel pertumbuhan) async {
     try {
       final document = await _db.updateDocument(
         databaseId: AppwriteConstants.databaseId,
-        collectionId: AppwriteConstants.cpCollection,
-        documentId: cp.id,
-        data: {
-          'tujuan': cp.tujuan,
-          'tanggal': cp.tanggal,
-          'konteks': cp.konteks, //kegiatan
-          'agama': cp.agama,
-          'jatidiri': cp.jatidiri,
-          'literasi': cp.literasi,
-          'kelompok': cp.kelompok,
-          'isDone': cp.isDone,
-          'muridId': cp.muridId,
-          'rekomendasi': cp.rekomendasi, //umpan balik
-          'tanggapan': cp.tanggapan,
-        },
+        collectionId: AppwriteConstants.pertumbuhanCollection,
+        documentId: pertumbuhan.id,
+        data: pertumbuhan.toMap(),
       );
       return right(document);
     } on AppwriteException catch (e, st) {
@@ -130,15 +121,15 @@ class CpAPI implements ICpAPI {
   }
 
   @override
-  FutureVoid deleteCp(CpModel cp) async {
+  FutureVoid deletePertumbuhan(PertumbuhanModel pertumbuhan) async {
     try {
       await _db.deleteDocument(
         databaseId: AppwriteConstants.databaseId,
-        collectionId: AppwriteConstants.cpCollection,
-        documentId: cp.id,
+        collectionId: AppwriteConstants.pertumbuhanCollection,
+        documentId: pertumbuhan.id,
       );
     } catch (e) {
-      print(e.toString());
+      // Handle or log error
     }
   }
 
@@ -146,17 +137,17 @@ class CpAPI implements ICpAPI {
   FutureVoid deleteAll(String uid) async {
     final documents = await _db.listDocuments(
       databaseId: AppwriteConstants.databaseId,
-      collectionId: AppwriteConstants.cpCollection,
+      collectionId: AppwriteConstants.pertumbuhanCollection,
       queries: [
         Query.equal('uid', uid),
       ],
     );
 
-    for (int i = 0; i < documents.documents.length; i++) {
+    for (final doc in documents.documents) {
       await _db.deleteDocument(
         databaseId: AppwriteConstants.databaseId,
-        collectionId: AppwriteConstants.cpCollection,
-        documentId: documents.documents[i].$id,
+        collectionId: AppwriteConstants.pertumbuhanCollection,
+        documentId: doc.$id,
       );
     }
   }

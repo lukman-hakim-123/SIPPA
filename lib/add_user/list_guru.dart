@@ -95,29 +95,38 @@ class _GuruListPageState extends ConsumerState<GuruListPage> {
                   margin: const EdgeInsets.symmetric(vertical: 8),
                   child: ListTile(
                     leading: ClipOval(
-                      child: ref.watch(getUserImageProvider(guru.imageId)).when(
-                            data: (imageData) {
-                              if (imageData != null) {
-                                return Image.memory(
-                                  imageData,
-                                  width: 50,
-                                  height: 50,
-                                  fit: BoxFit.cover,
-                                );
-                              } else {
-                                return Image.asset(
-                                  'assets/images/pp_kosong.jpg',
-                                  width: 50,
-                                  height: 50,
-                                  fit: BoxFit.cover,
-                                );
-                              }
-                            },
-                            loading: () => const Loader(),
-                            error: (_, __) => const Center(
-                              child: Icon(Icons.error),
+                      child: SizedBox(
+                        width: 50,
+                        height: 50,
+                        child: ref
+                            .watch(getUserImageProvider(guru.imageId))
+                            .when(
+                              data: (imageData) {
+                                if (imageData != null) {
+                                  return Image.memory(
+                                    imageData,
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (context, error, stackTrace) {
+                                      return const Icon(Icons.error,
+                                          color: Colors.red);
+                                    },
+                                  );
+                                } else {
+                                  return Image.asset(
+                                    'assets/images/pp_kosong.jpg',
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (context, error, stackTrace) {
+                                      return const Icon(Icons.error,
+                                          color: Colors.red);
+                                    },
+                                  );
+                                }
+                              },
+                              loading: () => const Loader(),
+                              error: (_, __) =>
+                                  const Icon(Icons.error, color: Colors.red),
                             ),
-                          ),
+                      ),
                     ),
                     title: Text(guru.nama),
                     subtitle: Text('Kelompok: ${guru.kelompok}'),

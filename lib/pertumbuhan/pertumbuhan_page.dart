@@ -4,34 +4,35 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
-import 'package:sippa/anekdot/add_anekdot.dart';
-import 'package:sippa/anekdot/controller/anekdot_controller.dart';
-import 'package:sippa/anekdot/edit_anekdot.dart';
 
 import 'package:sippa/auth/controllers/auth_controller.dart';
 import 'package:sippa/common/loading.dart';
 import 'package:sippa/constant/appwrite.dart';
-import 'package:sippa/models/anekdot.dart';
+import 'package:sippa/models/pertumbuhan.dart';
+import 'package:sippa/pertumbuhan/add_pertumbuhan_page.dart';
+import 'package:sippa/pertumbuhan/controller/pertumbuhanController.dart';
+import 'package:sippa/pertumbuhan/edit_pertumbuhan_page.dart';
 
 import 'package:sippa/widget_view/appbar.dart';
 import 'package:sippa/widget_view/calendar.dart';
 import 'package:sippa/widget_view/drawer.dart';
 import 'package:sippa/widget_view/teks.dart';
 
-class AnekdotPage extends ConsumerStatefulWidget {
+class PertumbuhanPage extends ConsumerStatefulWidget {
   static route() =>
-      MaterialPageRoute(builder: (context) => const AnekdotPage());
+      MaterialPageRoute(builder: (context) => const PertumbuhanPage());
 
-  const AnekdotPage({super.key});
+  const PertumbuhanPage({super.key});
 
   @override
-  ConsumerState<ConsumerStatefulWidget> createState() => _AnekdotPageState();
+  ConsumerState<ConsumerStatefulWidget> createState() =>
+      _PertumbuhanPageState();
 }
 
-class _AnekdotPageState extends ConsumerState<AnekdotPage> {
-  int _selectedIndex = 0;
-  List<AnekdotModel> _anekdotList = [];
-  List<AnekdotModel> _filteredList = [];
+class _PertumbuhanPageState extends ConsumerState<PertumbuhanPage> {
+  int _selectedIndex = 8;
+  List<PertumbuhanModel> _pertumbuhanList = [];
+  List<PertumbuhanModel> _filteredList = [];
   DateTime _selectedDate = DateTime.now();
 
   void _onItemSelected(int index) {
@@ -54,11 +55,12 @@ class _AnekdotPageState extends ConsumerState<AnekdotPage> {
   }
 
   void _filterList() {
-    _filteredList = _anekdotList.where((anekdot) {
-      final anekdotDate = DateFormat("d MMMM yyyy").parse(anekdot.tanggal);
-      return anekdotDate.year == _selectedDate.year &&
-          anekdotDate.month == _selectedDate.month &&
-          anekdotDate.day == _selectedDate.day;
+    _filteredList = _pertumbuhanList.where((pertumbuhan) {
+      final pertumbuhanDate =
+          DateFormat("d MMMM yyyy").parse(pertumbuhan.tanggal);
+      return pertumbuhanDate.year == _selectedDate.year &&
+          pertumbuhanDate.month == _selectedDate.month &&
+          pertumbuhanDate.day == _selectedDate.day;
     }).toList();
   }
 
@@ -66,7 +68,7 @@ class _AnekdotPageState extends ConsumerState<AnekdotPage> {
   Widget build(BuildContext context) {
     final userDetailsAsync = ref.watch(currentUserDetailsProvider);
     return Scaffold(
-      appBar: const CustomAppBar(title: 'Catatan Anekdotal'),
+      appBar: const CustomAppBar(title: 'Catatan Pertumbuhan'),
       body: Padding(
         padding: const EdgeInsets.only(top: 12, left: 12, right: 12),
         child: userDetailsAsync.when(
@@ -77,59 +79,63 @@ class _AnekdotPageState extends ConsumerState<AnekdotPage> {
             final userId = userDetails.id;
             final kelompok = userDetails.kelompok;
             final levelUser = userDetails.levelUser;
-            final anekdotAsyncValue =
-                ref.watch(getAnekdotByUserIdProvider(userId));
-            ref.listen<AsyncValue<RealtimeMessage>>(getLatestAnekdotProvider,
-                (_, next) {
+            final pertumbuhanAsyncValue =
+                ref.watch(getPertumbuhanByUserIdProvider(userId));
+            ref.listen<AsyncValue<RealtimeMessage>>(
+                getLatestPertumbuhanProvider, (_, next) {
               next.whenData((data) {
                 if (data.events.contains(
-                  'databases.*.collections.${AppwriteConstants.anekdotCollection}.documents.*.create',
+                  'databases.*.collections.${AppwriteConstants.pertumbuhanCollection}.documents.*.create',
                 )) {
-                  final newAnekdot = AnekdotModel.fromMap(data.payload);
+                  final newPertumbuhan = PertumbuhanModel.fromMap(data.payload);
                   if ((levelUser == 1) ||
-                      (levelUser == 2 && newAnekdot.uid == userId) ||
-                      (levelUser == 3 && newAnekdot.muridId == userId)) {
-                    if (!_anekdotList
-                        .any((anekdot) => anekdot.id == newAnekdot.id)) {
+                      (levelUser == 2 && newPertumbuhan.uid == userId) ||
+                      (levelUser == 3 && newPertumbuhan.muridId == userId)) {
+                    if (!_pertumbuhanList.any(
+                        (pertumbuhan) => pertumbuhan.id == newPertumbuhan.id)) {
                       setState(() {
-                        _anekdotList.add(newAnekdot);
+                        _pertumbuhanList.add(newPertumbuhan);
                         _filterList();
                       });
                     }
                   }
                 } else if (data.events.contains(
-                  'databases.*.collections.${AppwriteConstants.anekdotCollection}.documents.*.update',
+                  'databases.*.collections.${AppwriteConstants.pertumbuhanCollection}.documents.*.update',
                 )) {
                   final startingPoint =
                       data.events[0].lastIndexOf('documents.');
                   final endPoint = data.events[0].lastIndexOf('.update');
-                  final anekdotId =
+                  final pertumbuhanId =
                       data.events[0].substring(startingPoint + 10, endPoint);
-                  var anekdot = _anekdotList
-                      .firstWhere((element) => element.id == anekdotId);
-                  final anekdotIndex = _anekdotList.indexOf(anekdot);
+                  var pertumbuhan = _pertumbuhanList
+                      .firstWhere((element) => element.id == pertumbuhanId);
+                  final pertumbuhanIndex =
+                      _pertumbuhanList.indexOf(pertumbuhan);
                   setState(() {
-                    _anekdotList.removeAt(anekdotIndex);
-                    final updatedAnekdot = AnekdotModel.fromMap(data.payload);
+                    _pertumbuhanList.removeAt(pertumbuhanIndex);
+                    final updatedPertumbuhan =
+                        PertumbuhanModel.fromMap(data.payload);
                     if ((levelUser == 1) ||
-                        (levelUser == 2 && updatedAnekdot.uid == userId) ||
-                        (levelUser == 3 && updatedAnekdot.muridId == userId)) {
-                      _anekdotList.insert(anekdotIndex, updatedAnekdot);
+                        (levelUser == 2 && updatedPertumbuhan.uid == userId) ||
+                        (levelUser == 3 &&
+                            updatedPertumbuhan.muridId == userId)) {
+                      _pertumbuhanList.insert(
+                          pertumbuhanIndex, updatedPertumbuhan);
                     }
                     _filterList();
                   });
                 } else if (data.events.contains(
-                  'databases.*.collections.${AppwriteConstants.anekdotCollection}.documents.*.delete',
+                  'databases.*.collections.${AppwriteConstants.pertumbuhanCollection}.documents.*.delete',
                 )) {
                   final startingPoint =
                       data.events[0].lastIndexOf('documents.');
                   final endPoint = data.events[0].lastIndexOf('.delete');
-                  final anekdotId =
+                  final pertumbuhanId =
                       data.events[0].substring(startingPoint + 10, endPoint);
 
                   setState(() {
-                    _anekdotList
-                        .removeWhere((anekdot) => anekdot.id == anekdotId);
+                    _pertumbuhanList.removeWhere(
+                        (pertumbuhan) => pertumbuhan.id == pertumbuhanId);
                     _filterList();
                   });
                 }
@@ -146,7 +152,7 @@ class _AnekdotPageState extends ConsumerState<AnekdotPage> {
                     child: Padding(
                       padding: EdgeInsets.only(bottom: 16),
                       child: CustomText(
-                        text: "Catatan Anekdotal",
+                        text: "Catatan Pertumbuhan",
                         fontSize: 18,
                         fontWeight: FontWeight.w800,
                         textAlign: TextAlign.start,
@@ -156,8 +162,8 @@ class _AnekdotPageState extends ConsumerState<AnekdotPage> {
                   if (levelUser != 3)
                     ElevatedButton(
                       onPressed: () {
-                        Navigator.push(
-                            context, AddAnekdotPage.route(kelompok: kelompok));
+                        Navigator.push(context,
+                            AddPertumbuhanPage.route(kelompok: kelompok));
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.green,
@@ -169,9 +175,11 @@ class _AnekdotPageState extends ConsumerState<AnekdotPage> {
                     ),
                   MonthlyCalendar(onDateSelected: _onDateSelected),
                   const SizedBox(height: 16),
-                  anekdotAsyncValue.when(
-                    data: (anekdotList) {
-                      _anekdotList = anekdotList;
+                  pertumbuhanAsyncValue.when(
+                    data: (pertumbuhanList) {
+                      _pertumbuhanList = pertumbuhanList;
+                      _filterList();
+
                       return Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -194,42 +202,36 @@ class _AnekdotPageState extends ConsumerState<AnekdotPage> {
                                 )),
                                 DataColumn(
                                     label: CustomText(
-                                  text: 'Kelompok',
-                                  fontWeight: FontWeight.w700,
-                                )),
-                                DataColumn(
-                                    label: CustomText(
-                                  text: 'Kegiatan',
-                                  fontWeight: FontWeight.w700,
-                                )),
-                                DataColumn(
-                                    label: CustomText(
-                                  text: 'Tujuan Pembelajaran',
-                                  fontWeight: FontWeight.w700,
-                                )),
-                                DataColumn(
-                                    label: CustomText(
                                   text: 'Nama Murid',
                                   fontWeight: FontWeight.w700,
                                 )),
                                 DataColumn(
                                     label: CustomText(
-                                  text: 'Foto',
+                                  text: 'Kelompok',
                                   fontWeight: FontWeight.w700,
                                 )),
                                 DataColumn(
                                     label: CustomText(
-                                  text: 'Nilai Agama dan Budi Pekerti',
+                                  textAlign: TextAlign.center,
+                                  text: 'Tinggi Badan\n(cm)',
                                   fontWeight: FontWeight.w700,
                                 )),
                                 DataColumn(
                                     label: CustomText(
-                                  text: 'Jati Diri',
+                                  textAlign: TextAlign.center,
+                                  text: 'Berat Badan\n(kg)',
+                                  fontWeight: FontWeight.w700,
+                                )),
+
+                                DataColumn(
+                                    label: CustomText(
+                                  textAlign: TextAlign.center,
+                                  text: 'Lingkar Kepala\n(cm)',
                                   fontWeight: FontWeight.w700,
                                 )),
                                 DataColumn(
                                     label: CustomText(
-                                  text: 'Literasi dan STEAM',
+                                  text: 'Kondisi Fisik',
                                   fontWeight: FontWeight.w700,
                                 )),
                                 DataColumn(
@@ -250,13 +252,13 @@ class _AnekdotPageState extends ConsumerState<AnekdotPage> {
                                 )),
                               ],
                               rows: _filteredList
-                                  .where((anekdot) => !(levelUser == 2 &&
-                                      anekdot.kelompok != kelompok))
-                                  .map((anekdot) {
+                                  .where((pertumbuhan) => !(levelUser == 2 &&
+                                      pertumbuhan.kelompok != kelompok))
+                                  .map((pertumbuhan) {
                                 final muridData = ref.watch(
-                                    getUserDataProvider(anekdot.muridId));
-                                final guruData =
-                                    ref.watch(getUserDataProvider(anekdot.uid));
+                                    getUserDataProvider(pertumbuhan.muridId));
+                                // final guruData = ref.watch(
+                                //     getUserDataProvider(pertumbuhan.uid));
                                 return DataRow(
                                   cells: [
                                     DataCell(
@@ -266,46 +268,7 @@ class _AnekdotPageState extends ConsumerState<AnekdotPage> {
                                               100, // Ubah sesuai kebutuhan
                                         ),
                                         child: Text(
-                                          anekdot.tanggal,
-                                          overflow: TextOverflow.visible,
-                                          softWrap: true,
-                                        ),
-                                      ),
-                                    ),
-                                    DataCell(
-                                      ConstrainedBox(
-                                        constraints: const BoxConstraints(
-                                          maxWidth:
-                                              100, // Ubah sesuai kebutuhan
-                                        ),
-                                        child: Text(
-                                          anekdot.kelompok,
-                                          overflow: TextOverflow.visible,
-                                          softWrap: true,
-                                        ),
-                                      ),
-                                    ),
-                                    DataCell(
-                                      ConstrainedBox(
-                                        constraints: const BoxConstraints(
-                                          maxWidth:
-                                              200, // Ubah sesuai kebutuhan
-                                        ),
-                                        child: Text(
-                                          anekdot.pengamatan,
-                                          overflow: TextOverflow.visible,
-                                          softWrap: true,
-                                        ),
-                                      ),
-                                    ),
-                                    DataCell(
-                                      ConstrainedBox(
-                                        constraints: const BoxConstraints(
-                                          maxWidth:
-                                              200, // Ubah sesuai kebutuhan
-                                        ),
-                                        child: Text(
-                                          anekdot.tujuan,
+                                          pertumbuhan.tanggal,
                                           overflow: TextOverflow.visible,
                                           softWrap: true,
                                         ),
@@ -332,39 +295,11 @@ class _AnekdotPageState extends ConsumerState<AnekdotPage> {
                                     DataCell(
                                       ConstrainedBox(
                                         constraints: const BoxConstraints(
-                                          maxWidth: 150,
-                                          maxHeight: 150,
-                                        ),
-                                        child: ref
-                                            .watch(getAnekdotImageProvider(
-                                                anekdot.imageId))
-                                            .when(
-                                              data: (imageData) {
-                                                if (imageData != null) {
-                                                  return Image.memory(
-                                                    imageData,
-                                                    fit: BoxFit.cover,
-                                                  );
-                                                } else {
-                                                  return const Icon(Icons
-                                                      .image_not_supported);
-                                                }
-                                              },
-                                              loading: () =>
-                                                  const CircularProgressIndicator(),
-                                              error: (_, __) =>
-                                                  const Icon(Icons.error),
-                                            ),
-                                      ),
-                                    ),
-                                    DataCell(
-                                      ConstrainedBox(
-                                        constraints: const BoxConstraints(
                                           maxWidth:
-                                              200, // Ubah sesuai kebutuhan
+                                              100, // Ubah sesuai kebutuhan
                                         ),
                                         child: Text(
-                                          anekdot.nilai,
+                                          pertumbuhan.kelompok,
                                           overflow: TextOverflow.visible,
                                           softWrap: true,
                                         ),
@@ -377,7 +312,7 @@ class _AnekdotPageState extends ConsumerState<AnekdotPage> {
                                               200, // Ubah sesuai kebutuhan
                                         ),
                                         child: Text(
-                                          anekdot.jatiDiri,
+                                          pertumbuhan.tinggi.toString(),
                                           overflow: TextOverflow.visible,
                                           softWrap: true,
                                         ),
@@ -390,7 +325,20 @@ class _AnekdotPageState extends ConsumerState<AnekdotPage> {
                                               200, // Ubah sesuai kebutuhan
                                         ),
                                         child: Text(
-                                          anekdot.literasi,
+                                          pertumbuhan.berat.toString(),
+                                          overflow: TextOverflow.visible,
+                                          softWrap: true,
+                                        ),
+                                      ),
+                                    ),
+                                    DataCell(
+                                      ConstrainedBox(
+                                        constraints: const BoxConstraints(
+                                          maxWidth:
+                                              200, // Ubah sesuai kebutuhan
+                                        ),
+                                        child: Text(
+                                          pertumbuhan.kepala.toString(),
                                           overflow: TextOverflow.visible,
                                           softWrap: true,
                                         ),
@@ -403,7 +351,7 @@ class _AnekdotPageState extends ConsumerState<AnekdotPage> {
                                               200, // Ubah sesuai kebutuhan
                                         ), // Sesuaikan lebar sesuai kebutuhan
                                         child: Text(
-                                          anekdot.umpanBalik,
+                                          pertumbuhan.fisik,
                                           overflow: TextOverflow.visible,
                                           softWrap: true,
                                         ),
@@ -416,7 +364,20 @@ class _AnekdotPageState extends ConsumerState<AnekdotPage> {
                                               200, // Ubah sesuai kebutuhan
                                         ), // Sesuaikan lebar sesuai kebutuhan
                                         child: Text(
-                                          anekdot.tanggapan,
+                                          pertumbuhan.rekomendasi,
+                                          overflow: TextOverflow.visible,
+                                          softWrap: true,
+                                        ),
+                                      ),
+                                    ),
+                                    DataCell(
+                                      ConstrainedBox(
+                                        constraints: const BoxConstraints(
+                                          maxWidth:
+                                              200, // Ubah sesuai kebutuhan
+                                        ), // Sesuaikan lebar sesuai kebutuhan
+                                        child: Text(
+                                          pertumbuhan.tanggapan,
                                           overflow: TextOverflow.visible,
                                           softWrap: true,
                                         ),
@@ -430,8 +391,8 @@ class _AnekdotPageState extends ConsumerState<AnekdotPage> {
                                             onPressed: () {
                                               Navigator.push(
                                                   context,
-                                                  EditAnekdotPage.route(
-                                                      anekdot: anekdot,
+                                                  EditPertumbuhanPage.route(
+                                                      pertumbuhan: pertumbuhan,
                                                       kelompok: kelompok,
                                                       levelUser: levelUser));
                                             },
@@ -441,7 +402,7 @@ class _AnekdotPageState extends ConsumerState<AnekdotPage> {
                                               icon: const Icon(Icons.delete),
                                               onPressed: () {
                                                 _showDeleteDialog(context, ref,
-                                                    anekdot, muridData);
+                                                    pertumbuhan, muridData);
                                               },
                                             ),
                                         ],
@@ -477,7 +438,7 @@ class _AnekdotPageState extends ConsumerState<AnekdotPage> {
 }
 
 void _showDeleteDialog(BuildContext context, WidgetRef ref,
-    AnekdotModel anekdot, AsyncValue<Document?> muridData) {
+    PertumbuhanModel pertumbuhan, AsyncValue<Document?> muridData) {
   showDialog(
     context: context,
     builder: (BuildContext context) {
@@ -490,12 +451,12 @@ void _showDeleteDialog(BuildContext context, WidgetRef ref,
                 data: (data) {
                   final nama = data?.data['nama'] ?? 'Murid tidak ditemukan';
                   return Text(
-                    'Apakah Anda yakin ingin menghapus catatan anekdotal $nama pada tanggal ${anekdot.tanggal}',
+                    'Apakah Anda yakin ingin menghapus catatan Pertumbuhan $nama pada tanggal ${pertumbuhan.tanggal}',
                   );
                 },
                 loading: () => const CircularProgressIndicator(),
                 error: (_, __) => Text(
-                  'Apakah Anda yakin ingin menghapus catatan anekdotal pada tanggal ${anekdot.tanggal}?',
+                  'Apakah Anda yakin ingin menghapus catatan Pertumbuhan pada tanggal ${pertumbuhan.tanggal}?',
                 ),
               ),
             ],
@@ -513,11 +474,11 @@ void _showDeleteDialog(BuildContext context, WidgetRef ref,
             onPressed: () {
               Navigator.of(context).pop();
               ref
-                  .read(anekdotControllerProvider.notifier)
-                  .deleteAnekdot(anekdot, context);
+                  .read(pertumbuhanControllerProvider.notifier)
+                  .deletePertumbuhan(pertumbuhan, context);
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
-                  content: Text('Catatan Anekdotal berhasil dihapus'),
+                  content: Text('Catatan Pertumbuhan berhasil dihapus'),
                 ),
               );
             },

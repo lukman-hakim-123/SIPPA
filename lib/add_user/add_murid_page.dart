@@ -18,7 +18,15 @@ class AddMuridPage extends ConsumerStatefulWidget {
 }
 
 class _AddMuridPageState extends ConsumerState<AddMuridPage> {
-  final List<String> kelompokOptions = ['A', 'B', 'C', 'D', 'E', 'F', 'G'];
+  final List<String> kelompokOptions = [
+    'Pra1',
+    'A1',
+    'A2',
+    'A3',
+    'B1',
+    'B2',
+    'B3'
+  ];
   String? selectedKelompok;
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final emailController = TextEditingController();

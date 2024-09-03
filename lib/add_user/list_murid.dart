@@ -26,10 +26,18 @@ class _MuridListPageState extends ConsumerState<MuridListPage> {
   int selectedIndex = 6;
   List<User> muridList = [];
 
+  final ScrollController _scrollController = ScrollController();
+
   @override
   void initState() {
     super.initState();
     Future.microtask(() => _loadInitialData());
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
   }
 
   Future<void> _loadInitialData() async {
@@ -38,6 +46,12 @@ class _MuridListPageState extends ConsumerState<MuridListPage> {
     if (mounted) {
       setState(() => muridList = initialList);
     }
+  }
+
+  void _updateMuridList(User deletedMurid) {
+    setState(() {
+      muridList.removeWhere((murid) => murid.id == deletedMurid.id);
+    });
   }
 
   @override
@@ -83,7 +97,7 @@ class _MuridListPageState extends ConsumerState<MuridListPage> {
       appBar: const CustomAppBar(title: 'Daftar Murid'),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16),
-        child: ListView(
+        child: Column(
           children: [
             const SizedBox(height: 16),
             Align(
@@ -102,59 +116,80 @@ class _MuridListPageState extends ConsumerState<MuridListPage> {
               ),
             ),
             const SizedBox(height: 16),
-            ...muridList.map((murid) => Card(
-                  margin: const EdgeInsets.symmetric(vertical: 8),
-                  child: ListTile(
-                    leading: ClipOval(
-                      child: ref
-                          .watch(getUserImageProvider(murid
-                              .imageId)) // Anda mungkin perlu menyesuaikan nama provider
-                          .when(
-                            data: (imageData) {
-                              if (imageData != null) {
-                                return Image.memory(
-                                  imageData,
-                                  width:
-                                      50, // Sesuaikan dengan ukuran yang diinginkan
-                                  height: 50,
-                                  fit: BoxFit.cover,
-                                );
-                              } else {
-                                return Image.asset(
-                                  'assets/images/pp_kosong.jpg', // Gambar default jika tidak ada gambar
-                                  width: 50,
-                                  height: 50,
-                                  fit: BoxFit.cover,
-                                );
-                              }
-                            },
-                            loading: () => const Loader(),
-                            error: (_, __) => const Center(
-                              child: Icon(Icons.error, color: Colors.white),
+            Expanded(
+              child: muridList.isEmpty
+                  ? const Center(child: CircularProgressIndicator())
+                  : ListView.builder(
+                      controller: _scrollController,
+                      itemCount: muridList.length,
+                      cacheExtent: 500, // Pre-load items
+                      itemBuilder: (context, index) {
+                        final murid = muridList[index];
+                        return Card(
+                          margin: const EdgeInsets.symmetric(vertical: 8),
+                          child: ListTile(
+                            leading: ClipOval(
+                              child: SizedBox(
+                                width: 50,
+                                height: 50,
+                                child: ref
+                                    .watch(getUserImageProvider(murid.imageId))
+                                    .when(
+                                      data: (imageData) {
+                                        if (imageData != null) {
+                                          return Image.memory(
+                                            imageData,
+                                            fit: BoxFit.cover,
+                                            errorBuilder:
+                                                (context, error, stackTrace) {
+                                              return const Icon(Icons.error,
+                                                  color: Colors.red);
+                                            },
+                                          );
+                                        } else {
+                                          return Image.asset(
+                                            'assets/images/pp_kosong.jpg',
+                                            fit: BoxFit.cover,
+                                            errorBuilder:
+                                                (context, error, stackTrace) {
+                                              return const Icon(Icons.error,
+                                                  color: Colors.red);
+                                            },
+                                          );
+                                        }
+                                      },
+                                      loading: () => const Loader(),
+                                      error: (_, __) => const Icon(Icons.error,
+                                          color: Colors.red),
+                                    ),
+                              ),
+                            ),
+                            title: Text(murid.nama),
+                            subtitle: Text('Kelompok: ${murid.kelompok}'),
+                            trailing: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                IconButton(
+                                  icon: const Icon(Icons.edit),
+                                  onPressed: () {
+                                    Navigator.push(
+                                        context, EditMuridPage.route(murid));
+                                  },
+                                ),
+                                IconButton(
+                                  icon: const Icon(Icons.delete),
+                                  onPressed: () {
+                                    _showDeleteConfirmationDialog(
+                                        context, ref, murid, _updateMuridList);
+                                  },
+                                ),
+                              ],
                             ),
                           ),
+                        );
+                      },
                     ),
-                    title: Text(murid.nama),
-                    subtitle: Text('Kelompok: ${murid.kelompok}'),
-                    trailing: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        IconButton(
-                          icon: const Icon(Icons.edit),
-                          onPressed: () {
-                            Navigator.push(context, EditMuridPage.route(murid));
-                          },
-                        ),
-                        IconButton(
-                          icon: const Icon(Icons.delete),
-                          onPressed: () {
-                            _showDeleteConfirmationDialog(context, ref, murid);
-                          },
-                        ),
-                      ],
-                    ),
-                  ),
-                )),
+            ),
           ],
         ),
       ),
@@ -170,8 +205,8 @@ class _MuridListPageState extends ConsumerState<MuridListPage> {
   }
 }
 
-void _showDeleteConfirmationDialog(
-    BuildContext context, WidgetRef ref, User murid) {
+void _showDeleteConfirmationDialog(BuildContext context, WidgetRef ref,
+    User murid, Function(User) updateList) {
   showDialog(
     context: context,
     builder: (context) => AlertDialog(
@@ -186,9 +221,10 @@ void _showDeleteConfirmationDialog(
           child: const Text('Batal'),
         ),
         TextButton(
-          onPressed: () {
+          onPressed: () async {
             Navigator.pop(context);
-            ref.read(muridControllerProvider.notifier).deleteGuru(murid);
+            await ref.read(muridControllerProvider.notifier).deleteGuru(murid);
+            updateList(murid);
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(content: Text('Murid berhasil dihapus')),
             );

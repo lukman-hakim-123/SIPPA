@@ -172,8 +172,12 @@ class AnekdotController extends StateNotifier<bool> {
     state = true;
     try {
       final user = _ref.read(currentUserDetailsProvider).value!;
-      final kelompok = _ref.read(searchUserProvider(muridId)).value!.kelompok;
-
+      final kelompok = _ref.read(searchUserProvider(muridId)).value?.kelompok;
+      if (kelompok == null) {
+        showSnackBar(context, 'Tekan lagi');
+        state = false;
+        return;
+      }
       if (image != null) {
         if (imageId != null && imageId.isNotEmpty) {
           await _anekdotAPI.deleteImage(imageId);

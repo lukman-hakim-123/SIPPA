@@ -83,8 +83,7 @@ class AuthController extends StateNotifier<bool> {
       final res2 = await _userAPI.saveUserData(userModel);
       res2.fold((l) => showSnackBar(context, l.message), (r) {
         showSnackBar(context, "Account Murid Created Successfully");
-        Navigator.pushReplacement(
-            context, MuridListPage.route(kelompok: kelompok));
+        Navigator.pop(context, MuridListPage.route(kelompok: kelompok));
       });
     });
   }

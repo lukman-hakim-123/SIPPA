@@ -150,7 +150,6 @@ class _EditCpPageState extends ConsumerState<EditCpPage> {
                 },
               ),
               const SizedBox(height: 16),
-
               TextFormField(
                 keyboardType: TextInputType.multiline,
                 maxLines: null,
@@ -237,25 +236,6 @@ class _EditCpPageState extends ConsumerState<EditCpPage> {
                 error: (error, stack) => CustomText(text: 'Error: $error'),
               ),
               const SizedBox(height: 16),
-              TextFormField(
-                keyboardType: TextInputType.multiline,
-                maxLines: null,
-                minLines: 3,
-                controller: tujuanController,
-                maxLength: 500,
-                decoration: const InputDecoration(
-                  border: OutlineInputBorder(),
-                  labelText: 'Tujuan',
-                ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Masukkan Tujuan';
-                  }
-                  return null;
-                },
-                readOnly: widget.levelUser == 3,
-              ),
-              // const SizedBox(height: 16),
               Row(
                 children: [
                   InkWell(
@@ -311,7 +291,6 @@ class _EditCpPageState extends ConsumerState<EditCpPage> {
                 ],
               ),
               const SizedBox(height: 16),
-
               TextFormField(
                 keyboardType: TextInputType.multiline,
                 maxLines: null,
