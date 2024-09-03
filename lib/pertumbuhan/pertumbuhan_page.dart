@@ -179,7 +179,6 @@ class _PertumbuhanPageState extends ConsumerState<PertumbuhanPage> {
                     data: (pertumbuhanList) {
                       _pertumbuhanList = pertumbuhanList;
                       _filterList();
-
                       return Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [

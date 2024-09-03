@@ -109,6 +109,7 @@ class RubrikAPI implements IRubrikAPI {
           'agama': rubrik.agama,
           'jatidiri': rubrik.jatidiri,
           'literasi': rubrik.literasi,
+          'kelompok': rubrik.kelompok,
           'skor': rubrik.skor,
           'muridId': rubrik.muridId,
           'rekomendasi': rubrik.rekomendasi, //umpan balik

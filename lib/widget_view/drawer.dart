@@ -107,6 +107,8 @@ class CustomDrawer extends ConsumerWidget {
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
                         ),
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 1,
                       ),
                       const SizedBox(height: 1),
                       Text(
@@ -115,6 +117,8 @@ class CustomDrawer extends ConsumerWidget {
                           color: Colors.white70,
                           fontSize: 14,
                         ),
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 1,
                       ),
                     ],
                   ),

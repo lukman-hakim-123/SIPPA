@@ -6,6 +6,7 @@ import 'package:sippa/common/loading.dart';
 import 'package:sippa/models/pertumbuhan.dart';
 import 'package:sippa/pertumbuhan/controller/pertumbuhanController.dart';
 import 'package:sippa/widget_view/appbar.dart';
+import 'package:sippa/widget_view/teks.dart';
 
 class EditPertumbuhanPage extends ConsumerStatefulWidget {
   static route(
@@ -103,8 +104,8 @@ class _EditPertumbuhanPageState extends ConsumerState<EditPertumbuhanPage> {
     final isLoading = ref.watch(pertumbuhanControllerProvider);
 
     return Scaffold(
-      appBar: CustomAppBar(
-        title: 'Edit Catatan Pertumbuhan',
+      appBar: const CustomAppBar(
+        title: 'Edit Pertumbuhan',
       ),
       backgroundColor: Colors.white,
       body: Padding(
@@ -163,13 +164,15 @@ class _EditPertumbuhanPageState extends ConsumerState<EditPertumbuhanPage> {
                         return DropdownMenuItem<String>(
                           value: murid.id,
                           enabled: widget.levelUser != 3,
-                          child: Text(murid.nama),
+                          child: CustomText(text: murid.nama),
                         );
                       }).toList(),
                       value: widget.pertumbuhan.muridId,
-                      onChanged: (String? newValue) {
-                        muridIdController.text = newValue ?? '';
-                      },
+                      onChanged: widget.levelUser != 3
+                          ? (String? newValue) {
+                              muridIdController.text = newValue ?? '';
+                            }
+                          : null,
                       validator: (value) {
                         if (value == null || value.isEmpty) {
                           return 'Pilih murid';

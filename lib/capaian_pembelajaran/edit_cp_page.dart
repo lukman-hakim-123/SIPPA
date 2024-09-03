@@ -220,9 +220,11 @@ class _EditCpPageState extends ConsumerState<EditCpPage> {
                           child: CustomText(text: murid.nama),
                         );
                       }).toList(),
-                      onChanged: (String? newValue) {
-                        muridIdController.text = newValue ?? '';
-                      },
+                      onChanged: widget.levelUser != 3
+                          ? (String? newValue) {
+                              muridIdController.text = newValue ?? '';
+                            }
+                          : null,
                       validator: (value) {
                         if (value == null || value.isEmpty) {
                           return 'Pilih murid';

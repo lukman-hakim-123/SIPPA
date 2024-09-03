@@ -8,6 +8,7 @@ import 'package:sippa/models/anekdot.dart';
 import 'package:sippa/widget_view/appbar.dart';
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
+import 'package:sippa/widget_view/teks.dart';
 
 class EditAnekdotPage extends ConsumerStatefulWidget {
   static route(
@@ -317,13 +318,15 @@ class _EditAnekdotPageState extends ConsumerState<EditAnekdotPage> {
                         return DropdownMenuItem<String>(
                           value: murid.id,
                           enabled: widget.levelUser != 3,
-                          child: Text(murid.nama),
+                          child: CustomText(text: murid.nama),
                         );
                       }).toList(),
                       value: widget.anekdot.muridId,
-                      onChanged: (String? newValue) {
-                        muridIdController.text = newValue ?? '';
-                      },
+                      onChanged: widget.levelUser != 3
+                          ? (String? newValue) {
+                              muridIdController.text = newValue ?? '';
+                            }
+                          : null,
                       validator: (value) {
                         if (value == null || value.isEmpty) {
                           return 'Pilih murid';

@@ -59,12 +59,12 @@ class PertumbuhanAPI implements IPertumbuhanAPI {
   }
 
   @override
-  Future<List<Document>> getUserPertumbuhan(String uid) async {
+  Future<List<Document>> getUserPertumbuhan(String muridId) async {
     final documents = await _db.listDocuments(
       databaseId: AppwriteConstants.databaseId,
       collectionId: AppwriteConstants.pertumbuhanCollection,
       queries: [
-        Query.equal('uid', uid),
+        Query.equal('muridId', muridId),
       ],
     );
     return documents.documents;

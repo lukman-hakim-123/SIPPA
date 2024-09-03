@@ -279,11 +279,13 @@ class _EditHkPageState extends ConsumerState<EditHkPage> {
                           child: CustomText(text: murid.nama),
                         );
                       }).toList(),
-                      onChanged: (String? newValue) {
-                        setState(() {
-                          muridIdController.text = newValue ?? '';
-                        });
-                      },
+                      onChanged: widget.levelUser != 3
+                          ? (String? newValue) {
+                              setState(() {
+                                muridIdController.text = newValue ?? '';
+                              });
+                            }
+                          : null,
                       validator: (value) {
                         if (value == null || value.isEmpty) {
                           return 'Pilih murid';

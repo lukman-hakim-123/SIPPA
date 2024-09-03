@@ -172,6 +172,8 @@ class _AnekdotPageState extends ConsumerState<AnekdotPage> {
                   anekdotAsyncValue.when(
                     data: (anekdotList) {
                       _anekdotList = anekdotList;
+                      _filterList();
+
                       return Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
