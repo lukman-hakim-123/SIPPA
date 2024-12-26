@@ -7,6 +7,7 @@ import 'package:intl/intl.dart';
 
 import 'package:sippa/auth/controllers/auth_controller.dart';
 import 'package:sippa/common/loading.dart';
+import 'package:sippa/common/reload.dart';
 import 'package:sippa/constant/appwrite.dart';
 import 'package:sippa/hasil_karya/add_hasil_karya_page.dart';
 import 'package:sippa/hasil_karya/controller/hasil_karya_controller.dart';
@@ -448,7 +449,21 @@ class _HkPageState extends ConsumerState<HkPage> {
                     },
                     loading: () =>
                         const Center(child: CircularProgressIndicator()),
-                    error: (error, stack) => const Loader(),
+                    error: (error, stack) {
+                      if (error.toString().contains('Failed host lookup')) {
+                        return ReloadError(
+                          onReload: () {
+                            ref.refresh(hkControllerProvider);
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => const HkPage()),
+                            );
+                          },
+                        );
+                      }
+                      return Text(error.toString());
+                    },
                   ),
                   const SizedBox(height: 40),
                 ],
@@ -456,7 +471,20 @@ class _HkPageState extends ConsumerState<HkPage> {
             );
           },
           loading: () => const Center(child: CircularProgressIndicator()),
-          error: (error, stack) => const Loader(),
+          error: (error, stack) {
+            if (error.toString().contains('Failed host lookup')) {
+              return ReloadError(
+                onReload: () {
+                  ref.refresh(hkControllerProvider);
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(builder: (context) => const HkPage()),
+                  );
+                },
+              );
+            }
+            return Text(error.toString());
+          },
         ),
       ),
       drawer: CustomDrawer(

@@ -10,6 +10,7 @@ import 'package:sippa/capaian_pembelajaran/add_cp_page.dart';
 import 'package:sippa/capaian_pembelajaran/controller/cp_controller.dart';
 import 'package:sippa/capaian_pembelajaran/edit_cp_page.dart';
 import 'package:sippa/common/loading.dart';
+import 'package:sippa/common/reload.dart';
 import 'package:sippa/constant/appwrite.dart';
 
 import 'package:sippa/models/cp.dart';
@@ -440,7 +441,22 @@ class _CpPageState extends ConsumerState<CpPage> {
                     },
                     loading: () =>
                         const Center(child: CircularProgressIndicator()),
-                    error: (error, stack) => const Loader(),
+                    error: (error, stack) {
+                      if (error.toString().contains('Failed host lookup')) {
+                        return ReloadError(
+                          onReload: () {
+                            ref.refresh(
+                                cpControllerProvider); // Reset state atau data provider
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => const CpPage()),
+                            );
+                          },
+                        );
+                      }
+                      return Text(error.toString());
+                    },
                   ),
                   const SizedBox(height: 40),
                 ],
@@ -448,7 +464,7 @@ class _CpPageState extends ConsumerState<CpPage> {
             );
           },
           loading: () => const Center(child: CircularProgressIndicator()),
-          error: (error, stack) => const Loader(),
+          error: (error, stack) => Text(error.toString()),
         ),
       ),
       drawer: CustomDrawer(

@@ -7,6 +7,7 @@ import 'package:intl/intl.dart';
 
 import 'package:sippa/auth/controllers/auth_controller.dart';
 import 'package:sippa/common/loading.dart';
+import 'package:sippa/common/reload.dart';
 import 'package:sippa/constant/appwrite.dart';
 import 'package:sippa/models/pertumbuhan.dart';
 import 'package:sippa/pertumbuhan/add_pertumbuhan_page.dart';
@@ -417,7 +418,21 @@ class _PertumbuhanPageState extends ConsumerState<PertumbuhanPage> {
                     },
                     loading: () =>
                         const Center(child: CircularProgressIndicator()),
-                    error: (error, stack) => const Loader(),
+                    error: (error, stack) {
+                      if (error.toString().contains('Failed host lookup')) {
+                        return ReloadError(
+                          onReload: () {
+                            ref.refresh(pertumbuhanControllerProvider);
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => const PertumbuhanPage()),
+                            );
+                          },
+                        );
+                      }
+                      return Text(error.toString());
+                    },
                   ),
                   const SizedBox(height: 40),
                 ],
@@ -425,7 +440,21 @@ class _PertumbuhanPageState extends ConsumerState<PertumbuhanPage> {
             );
           },
           loading: () => const Center(child: CircularProgressIndicator()),
-          error: (error, stack) => const Loader(),
+          error: (error, stack) {
+                      if (error.toString().contains('Failed host lookup')) {
+                        return ReloadError(
+                          onReload: () {
+                            ref.refresh(pertumbuhanControllerProvider);
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => const PertumbuhanPage()),
+                            );
+                          },
+                        );
+                      }
+                      return Text(error.toString());
+                    },
         ),
       ),
       drawer: CustomDrawer(

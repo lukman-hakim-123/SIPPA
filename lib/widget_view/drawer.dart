@@ -208,7 +208,7 @@ class CustomDrawer extends ConsumerWidget {
                 ),
                 selected: selectedIndex == 9,
                 onTap: () {
-                  ref.read(authControllerProvider.notifier).logout(context);
+                  _showLogoutConfirmationDialog(context, ref);
                 },
               ),
             ],
@@ -223,6 +223,32 @@ class CustomDrawer extends ConsumerWidget {
       },
     );
   }
+
+  void _showLogoutConfirmationDialog(BuildContext context, WidgetRef ref) {
+  showDialog(
+    context: context,
+    builder: (dialogContext) => AlertDialog(
+      title: const Text('Konfirmasi Logout'),
+      content: const Text('Apakah Anda yakin ingin logout?'),
+      actions: [
+        TextButton(
+          onPressed: () {
+            Navigator.pop(dialogContext); // Tutup dialog
+          },
+          child: const Text('Batal'),
+        ),
+        TextButton(
+          onPressed: () async {
+            Navigator.pop(dialogContext); // Tutup dialog
+            ref.read(authControllerProvider.notifier).logout(context);
+          },
+          child: const Text('Logout'),
+        ),
+      ],
+    ),
+  );
+}
+
 
   List<Widget> _buildMenuItems(int? levelUser, int selectedIndex,
       BuildContext context, String? kelompok) {

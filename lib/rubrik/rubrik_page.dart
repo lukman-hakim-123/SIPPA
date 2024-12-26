@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 
 import 'package:sippa/auth/controllers/auth_controller.dart';
 import 'package:sippa/common/loading.dart';
+import 'package:sippa/common/reload.dart';
 import 'package:sippa/constant/appwrite.dart';
 import 'package:sippa/models/rubrik.dart';
 import 'package:sippa/rubrik/add_rubrik_page.dart';
@@ -485,7 +486,21 @@ class _RubrikPageState extends ConsumerState<RubrikPage> {
                     },
                     loading: () =>
                         const Center(child: CircularProgressIndicator()),
-                    error: (error, stack) => const Loader(),
+                    error: (error, stack) {
+                      if (error.toString().contains('Failed host lookup')) {
+                        return ReloadError(
+                          onReload: () {
+                            ref.refresh(rubrikControllerProvider);
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => const RubrikPage()),
+                            );
+                          },
+                        );
+                      }
+                      return Text(error.toString());
+                    },
                   ),
                   const SizedBox(height: 40),
                 ],
@@ -493,7 +508,21 @@ class _RubrikPageState extends ConsumerState<RubrikPage> {
             );
           },
           loading: () => const Center(child: CircularProgressIndicator()),
-          error: (error, stack) => const Loader(),
+          error: (error, stack) {
+                      if (error.toString().contains('Failed host lookup')) {
+                        return ReloadError(
+                          onReload: () {
+                            ref.refresh(rubrikControllerProvider);
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => const RubrikPage()),
+                            );
+                          },
+                        );
+                      }
+                      return Text(error.toString());
+                    },
         ),
       ),
       drawer: CustomDrawer(

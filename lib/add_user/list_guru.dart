@@ -72,7 +72,32 @@ class _GuruListPageState extends ConsumerState<GuruListPage> {
       appBar: const CustomAppBar(title: 'Daftar Guru'),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16),
-        child: ListView(
+        child: guruList.isEmpty?
+        Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(Icons.error, size: 50, color: Colors.red),
+                    const SizedBox(height: 16),
+                    const Text(
+                      'Gagal memuat data. Periksa koneksi internet Anda.',
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 16),
+                    ElevatedButton(
+                      onPressed: () {
+                        ref.refresh(getGuruByFiltersProvider);
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => const GuruListPage()),
+                        );
+                      },
+                      child: const Text('Coba Lagi'),
+                    ),
+                  ],
+                ),
+              ):ListView(
           children: [
             const SizedBox(height: 16),
             Align(

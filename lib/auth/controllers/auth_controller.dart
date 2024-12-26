@@ -131,7 +131,7 @@ class AuthController extends StateNotifier<bool> {
 
     final response = await _authAPI.login(email: email, password: password);
     state = false;
-    response.fold((l) => showSnackBar(context, 'Email atau Password Salah'),
+    response.fold((l) => showSnackBar(context, l.message),
         (r) {
       showSnackBar(context, "Login is Successfully");
       ref.refresh(currentUserAccountProvider);

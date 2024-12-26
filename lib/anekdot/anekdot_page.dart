@@ -10,6 +10,7 @@ import 'package:sippa/anekdot/edit_anekdot.dart';
 
 import 'package:sippa/auth/controllers/auth_controller.dart';
 import 'package:sippa/common/loading.dart';
+import 'package:sippa/common/reload.dart';
 import 'package:sippa/constant/appwrite.dart';
 import 'package:sippa/models/anekdot.dart';
 
@@ -459,7 +460,21 @@ class _AnekdotPageState extends ConsumerState<AnekdotPage> {
                     },
                     loading: () =>
                         const Center(child: CircularProgressIndicator()),
-                    error: (error, stack) => const Loader(),
+                    error: (error, stack) {
+                      if (error.toString().contains('Failed host lookup')) {
+                        return ReloadError(
+                          onReload: () {
+                            ref.refresh(anekdotControllerProvider);
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => const AnekdotPage()),
+                            );
+                          },
+                        );
+                      }
+                      return Text(error.toString());
+                    },
                   ),
                   const SizedBox(height: 40),
                 ],
@@ -467,7 +482,21 @@ class _AnekdotPageState extends ConsumerState<AnekdotPage> {
             );
           },
           loading: () => const Center(child: CircularProgressIndicator()),
-          error: (error, stack) => const Loader(),
+          error: (error, stack) {
+                      if (error.toString().contains('Failed host lookup')) {
+                        return ReloadError(
+                          onReload: () {
+                            ref.refresh(anekdotControllerProvider);
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => const AnekdotPage()),
+                            );
+                          },
+                        );
+                      }
+                      return const Loader();
+                    },
         ),
       ),
       drawer: CustomDrawer(

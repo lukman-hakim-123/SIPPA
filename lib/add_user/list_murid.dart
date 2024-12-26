@@ -118,7 +118,40 @@ class _MuridListPageState extends ConsumerState<MuridListPage> {
             const SizedBox(height: 16),
             Expanded(
               child: muridList.isEmpty
-                  ? const Center(child: CircularProgressIndicator())
+                  ? Center(
+                      child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(Icons.error, size: 50, color: Colors.red),
+                        const SizedBox(height: 16),
+                        Text(
+                          'Gagal memuat data. Periksa koneksi internet Anda.',
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(fontSize: 16),
+                        ),
+                        const SizedBox(height: 16),
+                        ElevatedButton(
+                          onPressed: () {
+                            ref.refresh(
+                                getMuridByFiltersProvider(widget.kelompok));
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => MuridListPage(
+                                        kelompok: widget.kelompok,
+                                      )),
+                            );
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.green,
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 12, vertical: 8),
+                          ),
+                          child: const Text('Muat Ulang',
+                              style: TextStyle(color: Colors.white)),
+                        ),
+                      ],
+                    ))
                   : ListView.builder(
                       controller: _scrollController,
                       itemCount: muridList.length,
