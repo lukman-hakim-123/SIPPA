@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:appwrite/appwrite.dart';
 import 'package:appwrite/models.dart';
 import 'package:flutter/material.dart';
@@ -50,11 +52,17 @@ class _ObservasiPageState extends ConsumerState<ObservasiPage> {
             final userId = userDetails.id;
             final kelompok = userDetails.kelompok;
             final levelUser = userDetails.levelUser;
+            final sekolah = userDetails.sekolah;
+            final paramKey = jsonEncode({'id': userId, 'sekolah': sekolah});
+
             final observasiAsyncValue =
-                ref.watch(getObservasiByUserIdProvider(userId));
+                ref.watch(getObservasiByUserIdProvider(paramKey));
             ref.listen<AsyncValue<RealtimeMessage>>(getLatestObservasiProvider,
                 (_, next) {
               next.whenData((data) {
+                final payloadSekolah = data.payload['sekolah'];
+                if (payloadSekolah != sekolah) return;
+
                 if (data.events.contains(
                   'databases.*.collections.${AppwriteConstants.obsCollection}.documents.*.create',
                 )) {
@@ -128,8 +136,10 @@ class _ObservasiPageState extends ConsumerState<ObservasiPage> {
                   if (levelUser != 3)
                     ElevatedButton(
                       onPressed: () {
-                        Navigator.push(context,
-                            AddObservasiPage.route(kelompok: kelompok));
+                        Navigator.push(
+                            context,
+                            AddObservasiPage.route(
+                                kelompok: kelompok, sekolah: sekolah));
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.green,
@@ -372,6 +382,7 @@ class _ObservasiPageState extends ConsumerState<ObservasiPage> {
                                                   EditObservasiPage.route(
                                                       observasi: observasi,
                                                       kelompok: kelompok,
+                                                      sekolah: sekolah,
                                                       levelUser: levelUser));
                                             },
                                           ),

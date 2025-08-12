@@ -3,7 +3,7 @@ import 'dart:convert';
 
 class RubrikModel {
   final String tujuan;
-  final String kegiatan; //kegiatan
+  final String kegiatan; // kegiatan
   final String skor;
   final String agama;
   final String jatidiri;
@@ -13,8 +13,10 @@ class RubrikModel {
   final String id;
   final String muridId;
   final String kelompok;
-  final String rekomendasi; //umpan balik
+  final String rekomendasi; // umpan balik
   final String tanggapan;
+  final String sekolah; // ✅ Tambahan
+
   RubrikModel({
     required this.tujuan,
     required this.kegiatan,
@@ -29,6 +31,7 @@ class RubrikModel {
     required this.kelompok,
     required this.rekomendasi,
     required this.tanggapan,
+    required this.sekolah, // ✅ Tambahan
   });
 
   RubrikModel copyWith({
@@ -45,6 +48,7 @@ class RubrikModel {
     String? kelompok,
     String? rekomendasi,
     String? tanggapan,
+    String? sekolah, // ✅ Tambahan
   }) {
     return RubrikModel(
       tujuan: tujuan ?? this.tujuan,
@@ -60,6 +64,7 @@ class RubrikModel {
       kelompok: kelompok ?? this.kelompok,
       rekomendasi: rekomendasi ?? this.rekomendasi,
       tanggapan: tanggapan ?? this.tanggapan,
+      sekolah: sekolah ?? this.sekolah, // ✅ Tambahan
     );
   }
 
@@ -77,6 +82,7 @@ class RubrikModel {
       'kelompok': kelompok,
       'rekomendasi': rekomendasi,
       'tanggapan': tanggapan,
+      'sekolah': sekolah, // ✅ Tambahan
     };
   }
 
@@ -95,6 +101,7 @@ class RubrikModel {
       kelompok: map['kelompok'] ?? '',
       rekomendasi: map['rekomendasi'] ?? '',
       tanggapan: map['tanggapan'] ?? '',
+      sekolah: map['sekolah'] ?? '', // ✅ Tambahan
     );
   }
 
@@ -105,7 +112,7 @@ class RubrikModel {
 
   @override
   String toString() {
-    return 'RubrikModel(tujuan: $tujuan, kegiatan: $kegiatan, skor: $skor, agama: $agama, jatidiri: $jatidiri, literasi: $literasi, tanggal: $tanggal, uid: $uid, id: $id, muridId: $muridId, kelompok: $kelompok, rekomendasi: $rekomendasi, tanggapan: $tanggapan)';
+    return 'RubrikModel(tujuan: $tujuan, kegiatan: $kegiatan, skor: $skor, agama: $agama, jatidiri: $jatidiri, literasi: $literasi, tanggal: $tanggal, uid: $uid, id: $id, muridId: $muridId, kelompok: $kelompok, rekomendasi: $rekomendasi, tanggapan: $tanggapan, sekolah: $sekolah)'; // ✅ Tambahan
   }
 
   @override
@@ -124,7 +131,8 @@ class RubrikModel {
         other.muridId == muridId &&
         other.kelompok == kelompok &&
         other.rekomendasi == rekomendasi &&
-        other.tanggapan == tanggapan;
+        other.tanggapan == tanggapan &&
+        other.sekolah == sekolah; // ✅ Tambahan
   }
 
   @override
@@ -141,6 +149,7 @@ class RubrikModel {
         muridId.hashCode ^
         kelompok.hashCode ^
         rekomendasi.hashCode ^
-        tanggapan.hashCode;
+        tanggapan.hashCode ^
+        sekolah.hashCode; // ✅ Tambahan
   }
 }

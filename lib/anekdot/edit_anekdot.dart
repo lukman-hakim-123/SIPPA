@@ -14,21 +14,25 @@ class EditAnekdotPage extends ConsumerStatefulWidget {
   static route(
           {required String kelompok,
           required AnekdotModel anekdot,
-          required int levelUser}) =>
+          required int levelUser,
+          required String sekolah}) =>
       MaterialPageRoute(
           builder: (context) => EditAnekdotPage(
                 kelompok: kelompok,
                 anekdot: anekdot,
                 levelUser: levelUser,
+                sekolah: sekolah,
               ));
 
   final String kelompok;
+  final String sekolah;
   final AnekdotModel anekdot;
   final int levelUser;
 
   const EditAnekdotPage(
       {super.key,
       required this.kelompok,
+      required this.sekolah,
       required this.anekdot,
       required this.levelUser});
 
@@ -53,9 +57,10 @@ class _EditAnekdotPageState extends ConsumerState<EditAnekdotPage> {
   final ImagePicker picker = ImagePicker();
   File? _image;
   String? _errorMessage;
-  static const int maxFileSize = 2 * 1024 * 1024;
+  // static const int maxFileSize = 2 * 1024 * 1024;
   bool _isNewImage = false;
   bool _deleteImage = false;
+  late final Map<String, String> _filterParams;
 
   @override
   void initState() {
@@ -70,6 +75,10 @@ class _EditAnekdotPageState extends ConsumerState<EditAnekdotPage> {
     muridIdController.text = widget.anekdot.muridId;
     tanggapanController.text = widget.anekdot.tanggapan;
     _selectedDate = DateFormat('dd MMMM yyyy').parse(widget.anekdot.tanggal);
+    _filterParams = {
+      'kelompok': widget.kelompok,
+      'sekolah': widget.sekolah,
+    };
   }
 
   Future<void> _selectDate(BuildContext context) async {
@@ -95,7 +104,7 @@ class _EditAnekdotPageState extends ConsumerState<EditAnekdotPage> {
 
       if (pickedFile != null) {
         final file = File(pickedFile.path);
-        final fileSize = await file.length();
+        // final fileSize = await file.length();
 
         setState(() {
           _image = file;
@@ -131,14 +140,14 @@ class _EditAnekdotPageState extends ConsumerState<EditAnekdotPage> {
           deleteId: _deleteImage,
           muridId: muridIdController.text,
           tanggapan: tanggapanController.text,
+          sekolah: widget.anekdot.sekolah,
           context: context);
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final muridAsyncValue =
-        ref.watch(getMuridByFiltersProvider(widget.kelompok));
+    final muridAsyncValue = ref.watch(getMuridByFiltersProvider(_filterParams));
     final isLoading = ref.watch(anekdotControllerProvider);
 
     return Scaffold(
@@ -461,7 +470,7 @@ class _EditAnekdotPageState extends ConsumerState<EditAnekdotPage> {
                       ),
                     ),
               const SizedBox(
-                height: 15,
+                height: 40,
               ),
             ],
           ),

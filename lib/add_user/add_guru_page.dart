@@ -34,7 +34,7 @@ class _AddGuruPageState extends ConsumerState<AddGuruPage> {
   final nameController = TextEditingController();
   File? _image;
   String? _errorMessage;
-  static const int maxFileSize = 2 * 1024 * 1024;
+  // static const int maxFileSize = 2 * 1024 * 1024;
   final ImagePicker picker = ImagePicker();
 
   @override
@@ -50,7 +50,7 @@ class _AddGuruPageState extends ConsumerState<AddGuruPage> {
 
     if (pickedFile != null) {
       final file = File(pickedFile.path);
-      final fileSize = await file.length();
+      // final fileSize = await file.length();
 
       setState(() {
         _image = file;
@@ -63,7 +63,7 @@ class _AddGuruPageState extends ConsumerState<AddGuruPage> {
     }
   }
 
-  void onSignup() {
+  void onSignup(String sekolah) {
     if (_formKey.currentState!.validate()) {
       ref.read(authControllerProvider.notifier).signupguru(
           image: _image,
@@ -71,6 +71,7 @@ class _AddGuruPageState extends ConsumerState<AddGuruPage> {
           password: passwordController.text,
           nama: nameController.text,
           kelompok: selectedKelompok!,
+          sekolah: sekolah,
           context: context);
     }
   }
@@ -79,6 +80,9 @@ class _AddGuruPageState extends ConsumerState<AddGuruPage> {
 
   @override
   Widget build(BuildContext context) {
+    final currentUser = ref.watch(currentUserDetailsProvider).value!;
+    final sekolah = currentUser.sekolah;
+
     final isLoading = ref.watch(authControllerProvider);
 
     return Scaffold(
@@ -207,7 +211,9 @@ class _AddGuruPageState extends ConsumerState<AddGuruPage> {
               isLoading
                   ? const Loader()
                   : ElevatedButton(
-                      onPressed: onSignup,
+                      onPressed: () {
+                        onSignup(sekolah);
+                      },
                       style: ButtonStyle(
                         backgroundColor:
                             MaterialStateProperty.all(const Color(0xff104993)),

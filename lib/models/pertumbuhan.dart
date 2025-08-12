@@ -7,12 +7,14 @@ class PertumbuhanModel {
   final String id;
   final String muridId;
   final String kelompok;
-  final int tinggi; 
-  final int berat; 
-  final int kepala; 
-  final String fisik; 
-  final String rekomendasi; 
+  final int tinggi;
+  final int berat;
+  final int kepala;
+  final String fisik;
+  final String rekomendasi;
   final String tanggapan;
+  final String sekolah; // ✅ Tambahan
+
   PertumbuhanModel({
     required this.tanggal,
     required this.uid,
@@ -25,6 +27,7 @@ class PertumbuhanModel {
     required this.fisik,
     required this.rekomendasi,
     required this.tanggapan,
+    required this.sekolah, // ✅ Tambahan
   });
 
   PertumbuhanModel copyWith({
@@ -39,6 +42,7 @@ class PertumbuhanModel {
     String? fisik,
     String? rekomendasi,
     String? tanggapan,
+    String? sekolah, // ✅ Tambahan
   }) {
     return PertumbuhanModel(
       tanggal: tanggal ?? this.tanggal,
@@ -52,6 +56,7 @@ class PertumbuhanModel {
       fisik: fisik ?? this.fisik,
       rekomendasi: rekomendasi ?? this.rekomendasi,
       tanggapan: tanggapan ?? this.tanggapan,
+      sekolah: sekolah ?? this.sekolah, // ✅ Tambahan
     );
   }
 
@@ -67,64 +72,68 @@ class PertumbuhanModel {
       'fisik': fisik,
       'rekomendasi': rekomendasi,
       'tanggapan': tanggapan,
+      'sekolah': sekolah, // ✅ Tambahan
     };
   }
 
   factory PertumbuhanModel.fromMap(Map<String, dynamic> map) {
     return PertumbuhanModel(
-      tanggal: map['tanggal'] ??'',
-      uid: map['uid'] ??'',
-      id: map['\$id'] ??'',
-      muridId: map['muridId'] ??'',
-      kelompok: map['kelompok'] ??'',
-      tinggi: map['tinggi'] ??0,
-      berat: map['berat'] ??0,
-      kepala: map['kepala'] ??0,
-      fisik: map['fisik'] ??'',
-      rekomendasi: map['rekomendasi'] ??'',
-      tanggapan: map['tanggapan'] ??'',
+      tanggal: map['tanggal'] ?? '',
+      uid: map['uid'] ?? '',
+      id: map['\$id'] ?? '',
+      muridId: map['muridId'] ?? '',
+      kelompok: map['kelompok'] ?? '',
+      tinggi: map['tinggi'] ?? 0,
+      berat: map['berat'] ?? 0,
+      kepala: map['kepala'] ?? 0,
+      fisik: map['fisik'] ?? '',
+      rekomendasi: map['rekomendasi'] ?? '',
+      tanggapan: map['tanggapan'] ?? '',
+      sekolah: map['sekolah'] ?? '', // ✅ Tambahan
     );
   }
 
   String toJson() => json.encode(toMap());
 
-  factory PertumbuhanModel.fromJson(String source) => PertumbuhanModel.fromMap(json.decode(source) as Map<String, dynamic>);
+  factory PertumbuhanModel.fromJson(String source) =>
+      PertumbuhanModel.fromMap(json.decode(source) as Map<String, dynamic>);
 
   @override
   String toString() {
-    return 'PertumbuhanModel(tanggal: $tanggal, uid: $uid, id: $id, muridId: $muridId, kelompok: $kelompok, tinggi: $tinggi, berat: $berat, kepala: $kepala, fisik: $fisik, rekomendasi: $rekomendasi, tanggapan: $tanggapan)';
+    return 'PertumbuhanModel(tanggal: $tanggal, uid: $uid, id: $id, muridId: $muridId, kelompok: $kelompok, tinggi: $tinggi, berat: $berat, kepala: $kepala, fisik: $fisik, rekomendasi: $rekomendasi, tanggapan: $tanggapan, sekolah: $sekolah)'; // ✅ Tambahan
   }
 
   @override
   bool operator ==(covariant PertumbuhanModel other) {
     if (identical(this, other)) return true;
-  
-    return 
-      other.tanggal == tanggal &&
-      other.uid == uid &&
-      other.id == id &&
-      other.muridId == muridId &&
-      other.kelompok == kelompok &&
-      other.tinggi == tinggi &&
-      other.berat == berat &&
-      other.kepala == kepala &&
-      other.fisik == fisik &&
-      other.rekomendasi == rekomendasi &&
-      other.tanggapan == tanggapan;
+
+    return other.tanggal == tanggal &&
+        other.uid == uid &&
+        other.id == id &&
+        other.muridId == muridId &&
+        other.kelompok == kelompok &&
+        other.tinggi == tinggi &&
+        other.berat == berat &&
+        other.kepala == kepala &&
+        other.fisik == fisik &&
+        other.rekomendasi == rekomendasi &&
+        other.tanggapan == tanggapan &&
+        other.sekolah == sekolah; // ✅ Tambahan
   }
 
   @override
   int get hashCode {
     return tanggal.hashCode ^
-      uid.hashCode ^
-      id.hashCode ^
-      muridId.hashCode ^
-      kelompok.hashCode ^
-      tinggi.hashCode ^
-      berat.hashCode ^
-      kepala.hashCode ^
-      fisik.hashCode ^
-      rekomendasi.hashCode ^
-      tanggapan.hashCode;
+        uid.hashCode ^
+        id.hashCode ^
+        muridId.hashCode ^
+        kelompok.hashCode ^
+        tinggi.hashCode ^
+        berat.hashCode ^
+        kepala.hashCode ^
+        fisik.hashCode ^
+        rekomendasi.hashCode ^
+        tanggapan.hashCode ^
+        sekolah.hashCode; // ✅ Tambahan
   }
 }

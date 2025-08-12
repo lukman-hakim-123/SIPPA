@@ -8,6 +8,7 @@ class User {
   final String kelompok;
   final String imageId;
   final int levelUser;
+  final String sekolah;
 
   User({
     required this.id,
@@ -16,6 +17,7 @@ class User {
     required this.kelompok,
     required this.imageId,
     required this.levelUser,
+    required this.sekolah,
   });
 
   User copyWith({
@@ -25,6 +27,7 @@ class User {
     String? kelompok,
     String? imageId,
     int? levelUser,
+    String? sekolah,
   }) {
     return User(
       id: id ?? this.id,
@@ -33,6 +36,7 @@ class User {
       kelompok: kelompok ?? this.kelompok,
       imageId: imageId ?? this.imageId,
       levelUser: levelUser ?? this.levelUser,
+      sekolah: sekolah ?? this.sekolah,
     );
   }
 
@@ -44,6 +48,7 @@ class User {
       'kelompok': kelompok,
       'imageId': imageId,
       'levelUser': levelUser,
+      'sekolah': sekolah,
     });
     return result;
   }
@@ -56,6 +61,7 @@ class User {
       kelompok: map['kelompok'] ?? '',
       imageId: map['imageId'] ?? '',
       levelUser: map['levelUser'] ?? 0,
+      sekolah: map['sekolah'] ?? '',
     );
   }
 
@@ -66,7 +72,7 @@ class User {
 
   @override
   String toString() {
-    return 'User(id: $id, email: $email, nama: $nama, imageId: $imageId,kelompok: $kelompok, levelUser: $levelUser)';
+    return 'User(id: $id, email: $email, nama: $nama, imageId: $imageId,kelompok: $kelompok, levelUser: $levelUser, sekolah: $sekolah)';
   }
 
   @override
@@ -77,7 +83,8 @@ class User {
         other.nama == nama &&
         other.kelompok == kelompok &&
         other.imageId == imageId &&
-        other.levelUser == levelUser;
+        other.levelUser == levelUser &&
+        other.sekolah == sekolah;
   }
 
   @override
@@ -86,6 +93,7 @@ class User {
         email.hashCode ^
         nama.hashCode ^
         kelompok.hashCode ^
-        imageId.hashCode;
+        imageId.hashCode ^
+        sekolah.hashCode;
   }
 }

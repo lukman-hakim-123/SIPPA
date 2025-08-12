@@ -3,7 +3,7 @@ import 'dart:convert';
 
 class CpModel {
   final String tujuan;
-  final String konteks; //kegiatan
+  final String konteks; // kegiatan
   final bool isDone;
   final String agama;
   final String jatidiri;
@@ -13,8 +13,10 @@ class CpModel {
   final String id;
   final String muridId;
   final String kelompok;
-  final String rekomendasi; //umpan balik
+  final String rekomendasi; // umpan balik
   final String tanggapan;
+  final String sekolah; // ✅ Tambahan
+
   CpModel({
     required this.tujuan,
     required this.konteks,
@@ -29,6 +31,7 @@ class CpModel {
     required this.kelompok,
     required this.rekomendasi,
     required this.tanggapan,
+    required this.sekolah, // ✅
   });
 
   CpModel copyWith({
@@ -45,6 +48,7 @@ class CpModel {
     String? kelompok,
     String? rekomendasi,
     String? tanggapan,
+    String? sekolah, // ✅
   }) {
     return CpModel(
       tujuan: tujuan ?? this.tujuan,
@@ -60,6 +64,7 @@ class CpModel {
       kelompok: kelompok ?? this.kelompok,
       rekomendasi: rekomendasi ?? this.rekomendasi,
       tanggapan: tanggapan ?? this.tanggapan,
+      sekolah: sekolah ?? this.sekolah, // ✅
     );
   }
 
@@ -77,6 +82,7 @@ class CpModel {
       'kelompok': kelompok,
       'rekomendasi': rekomendasi,
       'tanggapan': tanggapan,
+      'sekolah': sekolah, // ✅
     };
   }
 
@@ -95,6 +101,7 @@ class CpModel {
       kelompok: map['kelompok'] ?? '',
       rekomendasi: map['rekomendasi'] ?? '',
       tanggapan: map['tanggapan'] ?? '',
+      sekolah: map['sekolah'] ?? '', // ✅
     );
   }
 
@@ -105,7 +112,7 @@ class CpModel {
 
   @override
   String toString() {
-    return 'CpModel(tujuan: $tujuan, konteks: $konteks, isDone: $isDone, agama: $agama, jatidiri: $jatidiri, literasi: $literasi, tanggal: $tanggal, uid: $uid, id: $id, muridId: $muridId, kelompok: $kelompok, rekomendasi: $rekomendasi, tanggapan: $tanggapan)';
+    return 'CpModel(tujuan: $tujuan, konteks: $konteks, isDone: $isDone, agama: $agama, jatidiri: $jatidiri, literasi: $literasi, tanggal: $tanggal, uid: $uid, id: $id, muridId: $muridId, kelompok: $kelompok, rekomendasi: $rekomendasi, tanggapan: $tanggapan, sekolah: $sekolah)';
   }
 
   @override
@@ -124,7 +131,8 @@ class CpModel {
         other.muridId == muridId &&
         other.kelompok == kelompok &&
         other.rekomendasi == rekomendasi &&
-        other.tanggapan == tanggapan;
+        other.tanggapan == tanggapan &&
+        other.sekolah == sekolah;
   }
 
   @override
@@ -141,6 +149,7 @@ class CpModel {
         muridId.hashCode ^
         kelompok.hashCode ^
         rekomendasi.hashCode ^
-        tanggapan.hashCode;
+        tanggapan.hashCode ^
+        sekolah.hashCode;
   }
 }

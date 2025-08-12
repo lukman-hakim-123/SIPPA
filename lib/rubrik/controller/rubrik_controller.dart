@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:appwrite/models.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -15,15 +17,20 @@ final rubrikControllerProvider =
   );
 });
 
-final getRubrikByUserIdProvider = FutureProvider.family((ref, String id) async {
+final getRubrikByUserIdProvider =
+    FutureProvider.family<List<RubrikModel>, String>((ref, paramKey) async {
   final rubrikController = ref.watch(rubrikControllerProvider.notifier);
   final levelUser = ref.watch(currentUserDetailsProvider).value!.levelUser;
+  final params = jsonDecode(paramKey) as Map<String, dynamic>;
+  final sekolah = params['sekolah'] as String;
+  final id = params['id'] as String;
+
   if (levelUser == 1) {
-    return rubrikController.getAllRubrik();
+    return rubrikController.getAllRubrik(sekolah);
   } else if (levelUser == 2) {
-    return rubrikController.getAllRubrik();
+    return rubrikController.getAllRubrik(sekolah);
   } else {
-    return rubrikController.getUserRubrik(id);
+    return rubrikController.getUserRubrik(id, sekolah);
   }
 });
 
@@ -34,6 +41,7 @@ final getUserDataProvider =
 });
 
 final getLatestRubrikProvider = StreamProvider((ref) {
+  ref.keepAlive();
   final rubrikAPI = ref.watch(rubrikAPIProvider);
   return rubrikAPI.getLatestRubrik();
 });
@@ -48,22 +56,23 @@ class RubrikController extends StateNotifier<bool> {
         _rubrikAPI = rubrikAPI,
         super(false);
 
-  Future<List<RubrikModel>> getUserRubrik(String uid) async {
-    final rubrikList = await _rubrikAPI.getUserRubrik(uid);
+  Future<List<RubrikModel>> getUserRubrik(String uid, String sekolah) async {
+    final rubrikList = await _rubrikAPI.getUserRubrik(uid, sekolah);
     return rubrikList
         .map((rubrik) => RubrikModel.fromMap(rubrik.data))
         .toList();
   }
 
-  Future<List<RubrikModel>> getKelompokRubrik(String kelompok) async {
-    final rubrikList = await _rubrikAPI.getKelompokRubrik(kelompok);
+  Future<List<RubrikModel>> getKelompokRubrik(
+      String kelompok, String sekolah) async {
+    final rubrikList = await _rubrikAPI.getKelompokRubrik(kelompok, sekolah);
     return rubrikList
         .map((rubrik) => RubrikModel.fromMap(rubrik.data))
         .toList();
   }
 
-  Future<List<RubrikModel>> getAllRubrik() async {
-    final rubrikList = await _rubrikAPI.getAllRubrik();
+  Future<List<RubrikModel>> getAllRubrik(String sekolah) async {
+    final rubrikList = await _rubrikAPI.getAllRubrik(sekolah);
     return rubrikList
         .map((rubrik) => RubrikModel.fromMap(rubrik.data))
         .toList();
@@ -79,6 +88,7 @@ class RubrikController extends StateNotifier<bool> {
     required String skor,
     required String muridId,
     required String rekomendasi,
+    required String sekolah,
     required BuildContext context,
   }) async {
     state = true;
@@ -103,6 +113,7 @@ class RubrikController extends StateNotifier<bool> {
       uid: user.id,
       id: '',
       rekomendasi: rekomendasi,
+      sekolah: sekolah,
       tanggapan: '',
     );
     final res = await _rubrikAPI.addRubrik(rubrik);
@@ -124,6 +135,7 @@ class RubrikController extends StateNotifier<bool> {
     required String skor,
     required String muridId,
     required String rekomendasi,
+    required String sekolah,
     required String tanggapan,
     required BuildContext context,
   }) async {
@@ -149,6 +161,7 @@ class RubrikController extends StateNotifier<bool> {
       kelompok: kelompok,
       uid: user.id,
       rekomendasi: rekomendasi,
+      sekolah: sekolah,
       tanggapan: tanggapan,
     );
     final res = await _rubrikAPI.updateRubrik(rubrik);

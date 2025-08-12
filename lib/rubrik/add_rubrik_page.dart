@@ -10,12 +10,15 @@ import 'package:sippa/widget_view/appbar.dart';
 import 'package:sippa/widget_view/teks.dart';
 
 class AddRubrikPage extends ConsumerStatefulWidget {
-  static route({required kelompok}) => MaterialPageRoute(
-      builder: (context) => AddRubrikPage(kelompok: kelompok));
+  static route({required kelompok, required sekolah}) => MaterialPageRoute(
+      builder: (context) =>
+          AddRubrikPage(kelompok: kelompok, sekolah: sekolah));
   final String kelompok;
+  final String sekolah;
   const AddRubrikPage({
     super.key,
     required this.kelompok,
+    required this.sekolah,
   });
 
   @override
@@ -62,23 +65,35 @@ class _AddRubrikPageState extends ConsumerState<AddRubrikPage> {
   void addRubrik() {
     if (_formKey.currentState!.validate()) {
       ref.read(rubrikControllerProvider.notifier).addRubrik(
-          tujuan: tujuanController.text,
-          tanggal: tanggalController.text,
-          // kegiatan: kegiatanController.text,
-          agama: agamaController.text,
-          jatidiri: jatidiriController.text,
-          literasi: literasiController.text,
-          skor: skor,
-          muridId: muridIdController.text,
-          rekomendasi: rekomendasiController.text,
-          context: context);
+            tujuan: tujuanController.text,
+            tanggal: tanggalController.text,
+            // kegiatan: kegiatanController.text,
+            agama: agamaController.text,
+            jatidiri: jatidiriController.text,
+            literasi: literasiController.text,
+            skor: skor,
+            muridId: muridIdController.text,
+            rekomendasi: rekomendasiController.text,
+            context: context,
+            sekolah: widget.sekolah,
+          );
     }
+  }
+
+  late final Map<String, String> _filterParams;
+
+  @override
+  void initState() {
+    super.initState();
+    _filterParams = {
+      'kelompok': widget.kelompok,
+      'sekolah': widget.sekolah,
+    };
   }
 
   @override
   Widget build(BuildContext context) {
-    final muridAsyncValue =
-        ref.watch(getMuridByFiltersProvider(widget.kelompok));
+    final muridAsyncValue = ref.watch(getMuridByFiltersProvider(_filterParams));
     final isLoading = ref.watch(rubrikControllerProvider);
     return Scaffold(
       appBar: const CustomAppBar(

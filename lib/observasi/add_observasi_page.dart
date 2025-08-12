@@ -9,11 +9,14 @@ import 'package:sippa/observasi/controller/observasi_controller.dart';
 import 'package:sippa/widget_view/appbar.dart';
 
 class AddObservasiPage extends ConsumerStatefulWidget {
-  static route({required kelompok}) => MaterialPageRoute(
-      builder: (context) => AddObservasiPage(kelompok: kelompok));
+  static route({required kelompok, required sekolah}) => MaterialPageRoute(
+      builder: (context) =>
+          AddObservasiPage(kelompok: kelompok, sekolah: sekolah));
 
   final String kelompok;
-  const AddObservasiPage({super.key, required this.kelompok});
+  final String sekolah;
+  const AddObservasiPage(
+      {super.key, required this.kelompok, required this.sekolah});
 
   @override
   ConsumerState<ConsumerStatefulWidget> createState() =>
@@ -30,7 +33,7 @@ class _AddObservasiPageState extends ConsumerState<AddObservasiPage> {
   DateTime? _selectedDate;
   File? _image;
   String? _errorMessage;
-  static const int maxFileSize = 2 * 1024 * 1024;
+  // static const int maxFileSize = 2 * 1024 * 1024;
   final ImagePicker picker = ImagePicker();
 
   @override
@@ -64,14 +67,12 @@ class _AddObservasiPageState extends ConsumerState<AddObservasiPage> {
 
     if (pickedFile != null) {
       final file = File(pickedFile.path);
-      final fileSize = await file.length();
+      // final fileSize = await file.length();
 
-      
-        setState(() {
-          _image = file;
-          _errorMessage = null;
-        });
-      
+      setState(() {
+        _image = file;
+        _errorMessage = null;
+      });
     } else {
       setState(() {
         _errorMessage = null;
@@ -95,14 +96,25 @@ class _AddObservasiPageState extends ConsumerState<AddObservasiPage> {
           tanggal: tanggalController.text,
           muridId: muridIdController.text,
           image: _image,
+          sekolah: widget.sekolah,
           context: context);
     }
   }
 
+  late final Map<String, String> _filterParams;
+
+  @override
+  void initState() {
+    super.initState();
+    _filterParams = {
+      'kelompok': widget.kelompok,
+      'sekolah': widget.sekolah,
+    };
+  }
+
   @override
   Widget build(BuildContext context) {
-    final muridAsyncValue =
-        ref.watch(getMuridByFiltersProvider(widget.kelompok));
+    final muridAsyncValue = ref.watch(getMuridByFiltersProvider(_filterParams));
 
     return Scaffold(
       appBar: const CustomAppBar(

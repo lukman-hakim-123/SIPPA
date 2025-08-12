@@ -17,23 +17,24 @@ final pertumbuhanAPIProvider = Provider((ref) {
 
 abstract class IPertumbuhanAPI {
   FutureEither<Document> addPertumbuhan(PertumbuhanModel pertumbuhan);
-  Future<List<Document>> getUserPertumbuhan(String uid);
+  Future<List<Document>> getUserPertumbuhan(String uid, String sekolah);
   Stream<RealtimeMessage> getLatestPertumbuhan();
-  Future<List<Document>> getKelompokPertumbuhan(String kelompok);
-  Future<List<Document>> getAllPertumbuhan();
+  Future<List<Document>> getKelompokPertumbuhan(
+    String kelompok,
+    String sekolah,
+  );
+  Future<List<Document>> getAllPertumbuhan(String sekolah);
   FutureEither<Document> updatePertumbuhan(PertumbuhanModel pertumbuhan);
   FutureVoid deletePertumbuhan(PertumbuhanModel pertumbuhan);
-  FutureVoid deleteAll(String uid);
+  FutureVoid deleteAll(String uid, String sekolah);
 }
 
 class PertumbuhanAPI implements IPertumbuhanAPI {
   final Databases _db;
   final Realtime _realtime;
 
-  PertumbuhanAPI({
-    required Databases db,
-    required Realtime realtime,
-  })  : _db = db,
+  PertumbuhanAPI({required Databases db, required Realtime realtime})
+      : _db = db,
         _realtime = realtime;
 
   @override
@@ -43,50 +44,54 @@ class PertumbuhanAPI implements IPertumbuhanAPI {
         databaseId: AppwriteConstants.databaseId,
         collectionId: AppwriteConstants.pertumbuhanCollection,
         documentId: ID.unique(),
-        data: pertumbuhan.toMap(),
+        data: pertumbuhan.toMap(), // pastikan 'sekolah' sudah ada di model
       );
       return right(document);
     } on AppwriteException catch (e, st) {
-      return left(
-        Failure(
-          e.message ?? 'Some unexpected error occurred',
-          st,
-        ),
-      );
+      return left(Failure(e.message ?? 'Some unexpected error occurred', st));
     } catch (e, st) {
       return left(Failure(e.toString(), st));
     }
   }
 
   @override
-  Future<List<Document>> getUserPertumbuhan(String muridId) async {
+  Future<List<Document>> getUserPertumbuhan(
+    String muridId,
+    String sekolah,
+  ) async {
     final documents = await _db.listDocuments(
       databaseId: AppwriteConstants.databaseId,
       collectionId: AppwriteConstants.pertumbuhanCollection,
       queries: [
         Query.equal('muridId', muridId),
+        Query.equal('sekolah', sekolah),
       ],
     );
     return documents.documents;
   }
 
   @override
-  Future<List<Document>> getKelompokPertumbuhan(String kelompok) async {
+  Future<List<Document>> getKelompokPertumbuhan(
+    String kelompok,
+    String sekolah,
+  ) async {
     final documents = await _db.listDocuments(
       databaseId: AppwriteConstants.databaseId,
       collectionId: AppwriteConstants.pertumbuhanCollection,
       queries: [
         Query.equal('kelompok', kelompok),
+        Query.equal('sekolah', sekolah),
       ],
     );
     return documents.documents;
   }
 
   @override
-  Future<List<Document>> getAllPertumbuhan() async {
+  Future<List<Document>> getAllPertumbuhan(String sekolah) async {
     final documents = await _db.listDocuments(
       databaseId: AppwriteConstants.databaseId,
       collectionId: AppwriteConstants.pertumbuhanCollection,
+      queries: [Query.equal('sekolah', sekolah)],
     );
     return documents.documents;
   }
@@ -105,16 +110,11 @@ class PertumbuhanAPI implements IPertumbuhanAPI {
         databaseId: AppwriteConstants.databaseId,
         collectionId: AppwriteConstants.pertumbuhanCollection,
         documentId: pertumbuhan.id,
-        data: pertumbuhan.toMap(),
+        data: pertumbuhan.toMap(), // pastikan 'sekolah' tetap dikirim
       );
       return right(document);
     } on AppwriteException catch (e, st) {
-      return left(
-        Failure(
-          e.message ?? 'Some unexpected error occurred',
-          st,
-        ),
-      );
+      return left(Failure(e.message ?? 'Some unexpected error occurred', st));
     } catch (e, st) {
       return left(Failure(e.toString(), st));
     }
@@ -134,13 +134,11 @@ class PertumbuhanAPI implements IPertumbuhanAPI {
   }
 
   @override
-  FutureVoid deleteAll(String uid) async {
+  FutureVoid deleteAll(String uid, String sekolah) async {
     final documents = await _db.listDocuments(
       databaseId: AppwriteConstants.databaseId,
       collectionId: AppwriteConstants.pertumbuhanCollection,
-      queries: [
-        Query.equal('uid', uid),
-      ],
+      queries: [Query.equal('uid', uid), Query.equal('sekolah', sekolah)],
     );
 
     for (final doc in documents.documents) {

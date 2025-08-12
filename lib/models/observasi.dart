@@ -12,6 +12,8 @@ class ObservasiModel {
   final String id;
   final String muridId;
   final String tanggapan;
+  final String sekolah; // ✅ Tambahan
+
   ObservasiModel({
     required this.kegiatan,
     required this.hasilObservasi,
@@ -23,6 +25,7 @@ class ObservasiModel {
     required this.id,
     required this.muridId,
     required this.tanggapan,
+    required this.sekolah, // ✅ Tambahan
   });
 
   ObservasiModel copyWith({
@@ -36,6 +39,7 @@ class ObservasiModel {
     String? id,
     String? muridId,
     String? tanggapan,
+    String? sekolah, // ✅ Tambahan
   }) {
     return ObservasiModel(
       kegiatan: kegiatan ?? this.kegiatan,
@@ -48,6 +52,7 @@ class ObservasiModel {
       id: id ?? this.id,
       muridId: muridId ?? this.muridId,
       tanggapan: tanggapan ?? this.tanggapan,
+      sekolah: sekolah ?? this.sekolah, // ✅ Tambahan
     );
   }
 
@@ -62,6 +67,7 @@ class ObservasiModel {
       'uid': uid,
       'muridId': muridId,
       'tanggapan': tanggapan,
+      'sekolah': sekolah, // ✅ Tambahan
     };
   }
 
@@ -77,6 +83,7 @@ class ObservasiModel {
       id: map['\$id'] ?? '',
       muridId: map['muridId'] ?? '',
       tanggapan: map['tanggapan'] ?? '',
+      sekolah: map['sekolah'] ?? '', // ✅ Tambahan
     );
   }
 
@@ -87,7 +94,7 @@ class ObservasiModel {
 
   @override
   String toString() {
-    return 'ObservasiModel(kegiatan: $kegiatan, hasilObservasi: $hasilObservasi, rekomendasi: $rekomendasi, tanggal: $tanggal, kelompok: $kelompok, imageId: $imageId, uid: $uid, id: $id, muridId: $muridId, tanggapan: $tanggapan)';
+    return 'ObservasiModel(kegiatan: $kegiatan, hasilObservasi: $hasilObservasi, rekomendasi: $rekomendasi, tanggal: $tanggal, kelompok: $kelompok, imageId: $imageId, uid: $uid, id: $id, muridId: $muridId, tanggapan: $tanggapan, sekolah: $sekolah)'; // ✅ Tambahan
   }
 
   @override
@@ -103,7 +110,8 @@ class ObservasiModel {
         other.uid == uid &&
         other.id == id &&
         other.tanggapan == tanggapan &&
-        other.muridId == muridId;
+        other.muridId == muridId &&
+        other.sekolah == sekolah; // ✅ Tambahan
   }
 
   @override
@@ -117,6 +125,7 @@ class ObservasiModel {
         uid.hashCode ^
         id.hashCode ^
         tanggapan.hashCode ^
-        muridId.hashCode;
+        muridId.hashCode ^
+        sekolah.hashCode; // ✅ Tambahan
   }
 }

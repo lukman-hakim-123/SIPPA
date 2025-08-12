@@ -17,13 +17,13 @@ final cpAPIProvider = Provider((ref) {
 
 abstract class ICpAPI {
   FutureEither<Document> addCp(CpModel cp);
-  Future<List<Document>> getUserCp(String uid);
+  Future<List<Document>> getUserCp(String uid, String sekolah);
   Stream<RealtimeMessage> getLatestCp();
-  Future<List<Document>> getKelompokCp(String kelompok);
-  Future<List<Document>> getAllCp();
+  Future<List<Document>> getKelompokCp(String kelompok, String sekolah);
+  Future<List<Document>> getAllCp(String sekolah);
   FutureEither<Document> updateCp(CpModel cp);
   FutureVoid deleteCp(CpModel cp);
-  FutureVoid deleteAll(String uid);
+  FutureVoid deleteAll(String uid, String sekolah);
 }
 
 class CpAPI implements ICpAPI {
@@ -40,7 +40,10 @@ class CpAPI implements ICpAPI {
         databaseId: AppwriteConstants.databaseId,
         collectionId: AppwriteConstants.cpCollection,
         documentId: ID.unique(),
-        data: cp.toMap(),
+        data: {
+          ...cp.toMap(),
+          'sekolah': cp.sekolah, // Tambahan field sekolah
+        },
       );
       return right(document);
     } on AppwriteException catch (e, st) {
@@ -56,34 +59,39 @@ class CpAPI implements ICpAPI {
   }
 
   @override
-  Future<List<Document>> getUserCp(String muridId) async {
+  Future<List<Document>> getUserCp(String muridId, String sekolah) async {
     final documents = await _db.listDocuments(
       databaseId: AppwriteConstants.databaseId,
       collectionId: AppwriteConstants.cpCollection,
       queries: [
         Query.equal('muridId', muridId),
+        Query.equal('sekolah', sekolah),
       ],
     );
     return documents.documents;
   }
 
   @override
-  Future<List<Document>> getKelompokCp(String uid) async {
+  Future<List<Document>> getKelompokCp(String kelompok, String sekolah) async {
     final documents = await _db.listDocuments(
       databaseId: AppwriteConstants.databaseId,
       collectionId: AppwriteConstants.cpCollection,
       queries: [
-        Query.equal('uid', uid),
+        Query.equal('kelompok', kelompok),
+        Query.equal('sekolah', sekolah),
       ],
     );
     return documents.documents;
   }
 
   @override
-  Future<List<Document>> getAllCp() async {
+  Future<List<Document>> getAllCp(String sekolah) async {
     final documents = await _db.listDocuments(
       databaseId: AppwriteConstants.databaseId,
       collectionId: AppwriteConstants.cpCollection,
+      queries: [
+        Query.equal('sekolah', sekolah),
+      ],
     );
     return documents.documents;
   }
@@ -105,15 +113,16 @@ class CpAPI implements ICpAPI {
         data: {
           'tujuan': cp.tujuan,
           'tanggal': cp.tanggal,
-          'konteks': cp.konteks, //kegiatan
+          'konteks': cp.konteks, // kegiatan
           'agama': cp.agama,
           'jatidiri': cp.jatidiri,
           'literasi': cp.literasi,
           'kelompok': cp.kelompok,
           'isDone': cp.isDone,
           'muridId': cp.muridId,
-          'rekomendasi': cp.rekomendasi, //umpan balik
+          'rekomendasi': cp.rekomendasi, // umpan balik
           'tanggapan': cp.tanggapan,
+          'sekolah': cp.sekolah, // Tambahan field sekolah
         },
       );
       return right(document);
@@ -143,12 +152,13 @@ class CpAPI implements ICpAPI {
   }
 
   @override
-  FutureVoid deleteAll(String uid) async {
+  FutureVoid deleteAll(String uid, String sekolah) async {
     final documents = await _db.listDocuments(
       databaseId: AppwriteConstants.databaseId,
       collectionId: AppwriteConstants.cpCollection,
       queries: [
         Query.equal('uid', uid),
+        Query.equal('sekolah', sekolah),
       ],
     );
 

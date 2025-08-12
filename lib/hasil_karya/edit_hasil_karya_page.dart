@@ -12,16 +12,26 @@ import 'package:sippa/widget_view/teks.dart';
 import 'package:sippa/models/hk.dart';
 
 class EditHkPage extends ConsumerStatefulWidget {
-  static route({required kelompok, required hk, required levelUser}) =>
+  static route({
+    required kelompok,
+    required hk,
+    required levelUser,
+    required sekolah,
+  }) =>
       MaterialPageRoute(
-          builder: (context) =>
-              EditHkPage(kelompok: kelompok, hk: hk, levelUser: levelUser));
+          builder: (context) => EditHkPage(
+              kelompok: kelompok,
+              hk: hk,
+              levelUser: levelUser,
+              sekolah: sekolah));
   final String kelompok;
+  final String sekolah;
   final HkModel hk;
   final int levelUser;
   const EditHkPage({
     super.key,
     required this.kelompok,
+    required this.sekolah,
     required this.hk,
     required this.levelUser,
   });
@@ -45,9 +55,10 @@ class _EditHkPageState extends ConsumerState<EditHkPage> {
   DateTime? _selectedDate;
   File? _image;
   String? _errorMessage;
-  static const int maxFileSize = 2 * 1024 * 1024;
+  // static const int maxFileSize = 2 * 1024 * 1024;
   String? selectedSemester;
   bool _isNewImage = false;
+  late final Map<String, String> _filterParams;
 
   @override
   void initState() {
@@ -64,6 +75,10 @@ class _EditHkPageState extends ConsumerState<EditHkPage> {
     tanggapanController = TextEditingController(text: widget.hk.tanggapan);
     _selectedDate = DateFormat('dd MMMM yyyy').parse(widget.hk.tanggal);
     selectedSemester = widget.hk.semester;
+    _filterParams = {
+      'kelompok': widget.kelompok,
+      'sekolah': widget.sekolah,
+    };
   }
 
   @override
@@ -99,7 +114,7 @@ class _EditHkPageState extends ConsumerState<EditHkPage> {
     final pickedFile = await picker.pickImage(source: ImageSource.gallery);
     if (pickedFile != null) {
       final file = File(pickedFile.path);
-      final fileSize = await file.length();
+      // final fileSize = await file.length();
 
       setState(() {
         _image = file;
@@ -123,6 +138,7 @@ class _EditHkPageState extends ConsumerState<EditHkPage> {
             imageId: widget.hk.imageId,
             image: _image,
             context: context,
+            sekolah: widget.sekolah,
             rekomendasi: rekomendasiController.text,
             tanggapan: tanggapanController.text,
           );
@@ -131,8 +147,7 @@ class _EditHkPageState extends ConsumerState<EditHkPage> {
 
   @override
   Widget build(BuildContext context) {
-    final muridAsyncValue =
-        ref.watch(getMuridByFiltersProvider(widget.kelompok));
+    final muridAsyncValue = ref.watch(getMuridByFiltersProvider(_filterParams));
     final isLoading = ref.watch(hkControllerProvider);
 
     return Scaffold(

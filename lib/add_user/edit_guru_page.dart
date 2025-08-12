@@ -27,7 +27,7 @@ class _EditGuruPageState extends ConsumerState<EditGuruPage> {
   final ImagePicker picker = ImagePicker();
   File? _image;
   String? _errorMessage;
-  static const int maxFileSize = 2 * 1024 * 1024;
+  // static const int maxFileSize = 2 * 1024 * 1024;
   String? selectedKelompok;
   bool _isNewImage = false;
 
@@ -51,7 +51,7 @@ class _EditGuruPageState extends ConsumerState<EditGuruPage> {
 
     if (pickedFile != null) {
       final file = File(pickedFile.path);
-      final fileSize = await file.length();
+      // final fileSize = await file.length();
 
       setState(() {
         _image = file;
@@ -76,7 +76,8 @@ class _EditGuruPageState extends ConsumerState<EditGuruPage> {
         ref: ref,
         kelompok: selectedKelompok ?? widget.user.kelompok,
         levelUser: widget.user.levelUser,
-        imageId: widget.user.imageId);
+        imageId: widget.user.imageId,
+        sekolah: widget.user.sekolah);
   }
 
   @override

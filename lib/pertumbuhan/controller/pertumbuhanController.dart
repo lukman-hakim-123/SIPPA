@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:appwrite/models.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -16,16 +18,21 @@ final pertumbuhanControllerProvider =
 });
 
 final getPertumbuhanByUserIdProvider =
-    FutureProvider.family((ref, String id) async {
+    FutureProvider.family<List<PertumbuhanModel>, String>(
+        (ref, paramKey) async {
   final pertumbuhanController =
       ref.watch(pertumbuhanControllerProvider.notifier);
   final levelUser = ref.watch(currentUserDetailsProvider).value!.levelUser;
+  final params = jsonDecode(paramKey) as Map<String, dynamic>;
+  final sekolah = params['sekolah'] as String;
+  final id = params['id'] as String;
+
   if (levelUser == 1) {
-    return pertumbuhanController.getAllPertumbuhan();
+    return pertumbuhanController.getAllPertumbuhan(sekolah);
   } else if (levelUser == 2) {
-    return pertumbuhanController.getAllPertumbuhan();
+    return pertumbuhanController.getAllPertumbuhan(sekolah);
   } else {
-    return pertumbuhanController.getUserPertumbuhan(id);
+    return pertumbuhanController.getUserPertumbuhan(id, sekolah);
   }
 });
 final getUserDataProvider =
@@ -34,6 +41,7 @@ final getUserDataProvider =
   return await userAPI.getUserData(uid);
 });
 final getLatestPertumbuhanProvider = StreamProvider((ref) {
+  ref.keepAlive();
   final pertumbuhanAPI = ref.watch(pertumbuhanAPIProvider);
   return pertumbuhanAPI.getLatestPertumbuhan();
 });
@@ -49,23 +57,26 @@ class PertumbuhanController extends StateNotifier<bool> {
         _pertumbuhanAPI = pertumbuhanAPI,
         super(false);
 
-  Future<List<PertumbuhanModel>> getUserPertumbuhan(String uid) async {
-    final pertumbuhanList = await _pertumbuhanAPI.getUserPertumbuhan(uid);
-    return pertumbuhanList
-        .map((pertumbuhan) => PertumbuhanModel.fromMap(pertumbuhan.data))
-        .toList();
-  }
-
-  Future<List<PertumbuhanModel>> getKelompokPertumbuhan(String kelompok) async {
+  Future<List<PertumbuhanModel>> getUserPertumbuhan(
+      String uid, String sekolah) async {
     final pertumbuhanList =
-        await _pertumbuhanAPI.getKelompokPertumbuhan(kelompok);
+        await _pertumbuhanAPI.getUserPertumbuhan(uid, sekolah);
     return pertumbuhanList
         .map((pertumbuhan) => PertumbuhanModel.fromMap(pertumbuhan.data))
         .toList();
   }
 
-  Future<List<PertumbuhanModel>> getAllPertumbuhan() async {
-    final pertumbuhanList = await _pertumbuhanAPI.getAllPertumbuhan();
+  Future<List<PertumbuhanModel>> getKelompokPertumbuhan(
+      String kelompok, String sekolah) async {
+    final pertumbuhanList =
+        await _pertumbuhanAPI.getKelompokPertumbuhan(kelompok, sekolah);
+    return pertumbuhanList
+        .map((pertumbuhan) => PertumbuhanModel.fromMap(pertumbuhan.data))
+        .toList();
+  }
+
+  Future<List<PertumbuhanModel>> getAllPertumbuhan(String sekolah) async {
+    final pertumbuhanList = await _pertumbuhanAPI.getAllPertumbuhan(sekolah);
     return pertumbuhanList
         .map((pertumbuhan) => PertumbuhanModel.fromMap(pertumbuhan.data))
         .toList();
@@ -79,6 +90,7 @@ class PertumbuhanController extends StateNotifier<bool> {
     required int kepala,
     required String fisik,
     required String rekomendasi,
+    required String sekolah,
     required BuildContext context,
   }) async {
     state = true;
@@ -108,6 +120,7 @@ class PertumbuhanController extends StateNotifier<bool> {
         kepala: kepala,
         fisik: fisik,
         rekomendasi: rekomendasi,
+        sekolah: sekolah,
         tanggapan: '',
       );
 
@@ -137,6 +150,7 @@ class PertumbuhanController extends StateNotifier<bool> {
     required String fisik,
     required String rekomendasi,
     required String tanggapan,
+    required String sekolah,
     required BuildContext context,
   }) async {
     state = true;
@@ -161,6 +175,7 @@ class PertumbuhanController extends StateNotifier<bool> {
         fisik: fisik,
         rekomendasi: rekomendasi,
         tanggapan: tanggapan,
+        sekolah: sekolah,
       );
 
       final res = await _pertumbuhanAPI.updatePertumbuhan(pertumbuhan);

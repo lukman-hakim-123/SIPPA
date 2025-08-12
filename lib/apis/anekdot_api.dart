@@ -20,10 +20,10 @@ final anekdotAPIProvider = Provider((ref) {
 
 abstract class IAnekdotAPI {
   FutureEither<Document> addAnekdot(AnekdotModel anekdot);
-  Future<List<Document>> getUserAnekdot(String uid);
+  Future<List<Document>> getUserAnekdot(String uid, String sekolah);
   Stream<RealtimeMessage> getLatestAnekdot();
-  Future<List<Document>> getKelompokAnekdot(String kelompok);
-  Future<List<Document>> getAllAnekdot();
+  Future<List<Document>> getKelompokAnekdot(String kelompok, String sekolah);
+  Future<List<Document>> getAllAnekdot(String sekolah);
   FutureEither<Document> updateAnekdot(AnekdotModel anekdot);
   FutureVoid deleteAnekdot(AnekdotModel anekdot);
   FutureVoid deleteAll(String uid);
@@ -36,11 +36,11 @@ class AnekdotAPI implements IAnekdotAPI {
   final Realtime _realtime;
   final Storage _storage;
 
-  AnekdotAPI(
-      {required Databases db,
-      required Realtime realtime,
-      required Storage storage})
-      : _db = db,
+  AnekdotAPI({
+    required Databases db,
+    required Realtime realtime,
+    required Storage storage,
+  })  : _db = db,
         _realtime = realtime,
         _storage = storage;
 
@@ -51,7 +51,10 @@ class AnekdotAPI implements IAnekdotAPI {
         databaseId: AppwriteConstants.databaseId,
         collectionId: AppwriteConstants.anekdotCollection,
         documentId: ID.unique(),
-        data: anekdot.toMap(),
+        data: anekdot.toMap()
+          ..addAll({
+            'sekolah': anekdot.sekolah,
+          }),
       );
       return right(document);
     } on AppwriteException catch (e, st) {
@@ -106,34 +109,40 @@ class AnekdotAPI implements IAnekdotAPI {
   }
 
   @override
-  Future<List<Document>> getUserAnekdot(String muridId) async {
+  Future<List<Document>> getUserAnekdot(String muridId, String sekolah) async {
     final documents = await _db.listDocuments(
       databaseId: AppwriteConstants.databaseId,
       collectionId: AppwriteConstants.anekdotCollection,
       queries: [
         Query.equal('muridId', muridId),
+        Query.equal('sekolah', sekolah),
       ],
     );
     return documents.documents;
   }
 
   @override
-  Future<List<Document>> getKelompokAnekdot(String kelompok) async {
+  Future<List<Document>> getKelompokAnekdot(
+      String kelompok, String sekolah) async {
     final documents = await _db.listDocuments(
       databaseId: AppwriteConstants.databaseId,
       collectionId: AppwriteConstants.anekdotCollection,
       queries: [
         Query.equal('kelompok', kelompok),
+        Query.equal('sekolah', sekolah),
       ],
     );
     return documents.documents;
   }
 
   @override
-  Future<List<Document>> getAllAnekdot() async {
+  Future<List<Document>> getAllAnekdot(String sekolah) async {
     final documents = await _db.listDocuments(
       databaseId: AppwriteConstants.databaseId,
       collectionId: AppwriteConstants.anekdotCollection,
+      queries: [
+        Query.equal('sekolah', sekolah),
+      ],
     );
     return documents.documents;
   }
@@ -164,6 +173,7 @@ class AnekdotAPI implements IAnekdotAPI {
           'imageId': anekdot.imageId,
           'muridId': anekdot.muridId,
           'tanggapan': anekdot.tanggapan,
+          'sekolah': anekdot.sekolah,
         },
       );
       return right(document);

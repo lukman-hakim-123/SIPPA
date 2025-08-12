@@ -34,7 +34,7 @@ class _AddMuridPageState extends ConsumerState<AddMuridPage> {
   final nameController = TextEditingController();
   final ImagePicker picker = ImagePicker();
   File? _image;
-  static const int maxFileSize = 2 * 1024 * 1024;
+  // static const int maxFileSize = 2 * 1024 * 1024;
   String? _errorMessage;
 
   @override
@@ -50,7 +50,7 @@ class _AddMuridPageState extends ConsumerState<AddMuridPage> {
 
     if (pickedFile != null) {
       final file = File(pickedFile.path);
-      final fileSize = await file.length();
+      // final fileSize = await file.length();
 
       setState(() {
         _image = file;
@@ -63,13 +63,14 @@ class _AddMuridPageState extends ConsumerState<AddMuridPage> {
     }
   }
 
-  void onSignup() {
+  void onSignup(String sekolah) {
     ref.read(authControllerProvider.notifier).signup(
         image: _image,
         email: emailController.text,
         password: passwordController.text,
         nama: nameController.text,
         kelompok: selectedKelompok!,
+        sekolah: sekolah,
         context: context);
   }
 
@@ -77,8 +78,10 @@ class _AddMuridPageState extends ConsumerState<AddMuridPage> {
 
   @override
   Widget build(BuildContext context) {
-    final levelUser = ref.watch(currentUserDetailsProvider).value!.levelUser;
-    final kelompok = ref.watch(currentUserDetailsProvider).value!.kelompok;
+    final currentUser = ref.watch(currentUserDetailsProvider).value!;
+    final levelUser = currentUser.levelUser;
+    final kelompok = currentUser.kelompok;
+    final sekolah = currentUser.sekolah;
     final isLoading = ref.watch(authControllerProvider);
 
     List<String> kelompokOptionsFiltered =
@@ -211,7 +214,7 @@ class _AddMuridPageState extends ConsumerState<AddMuridPage> {
                   : ElevatedButton(
                       onPressed: () {
                         if (_formKey.currentState?.validate() ?? false) {
-                          onSignup();
+                          onSignup(sekolah);
                         }
                       },
                       style: ButtonStyle(

@@ -7,11 +7,14 @@ import 'package:sippa/pertumbuhan/controller/pertumbuhanController.dart';
 import 'package:sippa/widget_view/appbar.dart';
 
 class AddPertumbuhanPage extends ConsumerStatefulWidget {
-  static route({required kelompok}) => MaterialPageRoute(
-      builder: (context) => AddPertumbuhanPage(kelompok: kelompok));
+  static route({required kelompok, required sekolah}) => MaterialPageRoute(
+      builder: (context) =>
+          AddPertumbuhanPage(kelompok: kelompok, sekolah: sekolah));
 
   final String kelompok;
-  const AddPertumbuhanPage({super.key, required this.kelompok});
+  final String sekolah;
+  const AddPertumbuhanPage(
+      {super.key, required this.kelompok, required this.sekolah});
 
   @override
   ConsumerState<ConsumerStatefulWidget> createState() =>
@@ -68,14 +71,25 @@ class _AddPertumbuhanPageState extends ConsumerState<AddPertumbuhanPage> {
             fisik: fisikController.text,
             rekomendasi: rekomendasiController.text,
             context: context,
+            sekolah: widget.sekolah,
           );
     }
   }
 
+  late final Map<String, String> _filterParams;
+
+  @override
+  void initState() {
+    super.initState();
+    _filterParams = {
+      'kelompok': widget.kelompok,
+      'sekolah': widget.sekolah,
+    };
+  }
+
   @override
   Widget build(BuildContext context) {
-    final muridAsyncValue =
-        ref.watch(getMuridByFiltersProvider(widget.kelompok));
+    final muridAsyncValue = ref.watch(getMuridByFiltersProvider(_filterParams));
     final isLoading = ref.watch(pertumbuhanControllerProvider);
 
     return Scaffold(
@@ -240,7 +254,7 @@ class _AddPertumbuhanPageState extends ConsumerState<AddPertumbuhanPage> {
                         ),
                       ),
                     ),
-              const SizedBox(height: 15),
+              const SizedBox(height: 40),
             ],
           ),
         ),

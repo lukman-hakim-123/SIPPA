@@ -20,10 +20,10 @@ final observasiAPIProvider = Provider((ref) {
 
 abstract class IObservasiAPI {
   FutureEither<Document> addObservasi(ObservasiModel observasi);
-  Future<List<Document>> getUserObservasi(String uid);
+  Future<List<Document>> getUserObservasi(String uid, String sekolah);
   Stream<RealtimeMessage> getLatestObservasi();
-  Future<List<Document>> getKelompokObservasi(String kelompok);
-  Future<List<Document>> getAllObservasi();
+  Future<List<Document>> getKelompokObservasi(String kelompok, String sekolah);
+  Future<List<Document>> getAllObservasi(String sekolah);
   FutureEither<Document> updateObservasi(ObservasiModel observasi);
   FutureVoid deleteObservasi(ObservasiModel observasi);
   Future<Uint8List?> getImage(String imageId);
@@ -35,11 +35,11 @@ class ObservasiAPI implements IObservasiAPI {
   final Realtime _realtime;
   final Storage _storage;
 
-  ObservasiAPI(
-      {required Databases db,
-      required Realtime realtime,
-      required Storage storage})
-      : _db = db,
+  ObservasiAPI({
+    required Databases db,
+    required Realtime realtime,
+    required Storage storage,
+  })  : _db = db,
         _realtime = realtime,
         _storage = storage;
 
@@ -50,16 +50,11 @@ class ObservasiAPI implements IObservasiAPI {
         databaseId: AppwriteConstants.databaseId,
         collectionId: AppwriteConstants.obsCollection,
         documentId: ID.unique(),
-        data: observasi.toMap(),
+        data: observasi.toMap(), // pastikan 'sekolah' ada di model
       );
       return right(document);
     } on AppwriteException catch (e, st) {
-      return left(
-        Failure(
-          e.message ?? 'Some unexpected error occurred',
-          st,
-        ),
-      );
+      return left(Failure(e.message ?? 'Some unexpected error occurred', st));
     } catch (e, st) {
       return left(Failure(e.toString(), st));
     }
@@ -105,34 +100,43 @@ class ObservasiAPI implements IObservasiAPI {
   }
 
   @override
-  Future<List<Document>> getUserObservasi(String muridId) async {
+  Future<List<Document>> getUserObservasi(
+    String muridId,
+    String sekolah,
+  ) async {
     final documents = await _db.listDocuments(
       databaseId: AppwriteConstants.databaseId,
       collectionId: AppwriteConstants.obsCollection,
       queries: [
         Query.equal('muridId', muridId),
+        Query.equal('sekolah', sekolah),
       ],
     );
     return documents.documents;
   }
 
   @override
-  Future<List<Document>> getKelompokObservasi(String kelompok) async {
+  Future<List<Document>> getKelompokObservasi(
+    String kelompok,
+    String sekolah,
+  ) async {
     final documents = await _db.listDocuments(
       databaseId: AppwriteConstants.databaseId,
       collectionId: AppwriteConstants.obsCollection,
       queries: [
         Query.equal('kelompok', kelompok),
+        Query.equal('sekolah', sekolah),
       ],
     );
     return documents.documents;
   }
 
   @override
-  Future<List<Document>> getAllObservasi() async {
+  Future<List<Document>> getAllObservasi(String sekolah) async {
     final documents = await _db.listDocuments(
       databaseId: AppwriteConstants.databaseId,
       collectionId: AppwriteConstants.obsCollection,
+      queries: [Query.equal('sekolah', sekolah)],
     );
     return documents.documents;
   }
@@ -151,25 +155,11 @@ class ObservasiAPI implements IObservasiAPI {
         databaseId: AppwriteConstants.databaseId,
         collectionId: AppwriteConstants.obsCollection,
         documentId: observasi.id,
-        data: {
-          'tanggal': observasi.tanggal,
-          'kegiatan': observasi.kegiatan,
-          'hasilObservasi': observasi.hasilObservasi,
-          'rekomendasi': observasi.rekomendasi,
-          'kelompok': observasi.kelompok,
-          'imageId': observasi.imageId,
-          'muridId': observasi.muridId,
-          'tanggapan': observasi.tanggapan,
-        },
+        data: observasi.toMap(), // pastikan 'sekolah' juga dikirim
       );
       return right(document);
     } on AppwriteException catch (e, st) {
-      return left(
-        Failure(
-          e.message ?? 'Some unexpected error occurred',
-          st,
-        ),
-      );
+      return left(Failure(e.message ?? 'Some unexpected error occurred', st));
     } catch (e, st) {
       return left(Failure(e.toString(), st));
     }

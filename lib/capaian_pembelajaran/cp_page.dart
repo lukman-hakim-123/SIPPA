@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:appwrite/appwrite.dart';
 import 'package:appwrite/models.dart';
 import 'package:flutter/material.dart';
@@ -33,6 +35,7 @@ class _CpPageState extends ConsumerState<CpPage> {
   List<CpModel> _cpList = [];
   List<CpModel> _filteredList = [];
   DateTime _selectedDate = DateTime.now();
+  bool _isFirstLoad = true;
 
   void _onItemSelected(int index) {
     setState(() {
@@ -62,9 +65,28 @@ class _CpPageState extends ConsumerState<CpPage> {
     }).toList();
   }
 
+  Future<void> _refreshData() async {
+    // Refresh provider data manually
+    await ref.refresh(cpControllerProvider);
+    // Re-fetch the data from provider
+    final userDetails = await ref.read(currentUserDetailsProvider.future);
+    if (userDetails != null) {
+      final userId = userDetails.id;
+      final sekolah = userDetails.sekolah;
+      final paramKey = jsonEncode({'id': userId, 'sekolah': sekolah});
+      final newCpList = await ref.read(getCpByUserIdProvider(paramKey).future);
+      setState(() {
+        _cpList = newCpList;
+        _filterList();
+        _isFirstLoad = false;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final userDetailsAsync = ref.watch(currentUserDetailsProvider);
+
     return Scaffold(
       appBar: const CustomAppBar(title: 'Ceklis'),
       body: Padding(
@@ -77,10 +99,16 @@ class _CpPageState extends ConsumerState<CpPage> {
             final userId = userDetails.id;
             final kelompok = userDetails.kelompok;
             final levelUser = userDetails.levelUser;
-            final cpAsyncValue = ref.watch(getCpByUserIdProvider(userId));
+            final sekolah = userDetails.sekolah;
+            final paramKey = jsonEncode({'id': userId, 'sekolah': sekolah});
+            final cpAsyncValue = ref.watch(getCpByUserIdProvider(paramKey));
+
             ref.listen<AsyncValue<RealtimeMessage>>(getLatestCpProvider,
                 (_, next) {
               next.whenData((data) {
+                final payloadSekolah = data.payload['sekolah'];
+                if (payloadSekolah != sekolah) return;
+
                 if (data.events.contains(
                   'databases.*.collections.${AppwriteConstants.cpCollection}.documents.*.create',
                 )) {
@@ -132,202 +160,205 @@ class _CpPageState extends ConsumerState<CpPage> {
               });
             });
 
-            return SingleChildScrollView(
-              scrollDirection: Axis.vertical,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Align(
-                    alignment: Alignment.centerRight,
-                    child: Padding(
-                      padding: EdgeInsets.only(bottom: 16),
-                      child: CustomText(
-                        text: "Ceklis",
-                        fontSize: 18,
-                        fontWeight: FontWeight.w800,
-                        textAlign: TextAlign.start,
+            return RefreshIndicator(
+              onRefresh: _refreshData,
+              child: SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                scrollDirection: Axis.vertical,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Align(
+                      alignment: Alignment.centerRight,
+                      child: Padding(
+                        padding: EdgeInsets.only(bottom: 16),
+                        child: CustomText(
+                          text: "Ceklis",
+                          fontSize: 18,
+                          fontWeight: FontWeight.w800,
+                          textAlign: TextAlign.start,
+                        ),
                       ),
                     ),
-                  ),
-                  if (levelUser != 3)
-                    ElevatedButton(
-                      onPressed: () {
-                        Navigator.push(
-                            context, AddCpPage.route(kelompok: kelompok));
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.green,
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 12, vertical: 3),
+                    if (levelUser != 3)
+                      ElevatedButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            AddCpPage.route(
+                                kelompok: kelompok, sekolah: sekolah),
+                          );
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.green,
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 12, vertical: 3),
+                        ),
+                        child: const CustomText(
+                            text: "Tambah Data", color: Colors.white),
                       ),
-                      child: const CustomText(
-                          text: "Tambah Data", color: Colors.white),
-                    ),
-                  MonthlyCalendar(onDateSelected: _onDateSelected),
-                  const SizedBox(height: 16),
-                  cpAsyncValue.when(
-                    data: (cpList) {
-                      _cpList = cpList;
-                      _filterList();
-                      return Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          SingleChildScrollView(
-                            scrollDirection: Axis.horizontal,
-                            child: DataTable(
-                              dataRowMinHeight: 50,
-                              dataRowMaxHeight: double.infinity,
-                              border: TableBorder.all(),
-                              headingRowColor:
-                                  MaterialStateProperty.resolveWith<Color>(
-                                      (Set<MaterialState> states) {
-                                return Colors.grey;
-                              }),
-                              columns: const [
-                                DataColumn(
-                                    label: CustomText(
-                                  text: 'Tanggal',
-                                  fontWeight: FontWeight.w700,
-                                )),
-                                DataColumn(
-                                    label: CustomText(
-                                  text: 'Kelompok',
-                                  fontWeight: FontWeight.w700,
-                                )),
-                                DataColumn(
-                                    label: CustomText(
-                                  text: 'Kegiatan',
-                                  fontWeight: FontWeight.w700,
-                                )),
-                                DataColumn(
-                                    label: CustomText(
-                                  text: 'Tujuan Pembelajaran',
-                                  fontWeight: FontWeight.w700,
-                                )),
-                                DataColumn(
-                                    label: CustomText(
-                                  text: 'Nama Murid',
-                                  fontWeight: FontWeight.w700,
-                                )),
-                                DataColumn(
-                                    label: CustomText(
-                                  text: 'Kemunculan',
-                                  fontWeight: FontWeight.w700,
-                                )),
-                                DataColumn(
-                                    label: CustomText(
-                                  text: 'Nilai Agama dan Budi Pekerti',
-                                  fontWeight: FontWeight.w700,
-                                )),
-                                DataColumn(
-                                    label: CustomText(
-                                  text: 'Jati Diri',
-                                  fontWeight: FontWeight.w700,
-                                )),
-                                DataColumn(
-                                    label: CustomText(
-                                  text: 'Literasi dan STEAM',
-                                  fontWeight: FontWeight.w700,
-                                )),
-                                DataColumn(
-                                    label: CustomText(
-                                  text: 'Umpan Balik',
-                                  fontWeight: FontWeight.w700,
-                                )),
-                                DataColumn(
-                                    label: CustomText(
-                                  text: 'Tanggapan Orang Tua',
-                                  fontWeight: FontWeight.w700,
-                                )),
-                                DataColumn(
-                                    label: CustomText(
-                                  text: 'Action',
-                                  fontWeight: FontWeight.w700,
-                                )),
-                              ],
-                              rows: _filteredList
-                                  .where((cp) => !(levelUser == 2 &&
-                                      cp.kelompok != kelompok))
-                                  .map((cp) {
-                                final muridData =
-                                    ref.watch(getUserDataProvider(cp.muridId));
-                                // final guruData =
-                                //     ref.watch(getUserDataProvider(cp.uid));
-                                return DataRow(
-                                  cells: [
-                                    DataCell(
-                                      ConstrainedBox(
-                                        constraints: const BoxConstraints(
-                                          maxWidth: 100,
-                                        ),
-                                        child: Text(
-                                          cp.tanggal,
-                                          overflow: TextOverflow.visible,
-                                          softWrap: true,
-                                        ),
-                                      ),
-                                    ),
-                                    DataCell(
-                                      ConstrainedBox(
-                                        constraints: const BoxConstraints(
-                                          maxWidth: 100,
-                                        ),
-                                        child: Text(
-                                          cp.kelompok,
-                                          overflow: TextOverflow.visible,
-                                          softWrap: true,
-                                        ),
-                                      ),
-                                    ),
-                                    DataCell(
-                                      ConstrainedBox(
-                                        constraints: const BoxConstraints(
-                                          maxWidth:
-                                              200, // Ubah sesuai kebutuhan
-                                        ),
-                                        child: Text(
-                                          cp.konteks,
-                                          overflow: TextOverflow.visible,
-                                          softWrap: true,
-                                        ),
-                                      ),
-                                    ),
-                                    DataCell(
-                                      ConstrainedBox(
-                                        constraints: const BoxConstraints(
-                                          maxWidth:
-                                              200, // Ubah sesuai kebutuhan
-                                        ),
-                                        child: Text(
-                                          cp.tujuan,
-                                          overflow: TextOverflow.visible,
-                                          softWrap: true,
-                                        ),
-                                      ),
-                                    ),
-                                    DataCell(
-                                      ConstrainedBox(
-                                        constraints: const BoxConstraints(
-                                          maxWidth:
-                                              100, // Ubah sesuai kebutuhan
-                                        ),
-                                        child: muridData.when(
-                                          data: (data) => Text(
-                                            data.data['nama'],
+                    MonthlyCalendar(onDateSelected: _onDateSelected),
+                    const SizedBox(height: 16),
+                    cpAsyncValue.when(
+                      data: (cpList) {
+                        if (_isFirstLoad) {
+                          _cpList = cpList;
+                          _filterList();
+                          _isFirstLoad = false;
+                        }
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            SingleChildScrollView(
+                              scrollDirection: Axis.horizontal,
+                              child: DataTable(
+                                dataRowMinHeight: 50,
+                                dataRowMaxHeight: double.infinity,
+                                border: TableBorder.all(),
+                                headingRowColor:
+                                    MaterialStateProperty.resolveWith<Color>(
+                                        (Set<MaterialState> states) {
+                                  return Colors.grey;
+                                }),
+                                columns: const [
+                                  DataColumn(
+                                      label: CustomText(
+                                    text: 'Tanggal',
+                                    fontWeight: FontWeight.w700,
+                                  )),
+                                  DataColumn(
+                                      label: CustomText(
+                                    text: 'Kelompok',
+                                    fontWeight: FontWeight.w700,
+                                  )),
+                                  DataColumn(
+                                      label: CustomText(
+                                    text: 'Kegiatan',
+                                    fontWeight: FontWeight.w700,
+                                  )),
+                                  DataColumn(
+                                      label: CustomText(
+                                    text: 'Tujuan Pembelajaran',
+                                    fontWeight: FontWeight.w700,
+                                  )),
+                                  DataColumn(
+                                      label: CustomText(
+                                    text: 'Nama Murid',
+                                    fontWeight: FontWeight.w700,
+                                  )),
+                                  DataColumn(
+                                      label: CustomText(
+                                    text: 'Kemunculan',
+                                    fontWeight: FontWeight.w700,
+                                  )),
+                                  DataColumn(
+                                      label: CustomText(
+                                    text: 'Nilai Agama dan Budi Pekerti',
+                                    fontWeight: FontWeight.w700,
+                                  )),
+                                  DataColumn(
+                                      label: CustomText(
+                                    text: 'Jati Diri',
+                                    fontWeight: FontWeight.w700,
+                                  )),
+                                  DataColumn(
+                                      label: CustomText(
+                                    text: 'Literasi dan STEAM',
+                                    fontWeight: FontWeight.w700,
+                                  )),
+                                  DataColumn(
+                                      label: CustomText(
+                                    text: 'Umpan Balik',
+                                    fontWeight: FontWeight.w700,
+                                  )),
+                                  DataColumn(
+                                      label: CustomText(
+                                    text: 'Tanggapan Orang Tua',
+                                    fontWeight: FontWeight.w700,
+                                  )),
+                                  DataColumn(
+                                      label: CustomText(
+                                    text: 'Action',
+                                    fontWeight: FontWeight.w700,
+                                  )),
+                                ],
+                                rows: _filteredList
+                                    .where((cp) => !(levelUser == 2 &&
+                                        cp.kelompok != kelompok))
+                                    .map((cp) {
+                                  final muridData = ref
+                                      .watch(getUserDataProvider(cp.muridId));
+                                  return DataRow(
+                                    cells: [
+                                      DataCell(
+                                        ConstrainedBox(
+                                          constraints: const BoxConstraints(
+                                            maxWidth: 100,
+                                          ),
+                                          child: Text(
+                                            cp.tanggal,
                                             overflow: TextOverflow.visible,
                                             softWrap: true,
                                           ),
-                                          loading: () => const Loader(),
-                                          error: (error, stack) =>
-                                              const Text('Error'),
                                         ),
                                       ),
-                                    ),
-                                    DataCell(
-                                      ConstrainedBox(
+                                      DataCell(
+                                        ConstrainedBox(
                                           constraints: const BoxConstraints(
-                                            maxWidth:
-                                                200, // Ubah sesuai kebutuhan
+                                            maxWidth: 100,
+                                          ),
+                                          child: Text(
+                                            cp.kelompok,
+                                            overflow: TextOverflow.visible,
+                                            softWrap: true,
+                                          ),
+                                        ),
+                                      ),
+                                      DataCell(
+                                        ConstrainedBox(
+                                          constraints: const BoxConstraints(
+                                            maxWidth: 200,
+                                          ),
+                                          child: Text(
+                                            cp.konteks,
+                                            overflow: TextOverflow.visible,
+                                            softWrap: true,
+                                          ),
+                                        ),
+                                      ),
+                                      DataCell(
+                                        ConstrainedBox(
+                                          constraints: const BoxConstraints(
+                                            maxWidth: 200,
+                                          ),
+                                          child: Text(
+                                            cp.tujuan,
+                                            overflow: TextOverflow.visible,
+                                            softWrap: true,
+                                          ),
+                                        ),
+                                      ),
+                                      DataCell(
+                                        ConstrainedBox(
+                                          constraints: const BoxConstraints(
+                                            maxWidth: 100,
+                                          ),
+                                          child: muridData.when(
+                                            data: (data) => Text(
+                                              data.data['nama'],
+                                              overflow: TextOverflow.visible,
+                                              softWrap: true,
+                                            ),
+                                            loading: () => const Loader(),
+                                            error: (error, stack) =>
+                                                const Text('Error'),
+                                          ),
+                                        ),
+                                      ),
+                                      DataCell(
+                                        ConstrainedBox(
+                                          constraints: const BoxConstraints(
+                                            maxWidth: 200,
                                           ),
                                           child: Center(
                                             child: cp.isDone
@@ -339,127 +370,128 @@ class _CpPageState extends ConsumerState<CpPage> {
                                                     Icons.close,
                                                     color: Colors.red,
                                                   ),
-                                          )),
-                                    ),
-                                    DataCell(
-                                      ConstrainedBox(
-                                        constraints: const BoxConstraints(
-                                          maxWidth:
-                                              200, // Ubah sesuai kebutuhan
-                                        ), // Sesuaikan lebar sesuai kebutuhan
-                                        child: Text(
-                                          cp.agama,
-                                          overflow: TextOverflow.visible,
-                                          softWrap: true,
+                                          ),
                                         ),
                                       ),
-                                    ),
-                                    DataCell(
-                                      ConstrainedBox(
-                                        constraints: const BoxConstraints(
-                                          maxWidth:
-                                              200, // Ubah sesuai kebutuhan
-                                        ), // Sesuaikan lebar sesuai kebutuhan
-                                        child: Text(
-                                          cp.jatidiri,
-                                          overflow: TextOverflow.visible,
-                                          softWrap: true,
+                                      DataCell(
+                                        ConstrainedBox(
+                                          constraints: const BoxConstraints(
+                                            maxWidth: 200,
+                                          ),
+                                          child: Text(
+                                            cp.agama,
+                                            overflow: TextOverflow.visible,
+                                            softWrap: true,
+                                          ),
                                         ),
                                       ),
-                                    ),
-                                    DataCell(
-                                      ConstrainedBox(
-                                        constraints: const BoxConstraints(
-                                          maxWidth:
-                                              200, // Ubah sesuai kebutuhan
-                                        ), // Sesuaikan lebar sesuai kebutuhan
-                                        child: Text(
-                                          cp.literasi,
-                                          overflow: TextOverflow.visible,
-                                          softWrap: true,
+                                      DataCell(
+                                        ConstrainedBox(
+                                          constraints: const BoxConstraints(
+                                            maxWidth: 200,
+                                          ),
+                                          child: Text(
+                                            cp.jatidiri,
+                                            overflow: TextOverflow.visible,
+                                            softWrap: true,
+                                          ),
                                         ),
                                       ),
-                                    ),
-                                    DataCell(
-                                      ConstrainedBox(
-                                        constraints: const BoxConstraints(
-                                          maxWidth:
-                                              200, // Ubah sesuai kebutuhan
-                                        ), // Sesuaikan lebar sesuai kebutuhan
-                                        child: Text(
-                                          cp.rekomendasi,
-                                          overflow: TextOverflow.visible,
-                                          softWrap: true,
+                                      DataCell(
+                                        ConstrainedBox(
+                                          constraints: const BoxConstraints(
+                                            maxWidth: 200,
+                                          ),
+                                          child: Text(
+                                            cp.literasi,
+                                            overflow: TextOverflow.visible,
+                                            softWrap: true,
+                                          ),
                                         ),
                                       ),
-                                    ),
-                                    DataCell(
-                                      ConstrainedBox(
-                                        constraints: const BoxConstraints(
-                                          maxWidth:
-                                              200, // Ubah sesuai kebutuhan
-                                        ), // Sesuaikan lebar sesuai kebutuhan
-                                        child: Text(
-                                          cp.tanggapan,
-                                          overflow: TextOverflow.visible,
-                                          softWrap: true,
+                                      DataCell(
+                                        ConstrainedBox(
+                                          constraints: const BoxConstraints(
+                                            maxWidth: 200,
+                                          ),
+                                          child: Text(
+                                            cp.rekomendasi,
+                                            overflow: TextOverflow.visible,
+                                            softWrap: true,
+                                          ),
                                         ),
                                       ),
-                                    ),
-                                    DataCell(
-                                      Row(
-                                        children: [
-                                          IconButton(
-                                            icon: const Icon(Icons.edit),
-                                            onPressed: () {
-                                              Navigator.push(
+                                      DataCell(
+                                        ConstrainedBox(
+                                          constraints: const BoxConstraints(
+                                            maxWidth: 200,
+                                          ),
+                                          child: Text(
+                                            cp.tanggapan,
+                                            overflow: TextOverflow.visible,
+                                            softWrap: true,
+                                          ),
+                                        ),
+                                      ),
+                                      DataCell(
+                                        Row(
+                                          children: [
+                                            IconButton(
+                                              icon: const Icon(Icons.edit),
+                                              onPressed: () {
+                                                Navigator.push(
                                                   context,
                                                   EditCpPage.route(
-                                                      cp: cp,
-                                                      kelompok: kelompok,
-                                                      levelUser: levelUser));
-                                            },
-                                          ),
-                                          if (levelUser != 3)
-                                            IconButton(
-                                              icon: const Icon(Icons.delete),
-                                              onPressed: () {
-                                                _showDeleteDialog(context, ref,
-                                                    cp, muridData);
+                                                    cp: cp,
+                                                    kelompok: kelompok,
+                                                    sekolah: sekolah,
+                                                    levelUser: levelUser,
+                                                  ),
+                                                );
                                               },
                                             ),
-                                        ],
+                                            if (levelUser != 3)
+                                              IconButton(
+                                                icon: const Icon(Icons.delete),
+                                                onPressed: () {
+                                                  _showDeleteDialog(context,
+                                                      ref, cp, muridData);
+                                                },
+                                              ),
+                                          ],
+                                        ),
                                       ),
-                                    ),
-                                  ],
-                                );
-                              }).toList(),
+                                    ],
+                                  );
+                                }).toList(),
+                              ),
                             ),
-                          ),
-                        ],
-                      );
-                    },
-                    loading: () =>
-                        const Center(child: CircularProgressIndicator()),
-                    error: (error, stack) {
-                      if (error.toString().contains('Failed host lookup')) {
-                        return ReloadError(
-                          onReload: () {
-                            ref.refresh(
-                                cpControllerProvider); // Reset state atau data provider
-                            Navigator.pushReplacement(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => const CpPage()),
-                            );
-                          },
+                            const SizedBox(height: 40),
+                          ],
                         );
-                      }
-                      return Text(error.toString());
-                    },
-                  ),
-                  const SizedBox(height: 40),
-                ],
+                      },
+                      loading: () =>
+                          const Center(child: CircularProgressIndicator()),
+                      error: (error, stack) {
+                        if (error.toString().contains('Failed host lookup')) {
+                          return ReloadError(
+                            onReload: () {
+                              ref.refresh(
+                                  cpControllerProvider); // Reset state atau data provider
+                              Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => const CpPage()),
+                              );
+                            },
+                          );
+                        }
+                        return Text(error.toString());
+                      },
+                    ),
+                    const SizedBox(height: 40),
+                  ],
+                ),
               ),
             );
           },
@@ -489,12 +521,12 @@ void _showDeleteDialog(BuildContext context, WidgetRef ref, CpModel cp,
                 data: (data) {
                   final nama = data?.data['nama'] ?? 'Murid tidak ditemukan';
                   return Text(
-                    'Apakah Anda yakin ingin menghapus Ceklis $nama pada tanggal ${cp.tanggal}',
+                    'Apakah Anda yakin ingin menghapus ceklis $nama pada tanggal ${cp.tanggal}?',
                   );
                 },
                 loading: () => const CircularProgressIndicator(),
                 error: (_, __) => Text(
-                  'Apakah Anda yakin ingin menghapus Ceklis pada tanggal ${cp.tanggal}?',
+                  'Apakah Anda yakin ingin menghapus ceklis pada tanggal ${cp.tanggal}?',
                 ),
               ),
             ],

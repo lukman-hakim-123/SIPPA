@@ -27,7 +27,7 @@ class _EditMuridPageState extends ConsumerState<EditMuridPage> {
   final ImagePicker picker = ImagePicker();
   File? _image;
   String? _errorMessage;
-  static const int maxFileSize = 2 * 1024 * 1024;
+  // static const int maxFileSize = 2 * 1024 * 1024;
   String? selectedKelompok;
   bool _isNewImage = false;
 
@@ -51,7 +51,7 @@ class _EditMuridPageState extends ConsumerState<EditMuridPage> {
 
     if (pickedFile != null) {
       final file = File(pickedFile.path);
-      final fileSize = await file.length();
+      // final fileSize = await file.length();
 
       setState(() {
         _image = file;
@@ -76,6 +76,7 @@ class _EditMuridPageState extends ConsumerState<EditMuridPage> {
         ref: ref,
         kelompok: selectedKelompok ?? widget.user.kelompok,
         levelUser: widget.user.levelUser,
+        sekolah: widget.user.sekolah,
         imageId: widget.user.imageId);
   }
 

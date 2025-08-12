@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:appwrite/models.dart';
@@ -17,15 +18,20 @@ final hkControllerProvider = StateNotifierProvider<HkController, bool>((ref) {
   );
 });
 
-final getHkByUserIdProvider = FutureProvider.family((ref, String id) async {
+final getHkByUserIdProvider =
+    FutureProvider.family<List<HkModel>, String>((ref, paramKey) async {
   final hkController = ref.watch(hkControllerProvider.notifier);
   final levelUser = ref.watch(currentUserDetailsProvider).value!.levelUser;
+  final params = jsonDecode(paramKey) as Map<String, dynamic>;
+  final sekolah = params['sekolah'] as String;
+  final id = params['id'] as String;
+
   if (levelUser == 1) {
-    return hkController.getAllHk();
+    return hkController.getAllHk(sekolah);
   } else if (levelUser == 2) {
-    return hkController.getAllHk();
+    return hkController.getAllHk(sekolah);
   } else {
-    return hkController.getUserHk(id);
+    return hkController.getUserHk(id, sekolah);
   }
 });
 final getUserDataProvider =
@@ -35,6 +41,7 @@ final getUserDataProvider =
 });
 
 final getLatestHkProvider = StreamProvider((ref) {
+  ref.keepAlive();
   final hkAPI = ref.watch(hkAPIProvider);
   return hkAPI.getLatestHk();
 });
@@ -55,18 +62,18 @@ class HkController extends StateNotifier<bool> {
         _hkAPI = hkAPI,
         super(false);
 
-  Future<List<HkModel>> getUserHk(String uid) async {
-    final hkList = await _hkAPI.getUserHk(uid);
+  Future<List<HkModel>> getUserHk(String uid, String sekolah) async {
+    final hkList = await _hkAPI.getUserHk(uid, sekolah);
     return hkList.map((hk) => HkModel.fromMap(hk.data)).toList();
   }
 
-  Future<List<HkModel>> getKelompokHk(String kelompok) async {
-    final hkList = await _hkAPI.getKelompokHk(kelompok);
+  Future<List<HkModel>> getKelompokHk(String kelompok, String sekolah) async {
+    final hkList = await _hkAPI.getKelompokHk(kelompok, sekolah);
     return hkList.map((hk) => HkModel.fromMap(hk.data)).toList();
   }
 
-  Future<List<HkModel>> getAllHk() async {
-    final hkList = await _hkAPI.getAllHk();
+  Future<List<HkModel>> getAllHk(String sekolah) async {
+    final hkList = await _hkAPI.getAllHk(sekolah);
     return hkList.map((hk) => HkModel.fromMap(hk.data)).toList();
   }
 
@@ -84,6 +91,7 @@ class HkController extends StateNotifier<bool> {
     required String tanggal,
     required String muridId,
     required String rekomendasi,
+    required String sekolah,
     required BuildContext context,
   }) async {
     state = true;
@@ -113,6 +121,7 @@ class HkController extends StateNotifier<bool> {
       id: '',
       rekomendasi: rekomendasi,
       tanggapan: '',
+      sekolah: sekolah,
     );
 
     final res = await _hkAPI.addHk(hk);
@@ -136,6 +145,7 @@ class HkController extends StateNotifier<bool> {
     required String muridId,
     required String rekomendasi,
     required String tanggapan,
+    required String sekolah,
     required BuildContext context,
   }) async {
     state = true;
@@ -165,6 +175,7 @@ class HkController extends StateNotifier<bool> {
       kelompok: kelompok,
       rekomendasi: rekomendasi,
       tanggapan: tanggapan,
+      sekolah: sekolah,
       uid: user.id,
     );
 

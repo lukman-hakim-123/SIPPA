@@ -12,22 +12,26 @@ class EditCpPage extends ConsumerStatefulWidget {
   static route(
           {required CpModel cp,
           required String kelompok,
+          required String sekolah,
           required int levelUser}) =>
       MaterialPageRoute(
         builder: (context) => EditCpPage(
           cp: cp,
           kelompok: kelompok,
+          sekolah: sekolah,
           levelUser: levelUser,
         ),
       );
   final CpModel cp;
   final String kelompok;
+  final String sekolah;
   final int levelUser;
 
   const EditCpPage(
       {super.key,
       required this.cp,
       required this.kelompok,
+      required this.sekolah,
       required this.levelUser});
 
   @override
@@ -47,6 +51,7 @@ class _EditCpPageState extends ConsumerState<EditCpPage> {
   late TextEditingController tanggapanController;
   DateTime? _selectedDate;
   bool? isDone;
+  late final Map<String, String> _filterParams;
 
   @override
   void initState() {
@@ -62,6 +67,10 @@ class _EditCpPageState extends ConsumerState<EditCpPage> {
     tanggapanController = TextEditingController(text: widget.cp.tanggapan);
     isDone = widget.cp.isDone;
     _selectedDate = DateFormat('dd MMMM yyyy').parse(widget.cp.tanggal);
+    _filterParams = {
+      'kelompok': widget.kelompok,
+      'sekolah': widget.sekolah,
+    };
   }
 
   @override
@@ -108,14 +117,14 @@ class _EditCpPageState extends ConsumerState<EditCpPage> {
             context: context,
             rekomendasi: rekomendasiController.text,
             tanggapan: tanggapanController.text,
+            sekolah: widget.sekolah,
           );
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final muridAsyncValue =
-        ref.watch(getMuridByFiltersProvider(widget.kelompok));
+    final muridAsyncValue = ref.watch(getMuridByFiltersProvider(_filterParams));
     final isLoading = ref.watch(cpControllerProvider);
 
     return Scaffold(

@@ -10,12 +10,14 @@ import 'package:sippa/widget_view/appbar.dart';
 import 'package:sippa/widget_view/teks.dart';
 
 class AddCpPage extends ConsumerStatefulWidget {
-  static route({required kelompok}) =>
-      MaterialPageRoute(builder: (context) => AddCpPage(kelompok: kelompok));
+  static route({required kelompok, required sekolah}) => MaterialPageRoute(
+      builder: (context) => AddCpPage(kelompok: kelompok, sekolah: sekolah));
   final String kelompok;
+  final String sekolah;
   const AddCpPage({
     super.key,
     required this.kelompok,
+    required this.sekolah,
   });
 
   @override
@@ -70,14 +72,25 @@ class _AddCpPageState extends ConsumerState<AddCpPage> {
           isDone: isDone,
           muridId: muridIdController.text,
           rekomendasi: rekomendasiController.text,
-          context: context);
+          context: context,
+          sekolah: widget.sekolah);
     }
+  }
+
+  late final Map<String, String> _filterParams;
+
+  @override
+  void initState() {
+    super.initState();
+    _filterParams = {
+      'kelompok': widget.kelompok,
+      'sekolah': widget.sekolah,
+    };
   }
 
   @override
   Widget build(BuildContext context) {
-    final muridAsyncValue =
-        ref.watch(getMuridByFiltersProvider(widget.kelompok));
+    final muridAsyncValue = ref.watch(getMuridByFiltersProvider(_filterParams));
     final isLoading = ref.watch(cpControllerProvider);
 
     return Scaffold(

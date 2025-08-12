@@ -9,13 +9,11 @@ import 'package:sippa/capaian_pembelajaran/cp_page.dart';
 import 'package:sippa/common/loading.dart';
 import 'package:sippa/common/error.dart';
 import 'package:sippa/constant/appwrite.dart';
-import 'package:sippa/foto_berseri/foto_berseri_page.dart';
 import 'package:sippa/hasil_karya/hasil_karya_page.dart';
 import 'package:sippa/models/user.dart';
 import 'package:sippa/observasi/observasi_page.dart';
 import 'package:sippa/pertumbuhan/pertumbuhan_page.dart';
 import 'package:sippa/rubrik/rubrik_page.dart';
-import 'package:sippa/tanggapan_ortu/tanggapan_page.dart';
 import 'package:sippa/widget_view/edit_profil_page.dart';
 
 class CustomDrawer extends ConsumerWidget {
@@ -54,6 +52,7 @@ class CustomDrawer extends ConsumerWidget {
 
         final levelUser = copyOfUser.levelUser;
         final kelompok = copyOfUser.kelompok;
+        final sekolah = copyOfUser.sekolah;
 
         return Drawer(
           child: ListView(
@@ -189,7 +188,8 @@ class CustomDrawer extends ConsumerWidget {
                   onItemSelected(8);
                 },
               ),
-              ..._buildMenuItems(levelUser, selectedIndex, context, kelompok),
+              ..._buildMenuItems(
+                  levelUser, selectedIndex, context, kelompok, sekolah),
               ListTile(
                 title: const Text(
                   'Profil',
@@ -225,42 +225,41 @@ class CustomDrawer extends ConsumerWidget {
   }
 
   void _showLogoutConfirmationDialog(BuildContext context, WidgetRef ref) {
-  showDialog(
-    context: context,
-    builder: (dialogContext) => AlertDialog(
-      title: const Text('Konfirmasi Logout'),
-      content: const Text('Apakah Anda yakin ingin logout?'),
-      actions: [
-        TextButton(
-          onPressed: () {
-            Navigator.pop(dialogContext); // Tutup dialog
-          },
-          child: const Text('Batal'),
-        ),
-        TextButton(
-          onPressed: () async {
-            Navigator.pop(dialogContext); // Tutup dialog
-            ref.read(authControllerProvider.notifier).logout(context);
-          },
-          child: const Text('Logout'),
-        ),
-      ],
-    ),
-  );
-}
-
+    showDialog(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Konfirmasi Logout'),
+        content: const Text('Apakah Anda yakin ingin logout?'),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(dialogContext); // Tutup dialog
+            },
+            child: const Text('Batal'),
+          ),
+          TextButton(
+            onPressed: () async {
+              Navigator.pop(dialogContext); // Tutup dialog
+              ref.read(authControllerProvider.notifier).logout(context);
+            },
+            child: const Text('Logout'),
+          ),
+        ],
+      ),
+    );
+  }
 
   List<Widget> _buildMenuItems(int? levelUser, int selectedIndex,
-      BuildContext context, String? kelompok) {
+      BuildContext context, String? kelompok, String? sekolah) {
     List<Widget> items = [];
-    if (levelUser == 1) {
+    if (levelUser == 1 || levelUser == 0) {
       items.addAll([
         ListTile(
           title: const Text('List Murid'),
           selected: selectedIndex == 6,
           onTap: () {
-            Navigator.pushReplacement(
-                context, MuridListPage.route(kelompok: kelompok));
+            Navigator.pushReplacement(context,
+                MuridListPage.route(kelompok: kelompok, sekolah: sekolah));
             onItemSelected(6);
           },
         ),
@@ -279,8 +278,8 @@ class CustomDrawer extends ConsumerWidget {
           title: const Text('List Murid'),
           selected: selectedIndex == 6,
           onTap: () {
-            Navigator.pushReplacement(
-                context, MuridListPage.route(kelompok: kelompok));
+            Navigator.pushReplacement(context,
+                MuridListPage.route(kelompok: kelompok, sekolah: sekolah));
             onItemSelected(6);
           },
         ),

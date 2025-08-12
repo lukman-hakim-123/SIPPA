@@ -1,5 +1,5 @@
+import 'dart:convert';
 import 'dart:typed_data';
-
 import 'package:appwrite/models.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -19,17 +19,22 @@ final anekdotControllerProvider =
 });
 
 final getAnekdotByUserIdProvider =
-    FutureProvider.family((ref, String id) async {
+    FutureProvider.family<List<AnekdotModel>, String>((ref, paramKey) async {
   final anekdotController = ref.watch(anekdotControllerProvider.notifier);
   final levelUser = ref.watch(currentUserDetailsProvider).value!.levelUser;
+  final params = jsonDecode(paramKey) as Map<String, dynamic>;
+  final sekolah = params['sekolah'] as String;
+  final id = params['id'] as String;
+
   if (levelUser == 1) {
-    return anekdotController.getAllAnekdot();
+    return anekdotController.getAllAnekdot(sekolah);
   } else if (levelUser == 2) {
-    return anekdotController.getAllAnekdot();
+    return anekdotController.getAllAnekdot(sekolah);
   } else {
-    return anekdotController.getUserAnekdot(id);
+    return anekdotController.getUserAnekdot(id, sekolah);
   }
 });
+
 final getUserDataProvider =
     FutureProvider.family<Document, String>((ref, String uid) async {
   final userAPI = ref.watch(userAPIProvider);
@@ -37,6 +42,7 @@ final getUserDataProvider =
 });
 
 final getLatestAnekdotProvider = StreamProvider((ref) {
+  ref.keepAlive();
   final anekdotAPI = ref.watch(anekdotAPIProvider);
   return anekdotAPI.getLatestAnekdot();
 });
@@ -57,22 +63,23 @@ class AnekdotController extends StateNotifier<bool> {
         _anekdotAPI = anekdotAPI,
         super(false);
 
-  Future<List<AnekdotModel>> getUserAnekdot(String uid) async {
-    final anekdotList = await _anekdotAPI.getUserAnekdot(uid);
+  Future<List<AnekdotModel>> getUserAnekdot(String uid, String sekolah) async {
+    final anekdotList = await _anekdotAPI.getUserAnekdot(uid, sekolah);
     return anekdotList
         .map((anekdot) => AnekdotModel.fromMap(anekdot.data))
         .toList();
   }
 
-  Future<List<AnekdotModel>> getKelompokAnekdot(String kelompok) async {
-    final anekdotList = await _anekdotAPI.getKelompokAnekdot(kelompok);
+  Future<List<AnekdotModel>> getKelompokAnekdot(
+      String kelompok, String sekolah) async {
+    final anekdotList = await _anekdotAPI.getKelompokAnekdot(kelompok, sekolah);
     return anekdotList
         .map((anekdot) => AnekdotModel.fromMap(anekdot.data))
         .toList();
   }
 
-  Future<List<AnekdotModel>> getAllAnekdot() async {
-    final anekdotList = await _anekdotAPI.getAllAnekdot();
+  Future<List<AnekdotModel>> getAllAnekdot(String sekolah) async {
+    final anekdotList = await _anekdotAPI.getAllAnekdot(sekolah);
     return anekdotList
         .map((anekdot) => AnekdotModel.fromMap(anekdot.data))
         .toList();
@@ -89,6 +96,7 @@ class AnekdotController extends StateNotifier<bool> {
     required io.File? image,
     required String muridId,
     required String tanggapan,
+    required String sekolah, // ✅ ditambahkan
     required BuildContext context,
   }) async {
     state = true;
@@ -108,47 +116,42 @@ class AnekdotController extends StateNotifier<bool> {
       }
       String? imageId;
 
-      // Upload image if provided
       if (image != null) {
         imageId =
             await _anekdotAPI.uploadFile(image, 'an_${DateTime.now()}.jpg');
       }
 
-      // Create anekdot model
       AnekdotModel anekdot = AnekdotModel(
-          pengamatan: pengamatan,
-          tanggal: tanggal,
-          nilai: nilai,
-          jatiDiri: jatiDiri,
-          literasi: literasi,
-          umpanBalik: umpanBalik,
-          kelompok: kelompok,
-          imageId: imageId ?? '',
-          muridId: muridId,
-          uid: user.id,
-          id: '',
-          tanggapan: '',
-          tujuan: tujuan);
+        pengamatan: pengamatan,
+        tanggal: tanggal,
+        nilai: nilai,
+        jatiDiri: jatiDiri,
+        literasi: literasi,
+        umpanBalik: umpanBalik,
+        kelompok: kelompok,
+        imageId: imageId ?? '',
+        muridId: muridId,
+        uid: user.id,
+        id: '',
+        tanggapan: '',
+        tujuan: tujuan,
+        sekolah: sekolah, // ✅ dimasukkan ke model
+      );
 
-      // Add anekdot to the API
       final res = await _anekdotAPI.addAnekdot(anekdot);
 
       res.fold(
         (l) {
-          // Show error message from API
           showSnackBar(context, l.message);
         },
         (r) {
-          // Show success message and navigate back
           showSnackBar(context, 'Anekdot Added');
           Navigator.pop(context);
         },
       );
     } catch (e) {
-      // Handle unexpected errors
       showSnackBar(context, 'Terjadi kesalahan: $e');
     } finally {
-      // Set loading state back to false
       state = false;
     }
   }
@@ -167,6 +170,7 @@ class AnekdotController extends StateNotifier<bool> {
     required bool deleteId,
     required String muridId,
     required String tanggapan,
+    required String sekolah, // ✅ ditambahkan
     required BuildContext context,
   }) async {
     state = true;
@@ -182,7 +186,6 @@ class AnekdotController extends StateNotifier<bool> {
         if (imageId != null && imageId.isNotEmpty) {
           await _anekdotAPI.deleteImage(imageId);
         }
-
         imageId =
             await _anekdotAPI.uploadFile(image, 'an_${DateTime.now()}.jpg');
       }
@@ -205,12 +208,11 @@ class AnekdotController extends StateNotifier<bool> {
         uid: user.id,
         tanggapan: tanggapan,
         tujuan: tujuan,
+        sekolah: sekolah, // ✅ dimasukkan ke model
       );
 
-      // Update anekdot
       final res = await _anekdotAPI.updateAnekdot(anekdot);
 
-      // Handle response
       res.fold(
         (l) {
           showSnackBar(context, l.message);
@@ -221,7 +223,6 @@ class AnekdotController extends StateNotifier<bool> {
         },
       );
     } catch (e) {
-      // Handle unexpected errors
       showSnackBar(context, 'Tekan lagi');
     } finally {
       state = false;

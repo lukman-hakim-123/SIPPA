@@ -12,11 +12,14 @@ import 'package:sippa/widget_view/drawer.dart';
 import 'package:sippa/widget_view/teks.dart';
 
 class MuridListPage extends ConsumerStatefulWidget {
-  static route({required kelompok}) => MaterialPageRoute(
-      builder: (context) => MuridListPage(kelompok: kelompok));
+  static route({required kelompok, sekolah}) => MaterialPageRoute(
+      builder: (context) =>
+          MuridListPage(kelompok: kelompok, sekolah: sekolah));
 
   final String kelompok;
-  const MuridListPage({super.key, required this.kelompok});
+  final String sekolah;
+  const MuridListPage(
+      {super.key, required this.kelompok, required this.sekolah});
 
   @override
   ConsumerState<ConsumerStatefulWidget> createState() => _MuridListPageState();
@@ -25,6 +28,7 @@ class MuridListPage extends ConsumerStatefulWidget {
 class _MuridListPageState extends ConsumerState<MuridListPage> {
   int selectedIndex = 6;
   List<User> muridList = [];
+  bool isLoading = true;
 
   final ScrollController _scrollController = ScrollController();
 
@@ -41,10 +45,28 @@ class _MuridListPageState extends ConsumerState<MuridListPage> {
   }
 
   Future<void> _loadInitialData() async {
-    final initialList =
-        await ref.read(getMuridByFiltersProvider(widget.kelompok).future);
-    if (mounted) {
-      setState(() => muridList = initialList);
+    setState(() => isLoading = true);
+    try {
+      final initialList = await ref.read(
+        getMuridByFiltersProvider({
+          'kelompok': widget.kelompok,
+          'sekolah': widget.sekolah,
+        }).future,
+      );
+      if (mounted) {
+        setState(() {
+          muridList = initialList;
+          isLoading = false;
+        });
+      }
+    } catch (e) {
+      // Jika error, tetap matikan loading dan tampilkan "Belum ada data murid"
+      if (mounted) {
+        setState(() {
+          muridList = [];
+          isLoading = false;
+        });
+      }
     }
   }
 
@@ -58,6 +80,10 @@ class _MuridListPageState extends ConsumerState<MuridListPage> {
   Widget build(BuildContext context) {
     ref.listen<AsyncValue<RealtimeMessage>>(getLatestUsersProvider, (_, next) {
       next.whenData((data) {
+        final payloadSekolah = data.payload['sekolah'];
+        if (payloadSekolah != widget.sekolah) return;
+
+        // CREATE
         if (data.events.contains(
             'databases.*.collections.${AppwriteConstants.collectionUserId}.documents.*.create')) {
           final newUser = User.fromMap(data.payload);
@@ -65,30 +91,45 @@ class _MuridListPageState extends ConsumerState<MuridListPage> {
               !muridList.any((existingUser) => existingUser.id == newUser.id)) {
             setState(() => muridList.add(newUser));
           }
-        } else if (data.events.contains(
+        }
+        // UPDATE
+        else if (data.events.contains(
           'databases.*.collections.${AppwriteConstants.collectionUserId}.documents.*.update',
         )) {
-          final startingPoint = data.events[0].lastIndexOf('documents.');
-          final endPoint = data.events[0].lastIndexOf('.update');
-          final muridId =
-              data.events[0].substring(startingPoint + 10, endPoint);
-          var murid = muridList.firstWhere((element) => element.id == muridId);
-          final muridIndex = muridList.indexOf(murid);
-          setState(() {
-            muridList.removeAt(muridIndex);
-            final updatedMurid = User.fromMap(data.payload);
-            muridList.insert(muridIndex, updatedMurid);
-          });
-        } else if (data.events.contains(
+          if (data.events.isNotEmpty) {
+            final startingPoint = data.events[0].lastIndexOf('documents.');
+            final endPoint = data.events[0].lastIndexOf('.update');
+            if (startingPoint != -1 &&
+                endPoint != -1 &&
+                endPoint > startingPoint) {
+              final muridId =
+                  data.events[0].substring(startingPoint + 10, endPoint);
+              final muridIndex =
+                  muridList.indexWhere((element) => element.id == muridId);
+              if (muridIndex != -1) {
+                setState(() {
+                  muridList[muridIndex] = User.fromMap(data.payload);
+                });
+              }
+            }
+          }
+        }
+        // DELETE
+        else if (data.events.contains(
             'databases.*.collections.${AppwriteConstants.collectionUserId}.documents.*.delete')) {
-          final startingPoint = data.events[0].lastIndexOf('documents.');
-          final endPoint = data.events[0].lastIndexOf('.delete');
-          final deletedUserId =
-              data.events[0].substring(startingPoint + 10, endPoint);
-
-          setState(() {
-            muridList.removeWhere((user) => user.id == deletedUserId);
-          });
+          if (data.events.isNotEmpty) {
+            final startingPoint = data.events[0].lastIndexOf('documents.');
+            final endPoint = data.events[0].lastIndexOf('.delete');
+            if (startingPoint != -1 &&
+                endPoint != -1 &&
+                endPoint > startingPoint) {
+              final deletedUserId =
+                  data.events[0].substring(startingPoint + 10, endPoint);
+              setState(() {
+                muridList.removeWhere((user) => user.id == deletedUserId);
+              });
+            }
+          }
         }
       });
     });
@@ -104,7 +145,9 @@ class _MuridListPageState extends ConsumerState<MuridListPage> {
               alignment: Alignment.centerLeft,
               child: ElevatedButton(
                 onPressed: () {
-                  Navigator.push(context, AddMuridPage.route());
+                  Navigator.push(context, AddMuridPage.route()).then((_) {
+                    _loadInitialData();
+                  });
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.green,
@@ -117,110 +160,105 @@ class _MuridListPageState extends ConsumerState<MuridListPage> {
             ),
             const SizedBox(height: 16),
             Expanded(
-              child: muridList.isEmpty
-                  ? Center(
-                      child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Icon(Icons.error, size: 50, color: Colors.red),
-                        const SizedBox(height: 16),
-                        Text(
-                          'Gagal memuat data. Periksa koneksi internet Anda.',
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(fontSize: 16),
-                        ),
-                        const SizedBox(height: 16),
-                        ElevatedButton(
-                          onPressed: () {
-                            ref.refresh(
-                                getMuridByFiltersProvider(widget.kelompok));
-                            Navigator.pushReplacement(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => MuridListPage(
-                                        kelompok: widget.kelompok,
-                                      )),
-                            );
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.green,
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 12, vertical: 8),
-                          ),
-                          child: const Text('Muat Ulang',
-                              style: TextStyle(color: Colors.white)),
-                        ),
-                      ],
-                    ))
-                  : ListView.builder(
-                      controller: _scrollController,
-                      itemCount: muridList.length,
-                      cacheExtent: 500, // Pre-load items
-                      itemBuilder: (context, index) {
-                        final murid = muridList[index];
-                        return Card(
-                          margin: const EdgeInsets.symmetric(vertical: 8),
-                          child: ListTile(
-                            leading: ClipOval(
-                              child: SizedBox(
-                                width: 50,
-                                height: 50,
-                                child: ref
-                                    .watch(getUserImageProvider(murid.imageId))
-                                    .when(
-                                      data: (imageData) {
-                                        if (imageData != null) {
-                                          return Image.memory(
-                                            imageData,
-                                            fit: BoxFit.cover,
-                                            errorBuilder:
-                                                (context, error, stackTrace) {
-                                              return const Icon(Icons.error,
-                                                  color: Colors.red);
-                                            },
-                                          );
-                                        } else {
-                                          return Image.asset(
-                                            'assets/images/pp_kosong.jpg',
-                                            fit: BoxFit.cover,
-                                            errorBuilder:
-                                                (context, error, stackTrace) {
-                                              return const Icon(Icons.error,
-                                                  color: Colors.red);
-                                            },
-                                          );
-                                        }
-                                      },
-                                      loading: () => const Loader(),
-                                      error: (_, __) => const Icon(Icons.error,
-                                          color: Colors.red),
-                                    ),
-                              ),
-                            ),
-                            title: Text(murid.nama),
-                            subtitle: Text('Kelompok: ${murid.kelompok}'),
-                            trailing: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                IconButton(
-                                  icon: const Icon(Icons.edit),
-                                  onPressed: () {
-                                    Navigator.push(
-                                        context, EditMuridPage.route(murid));
-                                  },
-                                ),
-                                IconButton(
-                                  icon: const Icon(Icons.delete),
-                                  onPressed: () {
-                                    _showDeleteConfirmationDialog(
-                                        context, ref, murid, _updateMuridList);
-                                  },
+              child: isLoading
+                  ? const Center(child: Loader())
+                  : RefreshIndicator(
+                      onRefresh: _loadInitialData,
+                      child: muridList.isEmpty
+                          ? ListView(
+                              physics: const AlwaysScrollableScrollPhysics(),
+                              children: const [
+                                SizedBox(height: 180),
+                                Center(
+                                  child: Text(
+                                    'Belum ada data murid',
+                                    style: TextStyle(
+                                        fontSize: 16, color: Colors.grey),
+                                  ),
                                 ),
                               ],
+                            )
+                          : ListView.builder(
+                              controller: _scrollController,
+                              itemCount: muridList.length,
+                              cacheExtent: 500,
+                              itemBuilder: (context, index) {
+                                final murid = muridList[index];
+                                return Card(
+                                  margin:
+                                      const EdgeInsets.symmetric(vertical: 8),
+                                  child: ListTile(
+                                    leading: ClipOval(
+                                      child: SizedBox(
+                                        width: 50,
+                                        height: 50,
+                                        child: ref
+                                            .watch(getUserImageProvider(
+                                                murid.imageId))
+                                            .when(
+                                              data: (imageData) {
+                                                if (imageData != null) {
+                                                  return Image.memory(
+                                                    imageData,
+                                                    fit: BoxFit.cover,
+                                                    errorBuilder: (context,
+                                                        error, stackTrace) {
+                                                      return const Icon(
+                                                          Icons.error,
+                                                          color: Colors.red);
+                                                    },
+                                                  );
+                                                } else {
+                                                  return Image.asset(
+                                                    'assets/images/pp_kosong.jpg',
+                                                    fit: BoxFit.cover,
+                                                    errorBuilder: (context,
+                                                        error, stackTrace) {
+                                                      return const Icon(
+                                                          Icons.error,
+                                                          color: Colors.red);
+                                                    },
+                                                  );
+                                                }
+                                              },
+                                              loading: () => const Loader(),
+                                              error: (_, __) => const Icon(
+                                                  Icons.error,
+                                                  color: Colors.red),
+                                            ),
+                                      ),
+                                    ),
+                                    title: Text(murid.nama),
+                                    subtitle:
+                                        Text('Kelompok: ${murid.kelompok}'),
+                                    trailing: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        IconButton(
+                                          icon: const Icon(Icons.edit),
+                                          onPressed: () {
+                                            Navigator.push(context,
+                                                    EditMuridPage.route(murid))
+                                                .then(
+                                                    (_) => _loadInitialData());
+                                          },
+                                        ),
+                                        IconButton(
+                                          icon: const Icon(Icons.delete),
+                                          onPressed: () {
+                                            _showDeleteConfirmationDialog(
+                                                context,
+                                                ref,
+                                                murid,
+                                                _updateMuridList);
+                                          },
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                );
+                              },
                             ),
-                          ),
-                        );
-                      },
                     ),
             ),
           ],

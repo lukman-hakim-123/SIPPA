@@ -21,10 +21,10 @@ final hkAPIProvider = Provider((ref) {
 abstract class IHkAPI {
   FutureEither<Document> addHk(HkModel hk);
   Future<Uint8List?> getImage(String imageId);
-  Future<List<Document>> getUserHk(String uid);
+  Future<List<Document>> getUserHk(String uid, String sekolah);
   Stream<RealtimeMessage> getLatestHk();
-  Future<List<Document>> getKelompokHk(String kelompok);
-  Future<List<Document>> getAllHk();
+  Future<List<Document>> getKelompokHk(String kelompok, String sekolah);
+  Future<List<Document>> getAllHk(String sekolah);
   FutureEither<Document> updateHk(HkModel hk);
   FutureVoid deleteHk(HkModel hk);
   FutureVoid deleteAll(String uid);
@@ -65,6 +65,7 @@ class HkAPI implements IHkAPI {
         documentId: ID.unique(),
         data: {
           ...hk.toMap(),
+          'sekolah': hk.sekolah, // ✅ tambahkan sekolah
         },
       );
       return right(document);
@@ -95,34 +96,39 @@ class HkAPI implements IHkAPI {
   }
 
   @override
-  Future<List<Document>> getUserHk(String muridId) async {
+  Future<List<Document>> getUserHk(String muridId, String sekolah) async {
     final documents = await _db.listDocuments(
       databaseId: AppwriteConstants.databaseId,
       collectionId: AppwriteConstants.hkCollection,
       queries: [
         Query.equal('muridId', muridId),
+        Query.equal('sekolah', sekolah),
       ],
     );
     return documents.documents;
   }
 
   @override
-  Future<List<Document>> getKelompokHk(String uid) async {
+  Future<List<Document>> getKelompokHk(String uid, String sekolah) async {
     final documents = await _db.listDocuments(
       databaseId: AppwriteConstants.databaseId,
       collectionId: AppwriteConstants.hkCollection,
       queries: [
         Query.equal('uid', uid),
+        Query.equal('sekolah', sekolah),
       ],
     );
     return documents.documents;
   }
 
   @override
-  Future<List<Document>> getAllHk() async {
+  Future<List<Document>> getAllHk(String sekolah) async {
     final documents = await _db.listDocuments(
       databaseId: AppwriteConstants.databaseId,
       collectionId: AppwriteConstants.hkCollection,
+      queries: [
+        Query.equal('sekolah', sekolah),
+      ],
     );
     return documents.documents;
   }
@@ -141,7 +147,10 @@ class HkAPI implements IHkAPI {
         databaseId: AppwriteConstants.databaseId,
         collectionId: AppwriteConstants.hkCollection,
         documentId: hk.id,
-        data: hk.toMap(),
+        data: {
+          ...hk.toMap(),
+          'sekolah': hk.sekolah, // ✅ tambahkan sekolah
+        },
       );
       return right(document);
     } on AppwriteException catch (e, st) {

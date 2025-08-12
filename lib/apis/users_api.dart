@@ -24,10 +24,11 @@ abstract class IUserAPI {
   Future<model.Document> getUserData(String uid);
   Future<Uint8List?> getImage(String imageId);
   FutureEither<model.Document> updateUser(User userModel);
-  Future<List<model.Document>> getKelompokMurid(String kelompok);
-  Future<List<model.Document>> getAllMurid();
-  Stream<RealtimeMessage> getLatestMurid();
-  Future<List<model.Document>> getAllGuru();
+  Future<List<model.Document>> getKelompokMurid(
+      String kelompok, String sekolah);
+  Future<List<model.Document>> getAllMurid(String sekolah);
+  Stream<RealtimeMessage> getLatestMurid(String sekolah);
+  Future<List<model.Document>> getAllGuru(String sekolah);
   FutureVoid deleteGuru(User user);
   FutureVoid deleteImage(String imageId);
   FutureEither<model.Document> updateMurid(User user);
@@ -58,12 +59,13 @@ class UserAPI implements IUserAPI {
     }
   }
 
-  Future<Either<Failure, User>> getUserByEmail(String email) async {
+  Future<Either<Failure, User>> getUserByEmail(
+      String email, String sekolah) async {
     try {
       final documents = await _db.listDocuments(
         databaseId: AppwriteConstants.databaseId,
         collectionId: AppwriteConstants.collectionUserId,
-        queries: [Query.equal('email', email)],
+        queries: [Query.equal('email', email), Query.equal('sekolah', sekolah)],
       );
       if (documents.documents.isEmpty) {
         return left(Failure('User not found', StackTrace.current));
@@ -147,44 +149,53 @@ class UserAPI implements IUserAPI {
   }
 
   @override
-  Future<List<model.Document>> getKelompokMurid(String kelompok) async {
+  Future<List<model.Document>> getKelompokMurid(
+      String kelompok, String sekolah) async {
     final documents = await _db.listDocuments(
       databaseId: AppwriteConstants.databaseId,
       collectionId: AppwriteConstants.collectionUserId,
       queries: [
         Query.equal('levelUser', 3),
         Query.equal('kelompok', kelompok),
+        Query.equal('sekolah', sekolah),
       ],
     );
     return documents.documents;
   }
 
   @override
-  Future<List<model.Document>> getAllMurid() async {
+  Future<List<model.Document>> getAllMurid(String sekolah) async {
     final documents = await _db.listDocuments(
       databaseId: AppwriteConstants.databaseId,
       collectionId: AppwriteConstants.collectionUserId,
       queries: [
         Query.equal('levelUser', 3),
+        Query.equal('sekolah', sekolah),
       ],
     );
     return documents.documents;
   }
 
   @override
-  Stream<RealtimeMessage> getLatestMurid() {
-    return _realtime.subscribe([
-      'databases.${AppwriteConstants.databaseId}.collections.${AppwriteConstants.collectionUserId}.documents',
-    ]).stream;
+  Stream<RealtimeMessage> getLatestMurid(String sekolah) {
+    return _realtime
+        .subscribe([
+          'databases.${AppwriteConstants.databaseId}.collections.${AppwriteConstants.collectionUserId}.documents',
+        ])
+        .stream
+        .where((event) =>
+            event.payload['sekolah'] != null &&
+            event.payload['sekolah'] == sekolah);
   }
 
   @override
-  Future<List<model.Document>> getAllGuru() async {
+  Future<List<model.Document>> getAllGuru(String sekolah) async {
     final documents = await _db.listDocuments(
       databaseId: AppwriteConstants.databaseId,
       collectionId: AppwriteConstants.collectionUserId,
       queries: [
         Query.equal('levelUser', 2),
+        Query.equal('sekolah', sekolah),
       ],
     );
     return documents.documents;

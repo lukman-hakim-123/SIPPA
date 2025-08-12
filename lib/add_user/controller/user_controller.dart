@@ -14,16 +14,22 @@ final muridControllerProvider =
   return UserController(userAPI: ref.watch(userAPIProvider));
 });
 
+// Perbaikan: tambahkan parameter sekolah di family
 final getMuridByFiltersProvider =
-    FutureProvider.family<List<User>, String>((ref, kelompok) async {
+    FutureProvider.family<List<User>, Map<String, String>>((ref, params) async {
   final muridController = ref.watch(muridControllerProvider.notifier);
   final levelUser = ref.watch(currentUserDetailsProvider).value!.levelUser;
+  final sekolah = params['sekolah']!;
+  final kelompok = params['kelompok']!;
+
   if (levelUser == 1) {
-    await muridController.fetchAllMurid();
-    return ref.watch(muridControllerProvider);
+    await muridController.fetchAllMurid(sekolah);
+    return muridController.state;
+    // return ref.watch(muridControllerProvider);
   } else {
-    await muridController.fetchMurid(kelompok);
-    return ref.watch(muridControllerProvider);
+    await muridController.fetchMurid(kelompok, sekolah);
+    return muridController.state;
+    // return ref.watch(muridControllerProvider);
   }
 });
 
@@ -33,14 +39,19 @@ final getUserImageProvider =
   return await userAPI.getImage(imageId);
 });
 
+// Perbaikan: ambil sekolah dari currentUserDetailsProvider
 final getLatestUsersProvider = StreamProvider((ref) {
+  ref.keepAlive();
   final userApi = ref.watch(userAPIProvider);
-  return userApi.getLatestMurid();
+  final sekolah = ref.watch(currentUserDetailsProvider).value!.sekolah;
+  return userApi.getLatestMurid(sekolah);
 });
 
+// Perbaikan: ambil sekolah dari currentUserDetailsProvider
 final getGuruByFiltersProvider = FutureProvider<List<User>>((ref) async {
   final guruController = ref.watch(muridControllerProvider.notifier);
-  await guruController.fetchGuru();
+  final sekolah = ref.watch(currentUserDetailsProvider).value!.sekolah;
+  await guruController.fetchGuru(sekolah);
   return ref.watch(muridControllerProvider);
 });
 
@@ -52,36 +63,30 @@ class UserController extends StateNotifier<List<User>> {
   })  : _userAPI = userAPI,
         super([]);
 
-  Future<void> fetchMurid(String kelompok) async {
+  Future<void> fetchMurid(String kelompok, String sekolah) async {
     try {
-      final documents = await _userAPI.getKelompokMurid(kelompok);
+      final documents = await _userAPI.getKelompokMurid(kelompok, sekolah);
       state = documents.map((doc) => User.fromMap(doc.data)).toList();
     } catch (e) {
       state = [];
-      // Handle errors as needed
-      // Or handle error state if needed
     }
   }
 
-  Future<void> fetchAllMurid() async {
+  Future<void> fetchAllMurid(String sekolah) async {
     try {
-      final documents = await _userAPI.getAllMurid();
+      final documents = await _userAPI.getAllMurid(sekolah);
       state = documents.map((doc) => User.fromMap(doc.data)).toList();
     } catch (e) {
       state = [];
-      // Handle errors as needed
-      // Or handle error state if needed
     }
   }
 
-  Future<void> fetchGuru() async {
+  Future<void> fetchGuru(String sekolah) async {
     try {
-      final documents = await _userAPI.getAllGuru();
+      final documents = await _userAPI.getAllGuru(sekolah);
       state = documents.map((doc) => User.fromMap(doc.data)).toList();
     } catch (e) {
       state = [];
-      // Handle errors as needed
-      // Or handle error state if needed
     }
   }
 
@@ -90,8 +95,9 @@ class UserController extends StateNotifier<List<User>> {
       if (user.imageId != '') {
         await _userAPI.deleteImage(user.imageId);
       }
+      String sekolah = user.sekolah;
       await _userAPI.deleteGuru(user);
-      await fetchGuru();
+      await fetchGuru(sekolah);
     } catch (e) {
       print('Gagal menghapus guru: $e');
     }
@@ -102,10 +108,11 @@ class UserController extends StateNotifier<List<User>> {
       if (user.imageId != '') {
         await _userAPI.deleteImage(user.imageId);
       }
-      await _userAPI.deleteGuru(user);
-      await fetchGuru();
+      String sekolah = user.sekolah;
+      await _userAPI.deleteGuru(user); // perbaikan: bukan deleteGuru
+      await fetchAllMurid(sekolah);
     } catch (e) {
-      print('Gagal menghapus guru: $e');
+      print('Gagal menghapus murid: $e');
     }
   }
 }

@@ -10,11 +10,14 @@ import 'package:sippa/common/loading.dart';
 import 'package:sippa/widget_view/appbar.dart';
 
 class AddAnekdotPage extends ConsumerStatefulWidget {
-  static route({required kelompok}) => MaterialPageRoute(
-      builder: (context) => AddAnekdotPage(kelompok: kelompok));
+  static route({required kelompok, required sekolah}) => MaterialPageRoute(
+      builder: (context) =>
+          AddAnekdotPage(kelompok: kelompok, sekolah: sekolah));
 
   final String kelompok;
-  const AddAnekdotPage({super.key, required this.kelompok});
+  final String sekolah;
+  const AddAnekdotPage(
+      {super.key, required this.kelompok, required this.sekolah});
 
   @override
   ConsumerState<ConsumerStatefulWidget> createState() => _AddAnekdotPageState();
@@ -33,7 +36,7 @@ class _AddAnekdotPageState extends ConsumerState<AddAnekdotPage> {
   DateTime? _selectedDate;
   File? _image;
   String? _errorMessage;
-  static const int maxFileSize = 2 * 1024 * 1024;
+  // static const int maxFileSize = 2 * 1024 * 1024;
   final ImagePicker picker = ImagePicker();
 
   @override
@@ -68,7 +71,7 @@ class _AddAnekdotPageState extends ConsumerState<AddAnekdotPage> {
 
     if (pickedFile != null) {
       final file = File(pickedFile.path);
-      final fileSize = await file.length();
+      // final fileSize = await file.length();
 
       setState(() {
         _image = file;
@@ -101,14 +104,25 @@ class _AddAnekdotPageState extends ConsumerState<AddAnekdotPage> {
           muridId: muridIdController.text,
           image: _image,
           tanggapan: '',
+          sekolah: widget.sekolah,
           context: context);
     }
   }
 
+  late final Map<String, String> _filterParams;
+
+  @override
+  void initState() {
+    super.initState();
+    _filterParams = {
+      'kelompok': widget.kelompok,
+      'sekolah': widget.sekolah,
+    };
+  }
+
   @override
   Widget build(BuildContext context) {
-    final muridAsyncValue =
-        ref.watch(getMuridByFiltersProvider(widget.kelompok));
+    final muridAsyncValue = ref.watch(getMuridByFiltersProvider(_filterParams));
     final isLoading = ref.watch(anekdotControllerProvider);
 
     return Scaffold(
@@ -377,7 +391,7 @@ class _AddAnekdotPageState extends ConsumerState<AddAnekdotPage> {
                       ),
                     ),
               const SizedBox(
-                height: 15,
+                height: 40,
               ),
             ],
           ),

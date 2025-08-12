@@ -48,7 +48,7 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
   final rePasswordController = TextEditingController();
   final ImagePicker picker = ImagePicker();
   File? _image;
-  static const int maxFileSize = 2 * 1024 * 1024;
+  // static const int maxFileSize = 2 * 1024 * 1024;
   String? _errorMessage;
   final bool _obscureText = true;
   bool _isNewImage = false;
@@ -72,7 +72,7 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
 
     if (pickedFile != null) {
       final file = File(pickedFile.path);
-      final fileSize = await file.length();
+      // final fileSize = await file.length();
 
       setState(() {
         _image = file;

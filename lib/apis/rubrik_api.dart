@@ -17,13 +17,13 @@ final rubrikAPIProvider = Provider((ref) {
 
 abstract class IRubrikAPI {
   FutureEither<Document> addRubrik(RubrikModel rubrik);
-  Future<List<Document>> getUserRubrik(String uid);
+  Future<List<Document>> getUserRubrik(String uid, String sekolah);
   Stream<RealtimeMessage> getLatestRubrik();
-  Future<List<Document>> getKelompokRubrik(String kelompok);
-  Future<List<Document>> getAllRubrik();
+  Future<List<Document>> getKelompokRubrik(String kelompok, String sekolah);
+  Future<List<Document>> getAllRubrik(String sekolah);
   FutureEither<Document> updateRubrik(RubrikModel rubrik);
   FutureVoid deleteRubrik(RubrikModel rubrik);
-  FutureVoid deleteAll(String uid);
+  FutureVoid deleteAll(String uid, String sekolah);
 }
 
 class RubrikAPI implements IRubrikAPI {
@@ -40,50 +40,45 @@ class RubrikAPI implements IRubrikAPI {
         databaseId: AppwriteConstants.databaseId,
         collectionId: AppwriteConstants.rubrikCollection,
         documentId: ID.unique(),
-        data: rubrik.toMap(),
+        data: rubrik.toMap(), // pastikan di toMap() sudah ada field 'sekolah'
       );
       return right(document);
     } on AppwriteException catch (e, st) {
-      return left(
-        Failure(
-          e.message ?? 'Some unexpected error occurred',
-          st,
-        ),
-      );
+      return left(Failure(e.message ?? 'Some unexpected error occurred', st));
     } catch (e, st) {
       return left(Failure(e.toString(), st));
     }
   }
 
   @override
-  Future<List<Document>> getUserRubrik(String muridId) async {
+  Future<List<Document>> getUserRubrik(String muridId, String sekolah) async {
     final documents = await _db.listDocuments(
       databaseId: AppwriteConstants.databaseId,
       collectionId: AppwriteConstants.rubrikCollection,
       queries: [
         Query.equal('muridId', muridId),
+        Query.equal('sekolah', sekolah),
       ],
     );
     return documents.documents;
   }
 
   @override
-  Future<List<Document>> getKelompokRubrik(String uid) async {
+  Future<List<Document>> getKelompokRubrik(String uid, String sekolah) async {
     final documents = await _db.listDocuments(
       databaseId: AppwriteConstants.databaseId,
       collectionId: AppwriteConstants.rubrikCollection,
-      queries: [
-        Query.equal('uid', uid),
-      ],
+      queries: [Query.equal('uid', uid), Query.equal('sekolah', sekolah)],
     );
     return documents.documents;
   }
 
   @override
-  Future<List<Document>> getAllRubrik() async {
+  Future<List<Document>> getAllRubrik(String sekolah) async {
     final documents = await _db.listDocuments(
       databaseId: AppwriteConstants.databaseId,
       collectionId: AppwriteConstants.rubrikCollection,
+      queries: [Query.equal('sekolah', sekolah)],
     );
     return documents.documents;
   }
@@ -102,28 +97,11 @@ class RubrikAPI implements IRubrikAPI {
         databaseId: AppwriteConstants.databaseId,
         collectionId: AppwriteConstants.rubrikCollection,
         documentId: rubrik.id,
-        data: {
-          'tujuan': rubrik.tujuan,
-          'tanggal': rubrik.tanggal,
-          'kegiatan': rubrik.kegiatan, //kegiatan
-          'agama': rubrik.agama,
-          'jatidiri': rubrik.jatidiri,
-          'literasi': rubrik.literasi,
-          'kelompok': rubrik.kelompok,
-          'skor': rubrik.skor,
-          'muridId': rubrik.muridId,
-          'rekomendasi': rubrik.rekomendasi, //umpan balik
-          'tanggapan': rubrik.tanggapan,
-        },
+        data: rubrik.toMap(), // pastikan 'sekolah' tetap dikirim
       );
       return right(document);
     } on AppwriteException catch (e, st) {
-      return left(
-        Failure(
-          e.message ?? 'Some unexpected error occurred',
-          st,
-        ),
-      );
+      return left(Failure(e.message ?? 'Some unexpected error occurred', st));
     } catch (e, st) {
       return left(Failure(e.toString(), st));
     }
@@ -143,13 +121,11 @@ class RubrikAPI implements IRubrikAPI {
   }
 
   @override
-  FutureVoid deleteAll(String uid) async {
+  FutureVoid deleteAll(String uid, String sekolah) async {
     final documents = await _db.listDocuments(
       databaseId: AppwriteConstants.databaseId,
       collectionId: AppwriteConstants.rubrikCollection,
-      queries: [
-        Query.equal('uid', uid),
-      ],
+      queries: [Query.equal('uid', uid), Query.equal('sekolah', sekolah)],
     );
 
     for (int i = 0; i < documents.documents.length; i++) {

@@ -21,10 +21,10 @@ final fbAPIProvider = Provider((ref) {
 abstract class IFbAPI {
   FutureEither<Document> addFb(FbModel fb);
   Future<Uint8List?> getImage(String imageId);
-  Future<List<Document>> getUserFb(String uid);
+  Future<List<Document>> getUserFb(String uid, String sekolah);
   Stream<RealtimeMessage> getLatestFb();
-  Future<List<Document>> getKelompokFb(String kelompok);
-  Future<List<Document>> getAllFb();
+  Future<List<Document>> getKelompokFb(String kelompok, String sekolah);
+  Future<List<Document>> getAllFb(String sekolah);
   FutureEither<Document> updateFb(FbModel fb);
   FutureVoid deleteFb(FbModel fb);
   FutureVoid deleteImage(String imageId);
@@ -34,11 +34,11 @@ class FbAPI implements IFbAPI {
   final Databases _db;
   final Realtime _realtime;
   final Storage _storage;
-  FbAPI(
-      {required Databases db,
-      required Realtime realtime,
-      required Storage storage})
-      : _db = db,
+  FbAPI({
+    required Databases db,
+    required Realtime realtime,
+    required Storage storage,
+  })  : _db = db,
         _realtime = realtime,
         _storage = storage;
 
@@ -64,6 +64,7 @@ class FbAPI implements IFbAPI {
         documentId: ID.unique(),
         data: {
           ...fb.toMap(),
+          'sekolah': fb.sekolah,
         },
       );
       return right(document);
@@ -94,34 +95,39 @@ class FbAPI implements IFbAPI {
   }
 
   @override
-  Future<List<Document>> getUserFb(String muridId) async {
+  Future<List<Document>> getUserFb(String muridId, String sekolah) async {
     final documents = await _db.listDocuments(
       databaseId: AppwriteConstants.databaseId,
       collectionId: AppwriteConstants.fbCollection,
       queries: [
         Query.equal('muridId', muridId),
+        Query.equal('sekolah', sekolah),
       ],
     );
     return documents.documents;
   }
 
   @override
-  Future<List<Document>> getKelompokFb(String uid) async {
+  Future<List<Document>> getKelompokFb(String uid, String sekolah) async {
     final documents = await _db.listDocuments(
       databaseId: AppwriteConstants.databaseId,
       collectionId: AppwriteConstants.fbCollection,
       queries: [
         Query.equal('uid', uid),
+        Query.equal('sekolah', sekolah),
       ],
     );
     return documents.documents;
   }
 
   @override
-  Future<List<Document>> getAllFb() async {
+  Future<List<Document>> getAllFb(String sekolah) async {
     final documents = await _db.listDocuments(
       databaseId: AppwriteConstants.databaseId,
       collectionId: AppwriteConstants.fbCollection,
+      queries: [
+        Query.equal('sekolah', sekolah),
+      ],
     );
     return documents.documents;
   }
@@ -140,7 +146,10 @@ class FbAPI implements IFbAPI {
         databaseId: AppwriteConstants.databaseId,
         collectionId: AppwriteConstants.fbCollection,
         documentId: fb.id,
-        data: fb.toMap(),
+        data: {
+          ...fb.toMap(),
+          'sekolah': fb.sekolah,
+        },
       );
       return right(document);
     } on AppwriteException catch (e, st) {

@@ -16,6 +16,8 @@ class FbModel {
   final String id;
   final String muridId;
   final String tanggapan;
+  final String sekolah; // 🆕 Tambahan field sekolah
+
   FbModel({
     required this.tanggal,
     required this.keterangan,
@@ -31,6 +33,7 @@ class FbModel {
     required this.id,
     required this.muridId,
     required this.tanggapan,
+    required this.sekolah, // 🆕 Tambahan constructor
   });
 
   FbModel copyWith({
@@ -48,6 +51,7 @@ class FbModel {
     String? id,
     String? muridId,
     String? tanggapan,
+    String? sekolah, // 🆕 Tambahan di copyWith
   }) {
     return FbModel(
       tanggal: tanggal ?? this.tanggal,
@@ -64,6 +68,7 @@ class FbModel {
       id: id ?? this.id,
       muridId: muridId ?? this.muridId,
       tanggapan: tanggapan ?? this.tanggapan,
+      sekolah: sekolah ?? this.sekolah,
     );
   }
 
@@ -82,6 +87,7 @@ class FbModel {
       'uid': uid,
       'muridId': muridId,
       'tanggapan': tanggapan,
+      'sekolah': sekolah, // 🆕 Simpan sekolah ke map
     };
   }
 
@@ -101,6 +107,7 @@ class FbModel {
       id: map['\$id'] ?? '',
       muridId: map['muridId'] ?? '',
       tanggapan: map['tanggapan'] ?? '',
+      sekolah: map['sekolah'] ?? '', // 🆕 Ambil sekolah dari map
     );
   }
 
@@ -111,7 +118,7 @@ class FbModel {
 
   @override
   String toString() {
-    return 'FbModel(tanggal: $tanggal, keterangan: $keterangan, nilai: $nilai, jatiDiri: $jatiDiri, literasi: $literasi, umpanBalik: $umpanBalik, imageId1: $imageId1, imageId2: $imageId2, imageId3: $imageId3, kelompok: $kelompok, uid: $uid, id: $id, muridId: $muridId, tanggapan: $tanggapan)';
+    return 'FbModel(tanggal: $tanggal, keterangan: $keterangan, nilai: $nilai, jatiDiri: $jatiDiri, literasi: $literasi, umpanBalik: $umpanBalik, imageId1: $imageId1, imageId2: $imageId2, imageId3: $imageId3, kelompok: $kelompok, uid: $uid, id: $id, muridId: $muridId, tanggapan: $tanggapan, sekolah: $sekolah)';
   }
 
   @override
@@ -131,7 +138,8 @@ class FbModel {
         other.uid == uid &&
         other.id == id &&
         other.tanggapan == tanggapan &&
-        other.muridId == muridId;
+        other.muridId == muridId &&
+        other.sekolah == sekolah;
   }
 
   @override
@@ -149,6 +157,7 @@ class FbModel {
         uid.hashCode ^
         id.hashCode ^
         tanggapan.hashCode ^
-        muridId.hashCode;
+        muridId.hashCode ^
+        sekolah.hashCode;
   }
 }

@@ -61,6 +61,7 @@ class AuthController extends StateNotifier<bool> {
     required String password,
     required String nama,
     required String kelompok,
+    required String sekolah,
     required io.File? image,
     required BuildContext context,
   }) async {
@@ -79,7 +80,8 @@ class AuthController extends StateNotifier<bool> {
           id: r.$id,
           nama: nama,
           kelompok: kelompok,
-          levelUser: 3);
+          levelUser: 3,
+          sekolah: sekolah);
       final res2 = await _userAPI.saveUserData(userModel);
       res2.fold((l) => showSnackBar(context, l.message), (r) {
         showSnackBar(context, "Account Murid Created Successfully");
@@ -93,6 +95,7 @@ class AuthController extends StateNotifier<bool> {
     required String password,
     required String nama,
     required String kelompok,
+    required String sekolah,
     required io.File? image,
     required BuildContext context,
   }) async {
@@ -111,6 +114,7 @@ class AuthController extends StateNotifier<bool> {
           id: r.$id,
           nama: nama,
           kelompok: kelompok,
+          sekolah: sekolah,
           levelUser: 2);
       final res2 = await _userAPI.saveUserData(userModel);
       state = false;
@@ -131,8 +135,14 @@ class AuthController extends StateNotifier<bool> {
 
     final response = await _authAPI.login(email: email, password: password);
     state = false;
-    response.fold((l) => showSnackBar(context, l.message),
-        (r) {
+    response.fold((l) {
+      final errorMessage = l.message
+              .toLowerCase()
+              .contains('please check the email and password')
+          ? 'Email atau password salah'
+          : l.message;
+      showSnackBar(context, errorMessage);
+    }, (r) {
       showSnackBar(context, "Login is Successfully");
       ref.refresh(currentUserAccountProvider);
       Navigator.pushReplacement(context, AnekdotPage.route());
@@ -163,6 +173,7 @@ class AuthController extends StateNotifier<bool> {
         imageId: imageId ?? user.imageId,
         nama: nama,
         kelompok: user.kelompok,
+        sekolah: user.sekolah,
         levelUser: user.levelUser);
     final res = await _userAPI.updateUser(userModel);
     state = false;
@@ -199,6 +210,7 @@ class AuthController extends StateNotifier<bool> {
         kelompok, // Nullable karena hanya level 1 yang bisa mengubahnya
     required io.File? image,
     required String imageId,
+    required String sekolah,
     required BuildContext context,
     required WidgetRef ref,
   }) async {
@@ -219,6 +231,7 @@ class AuthController extends StateNotifier<bool> {
       nama: nama,
       kelompok: kelompok,
       levelUser: levelUser,
+      sekolah: sekolah,
     );
 
     // Memperbarui data murid di API

@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:appwrite/models.dart';
@@ -19,15 +20,20 @@ final observasiControllerProvider =
 });
 
 final getObservasiByUserIdProvider =
-    FutureProvider.family((ref, String id) async {
+    FutureProvider.family<List<ObservasiModel>, String>((ref, paramKey) async {
   final observasiController = ref.watch(observasiControllerProvider.notifier);
   final levelUser = ref.watch(currentUserDetailsProvider).value!.levelUser;
+  final params = jsonDecode(paramKey) as Map<String, dynamic>;
+
+  final sekolah = params['sekolah'] as String;
+  final id = params['id'] as String;
+
   if (levelUser == 1) {
-    return observasiController.getAllObservasi();
+    return observasiController.getAllObservasi(sekolah);
   } else if (levelUser == 2) {
-    return observasiController.getAllObservasi();
+    return observasiController.getAllObservasi(sekolah);
   } else {
-    return observasiController.getUserObservasi(id);
+    return observasiController.getUserObservasi(id, sekolah);
   }
 });
 final getUserDataProvider =
@@ -57,22 +63,25 @@ class ObservasiController extends StateNotifier<bool> {
         _observasiAPI = observasiAPI,
         super(false);
 
-  Future<List<ObservasiModel>> getUserObservasi(String uid) async {
-    final observasiList = await _observasiAPI.getUserObservasi(uid);
+  Future<List<ObservasiModel>> getUserObservasi(
+      String uid, String sekolah) async {
+    final observasiList = await _observasiAPI.getUserObservasi(uid, sekolah);
     return observasiList
         .map((observasi) => ObservasiModel.fromMap(observasi.data))
         .toList();
   }
 
-  Future<List<ObservasiModel>> getKelompokObservasi(String kelompok) async {
-    final observasiList = await _observasiAPI.getKelompokObservasi(kelompok);
+  Future<List<ObservasiModel>> getKelompokObservasi(
+      String kelompok, String sekolah) async {
+    final observasiList =
+        await _observasiAPI.getKelompokObservasi(kelompok, sekolah);
     return observasiList
         .map((observasi) => ObservasiModel.fromMap(observasi.data))
         .toList();
   }
 
-  Future<List<ObservasiModel>> getAllObservasi() async {
-    final observasiList = await _observasiAPI.getAllObservasi();
+  Future<List<ObservasiModel>> getAllObservasi(String sekolah) async {
+    final observasiList = await _observasiAPI.getAllObservasi(sekolah);
     return observasiList
         .map((observasi) => ObservasiModel.fromMap(observasi.data))
         .toList();
@@ -85,6 +94,7 @@ class ObservasiController extends StateNotifier<bool> {
     required String rekomendasi,
     required io.File? image,
     required String muridId,
+    required String sekolah,
     required BuildContext context,
   }) async {
     state = true;
@@ -119,6 +129,7 @@ class ObservasiController extends StateNotifier<bool> {
         kelompok: kelompok,
         imageId: imageId ?? '',
         muridId: muridId,
+        sekolah: sekolah,
         uid: user.id,
         id: '',
         tanggapan: '',
@@ -158,6 +169,7 @@ class ObservasiController extends StateNotifier<bool> {
     required bool deleteId,
     required String muridId,
     required String tanggapan,
+    required String sekolah,
     required BuildContext context,
   }) async {
     state = true;
@@ -189,6 +201,7 @@ class ObservasiController extends StateNotifier<bool> {
         muridId: muridId,
         uid: user.id,
         tanggapan: tanggapan,
+        sekolah: sekolah,
       );
 
       // Update observasi

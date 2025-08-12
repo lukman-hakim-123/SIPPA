@@ -12,22 +12,26 @@ class EditRubrikPage extends ConsumerStatefulWidget {
   static route(
           {required RubrikModel rubrik,
           required String kelompok,
+          required String sekolah,
           required int levelUser}) =>
       MaterialPageRoute(
         builder: (context) => EditRubrikPage(
           rubrik: rubrik,
           kelompok: kelompok,
+          sekolah: sekolah,
           levelUser: levelUser,
         ),
       );
   final RubrikModel rubrik;
   final String kelompok;
+  final String sekolah;
   final int levelUser;
 
   const EditRubrikPage(
       {super.key,
       required this.rubrik,
       required this.kelompok,
+      required this.sekolah,
       required this.levelUser});
 
   @override
@@ -47,6 +51,7 @@ class _EditRubrikPageState extends ConsumerState<EditRubrikPage> {
   late TextEditingController tanggapanController;
   DateTime? _selectedDate;
   String? score;
+  late final Map<String, String> _filterParams;
 
   @override
   void initState() {
@@ -63,6 +68,10 @@ class _EditRubrikPageState extends ConsumerState<EditRubrikPage> {
     tanggapanController = TextEditingController(text: widget.rubrik.tanggapan);
     score = widget.rubrik.skor;
     _selectedDate = DateFormat('dd MMMM yyyy').parse(widget.rubrik.tanggal);
+    _filterParams = {
+      'kelompok': widget.kelompok,
+      'sekolah': widget.sekolah,
+    };
   }
 
   @override
@@ -107,6 +116,7 @@ class _EditRubrikPageState extends ConsumerState<EditRubrikPage> {
             skor: score!,
             muridId: muridIdController.text,
             context: context,
+            sekolah: widget.sekolah,
             rekomendasi: rekomendasiController.text,
             tanggapan: tanggapanController.text,
           );
@@ -115,8 +125,7 @@ class _EditRubrikPageState extends ConsumerState<EditRubrikPage> {
 
   @override
   Widget build(BuildContext context) {
-    final muridAsyncValue =
-        ref.watch(getMuridByFiltersProvider(widget.kelompok));
+    final muridAsyncValue = ref.watch(getMuridByFiltersProvider(_filterParams));
     final isLoading = ref.watch(rubrikControllerProvider);
 
     return Scaffold(

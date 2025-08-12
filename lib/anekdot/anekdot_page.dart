@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:appwrite/appwrite.dart';
 import 'package:appwrite/models.dart';
 import 'package:flutter/material.dart';
@@ -63,6 +65,24 @@ class _AnekdotPageState extends ConsumerState<AnekdotPage> {
     }).toList();
   }
 
+  Future<void> _refreshData() async {
+    // Refresh provider data manually
+    await ref.refresh(anekdotControllerProvider);
+    // Re-fetch the data from provider
+    final userDetails = await ref.read(currentUserDetailsProvider.future);
+    if (userDetails != null) {
+      final userId = userDetails.id;
+      final sekolah = userDetails.sekolah;
+      final paramKey = jsonEncode({'id': userId, 'sekolah': sekolah});
+      final newAnekdotList =
+          await ref.read(getAnekdotByUserIdProvider(paramKey).future);
+      setState(() {
+        _anekdotList = newAnekdotList;
+        _filterList();
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final userDetailsAsync = ref.watch(currentUserDetailsProvider);
@@ -78,11 +98,16 @@ class _AnekdotPageState extends ConsumerState<AnekdotPage> {
             final userId = userDetails.id;
             final kelompok = userDetails.kelompok;
             final levelUser = userDetails.levelUser;
+            final sekolah = userDetails.sekolah;
+            final paramKey = jsonEncode({'id': userId, 'sekolah': sekolah});
             final anekdotAsyncValue =
-                ref.watch(getAnekdotByUserIdProvider(userId));
+                ref.watch(getAnekdotByUserIdProvider(paramKey));
+
             ref.listen<AsyncValue<RealtimeMessage>>(getLatestAnekdotProvider,
                 (_, next) {
               next.whenData((data) {
+                final payloadSekolah = data.payload['sekolah'];
+                if (payloadSekolah != sekolah) return;
                 if (data.events.contains(
                   'databases.*.collections.${AppwriteConstants.anekdotCollection}.documents.*.create',
                 )) {
@@ -137,366 +162,256 @@ class _AnekdotPageState extends ConsumerState<AnekdotPage> {
               });
             });
 
-            return SingleChildScrollView(
-              scrollDirection: Axis.vertical,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Align(
-                    alignment: Alignment.centerRight,
-                    child: Padding(
-                      padding: EdgeInsets.only(bottom: 16),
-                      child: CustomText(
-                        text: "Catatan Anekdotal",
-                        fontSize: 18,
-                        fontWeight: FontWeight.w800,
-                        textAlign: TextAlign.start,
+            return RefreshIndicator(
+              onRefresh: _refreshData,
+              child: SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                scrollDirection: Axis.vertical,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Align(
+                      alignment: Alignment.centerRight,
+                      child: Padding(
+                        padding: EdgeInsets.only(bottom: 16),
+                        child: CustomText(
+                          text: "Catatan Anekdotal",
+                          fontSize: 18,
+                          fontWeight: FontWeight.w800,
+                          textAlign: TextAlign.start,
+                        ),
                       ),
                     ),
-                  ),
-                  if (levelUser != 3)
-                    ElevatedButton(
-                      onPressed: () {
-                        Navigator.push(
-                            context, AddAnekdotPage.route(kelompok: kelompok));
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.green,
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 12, vertical: 3),
+                    if (levelUser != 3)
+                      ElevatedButton(
+                        onPressed: () {
+                          Navigator.push(
+                              context,
+                              AddAnekdotPage.route(
+                                  kelompok: kelompok, sekolah: sekolah));
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.green,
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 12, vertical: 3),
+                        ),
+                        child: const CustomText(
+                            text: "Tambah Data", color: Colors.white),
                       ),
-                      child: const CustomText(
-                          text: "Tambah Data", color: Colors.white),
-                    ),
-                  MonthlyCalendar(onDateSelected: _onDateSelected),
-                  const SizedBox(height: 16),
-                  anekdotAsyncValue.when(
-                    data: (anekdotList) {
-                      _anekdotList = anekdotList;
-                      _filterList();
+                    MonthlyCalendar(onDateSelected: _onDateSelected),
+                    const SizedBox(height: 16),
+                    anekdotAsyncValue.when(
+                      data: (anekdotList) {
+                        _anekdotList = anekdotList;
+                        _filterList();
 
-                      return Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          SingleChildScrollView(
-                            scrollDirection: Axis.horizontal,
-                            child: DataTable(
-                              dataRowMinHeight: 50,
-                              dataRowMaxHeight: double.infinity,
-                              border: TableBorder.all(),
-                              headingRowColor:
-                                  MaterialStateProperty.resolveWith<Color>(
-                                      (Set<MaterialState> states) {
-                                return Colors.grey;
-                              }),
-                              columns: const [
-                                DataColumn(
-                                    label: CustomText(
-                                  text: 'Tanggal',
-                                  fontWeight: FontWeight.w700,
-                                )),
-                                DataColumn(
-                                    label: CustomText(
-                                  text: 'Kelompok',
-                                  fontWeight: FontWeight.w700,
-                                )),
-                                DataColumn(
-                                    label: CustomText(
-                                  text: 'Kegiatan',
-                                  fontWeight: FontWeight.w700,
-                                )),
-                                DataColumn(
-                                    label: CustomText(
-                                  text: 'Tujuan Pembelajaran',
-                                  fontWeight: FontWeight.w700,
-                                )),
-                                DataColumn(
-                                    label: CustomText(
-                                  text: 'Nama Murid',
-                                  fontWeight: FontWeight.w700,
-                                )),
-                                DataColumn(
-                                    label: CustomText(
-                                  text: 'Foto',
-                                  fontWeight: FontWeight.w700,
-                                )),
-                                DataColumn(
-                                    label: CustomText(
-                                  text: 'Nilai Agama dan Budi Pekerti',
-                                  fontWeight: FontWeight.w700,
-                                )),
-                                DataColumn(
-                                    label: CustomText(
-                                  text: 'Jati Diri',
-                                  fontWeight: FontWeight.w700,
-                                )),
-                                DataColumn(
-                                    label: CustomText(
-                                  text: 'Literasi dan STEAM',
-                                  fontWeight: FontWeight.w700,
-                                )),
-                                DataColumn(
-                                    label: CustomText(
-                                  text: 'Umpan Balik',
-                                  fontWeight: FontWeight.w700,
-                                )),
-                                DataColumn(
-                                    label: CustomText(
-                                  text: 'Tanggapan Orang Tua',
-                                  fontWeight: FontWeight.w700,
-                                )),
-                                // if (levelUser != 3)
-                                DataColumn(
-                                    label: CustomText(
-                                  text: 'Action',
-                                  fontWeight: FontWeight.w700,
-                                )),
-                              ],
-                              rows: _filteredList
-                                  .where((anekdot) => !(levelUser == 2 &&
-                                      anekdot.kelompok != kelompok))
-                                  .map((anekdot) {
-                                final muridData = ref.watch(
-                                    getUserDataProvider(anekdot.muridId));
-                                final guruData =
-                                    ref.watch(getUserDataProvider(anekdot.uid));
-                                return DataRow(
-                                  cells: [
-                                    DataCell(
-                                      ConstrainedBox(
-                                        constraints: const BoxConstraints(
-                                          maxWidth:
-                                              100, // Ubah sesuai kebutuhan
-                                        ),
-                                        child: Text(
-                                          anekdot.tanggal,
-                                          overflow: TextOverflow.visible,
-                                          softWrap: true,
-                                        ),
-                                      ),
-                                    ),
-                                    DataCell(
-                                      ConstrainedBox(
-                                        constraints: const BoxConstraints(
-                                          maxWidth:
-                                              100, // Ubah sesuai kebutuhan
-                                        ),
-                                        child: Text(
-                                          anekdot.kelompok,
-                                          overflow: TextOverflow.visible,
-                                          softWrap: true,
-                                        ),
-                                      ),
-                                    ),
-                                    DataCell(
-                                      ConstrainedBox(
-                                        constraints: const BoxConstraints(
-                                          maxWidth:
-                                              200, // Ubah sesuai kebutuhan
-                                        ),
-                                        child: Text(
-                                          anekdot.pengamatan,
-                                          overflow: TextOverflow.visible,
-                                          softWrap: true,
-                                        ),
-                                      ),
-                                    ),
-                                    DataCell(
-                                      ConstrainedBox(
-                                        constraints: const BoxConstraints(
-                                          maxWidth:
-                                              200, // Ubah sesuai kebutuhan
-                                        ),
-                                        child: Text(
-                                          anekdot.tujuan,
-                                          overflow: TextOverflow.visible,
-                                          softWrap: true,
-                                        ),
-                                      ),
-                                    ),
-                                    DataCell(
-                                      ConstrainedBox(
-                                        constraints: const BoxConstraints(
-                                          maxWidth:
-                                              100, // Ubah sesuai kebutuhan
-                                        ),
-                                        child: muridData.when(
-                                          data: (data) => Text(
-                                            data.data['nama'],
-                                            overflow: TextOverflow.visible,
-                                            softWrap: true,
-                                          ),
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            SingleChildScrollView(
+                              scrollDirection: Axis.horizontal,
+                              child: DataTable(
+                                dataRowMinHeight: 50,
+                                dataRowMaxHeight: double.infinity,
+                                border: TableBorder.all(),
+                                headingRowColor:
+                                    MaterialStateProperty.resolveWith<Color>(
+                                        (Set<MaterialState> states) {
+                                  return Colors.grey;
+                                }),
+                                columns: const [
+                                  DataColumn(
+                                      label: CustomText(
+                                    text: 'Tanggal',
+                                    fontWeight: FontWeight.w700,
+                                  )),
+                                  DataColumn(
+                                      label: CustomText(
+                                    text: 'Kelompok',
+                                    fontWeight: FontWeight.w700,
+                                  )),
+                                  DataColumn(
+                                      label: CustomText(
+                                    text: 'Kegiatan',
+                                    fontWeight: FontWeight.w700,
+                                  )),
+                                  DataColumn(
+                                      label: CustomText(
+                                    text: 'Tujuan Pembelajaran',
+                                    fontWeight: FontWeight.w700,
+                                  )),
+                                  DataColumn(
+                                      label: CustomText(
+                                    text: 'Nama Murid',
+                                    fontWeight: FontWeight.w700,
+                                  )),
+                                  DataColumn(
+                                      label: CustomText(
+                                    text: 'Foto',
+                                    fontWeight: FontWeight.w700,
+                                  )),
+                                  DataColumn(
+                                      label: CustomText(
+                                    text: 'Nilai Agama dan Budi Pekerti',
+                                    fontWeight: FontWeight.w700,
+                                  )),
+                                  DataColumn(
+                                      label: CustomText(
+                                    text: 'Jati Diri',
+                                    fontWeight: FontWeight.w700,
+                                  )),
+                                  DataColumn(
+                                      label: CustomText(
+                                    text: 'Literasi dan STEAM',
+                                    fontWeight: FontWeight.w700,
+                                  )),
+                                  DataColumn(
+                                      label: CustomText(
+                                    text: 'Umpan Balik',
+                                    fontWeight: FontWeight.w700,
+                                  )),
+                                  DataColumn(
+                                      label: CustomText(
+                                    text: 'Tanggapan Orang Tua',
+                                    fontWeight: FontWeight.w700,
+                                  )),
+                                  DataColumn(
+                                      label: CustomText(
+                                    text: 'Action',
+                                    fontWeight: FontWeight.w700,
+                                  )),
+                                ],
+                                rows: _filteredList
+                                    .where((anekdot) => !(levelUser == 2 &&
+                                        anekdot.kelompok != kelompok))
+                                    .map((anekdot) {
+                                  final muridData = ref.watch(
+                                      getUserDataProvider(anekdot.muridId));
+                                  final guruData = ref
+                                      .watch(getUserDataProvider(anekdot.uid));
+                                  return DataRow(
+                                    cells: [
+                                      DataCell(Text(anekdot.tanggal)),
+                                      DataCell(Text(anekdot.kelompok)),
+                                      DataCell(Text(anekdot.pengamatan)),
+                                      DataCell(Text(anekdot.tujuan)),
+                                      DataCell(
+                                        muridData.when(
+                                          data: (data) =>
+                                              Text(data.data['nama']),
                                           loading: () => const Loader(),
                                           error: (error, stack) =>
                                               const Text('Error'),
                                         ),
                                       ),
-                                    ),
-                                    DataCell(
-                                      ConstrainedBox(
-                                        constraints: const BoxConstraints(
-                                          maxWidth: 150,
-                                          maxHeight: 150,
-                                        ),
-                                        child: ref
-                                            .watch(getAnekdotImageProvider(
-                                                anekdot.imageId))
-                                            .when(
-                                              data: (imageData) {
-                                                if (imageData != null) {
-                                                  return Image.memory(
-                                                    imageData,
-                                                    fit: BoxFit.cover,
-                                                  );
-                                                } else {
-                                                  return const Icon(Icons
-                                                      .image_not_supported);
-                                                }
-                                              },
-                                              loading: () =>
-                                                  const CircularProgressIndicator(),
-                                              error: (_, __) =>
-                                                  const Icon(Icons.error),
-                                            ),
-                                      ),
-                                    ),
-                                    DataCell(
-                                      ConstrainedBox(
-                                        constraints: const BoxConstraints(
-                                          maxWidth:
-                                              200, // Ubah sesuai kebutuhan
-                                        ),
-                                        child: Text(
-                                          anekdot.nilai,
-                                          overflow: TextOverflow.visible,
-                                          softWrap: true,
-                                        ),
-                                      ),
-                                    ),
-                                    DataCell(
-                                      ConstrainedBox(
-                                        constraints: const BoxConstraints(
-                                          maxWidth:
-                                              200, // Ubah sesuai kebutuhan
-                                        ),
-                                        child: Text(
-                                          anekdot.jatiDiri,
-                                          overflow: TextOverflow.visible,
-                                          softWrap: true,
-                                        ),
-                                      ),
-                                    ),
-                                    DataCell(
-                                      ConstrainedBox(
-                                        constraints: const BoxConstraints(
-                                          maxWidth:
-                                              200, // Ubah sesuai kebutuhan
-                                        ),
-                                        child: Text(
-                                          anekdot.literasi,
-                                          overflow: TextOverflow.visible,
-                                          softWrap: true,
-                                        ),
-                                      ),
-                                    ),
-                                    DataCell(
-                                      ConstrainedBox(
-                                        constraints: const BoxConstraints(
-                                          maxWidth:
-                                              200, // Ubah sesuai kebutuhan
-                                        ), // Sesuaikan lebar sesuai kebutuhan
-                                        child: Text(
-                                          anekdot.umpanBalik,
-                                          overflow: TextOverflow.visible,
-                                          softWrap: true,
-                                        ),
-                                      ),
-                                    ),
-                                    DataCell(
-                                      ConstrainedBox(
-                                        constraints: const BoxConstraints(
-                                          maxWidth:
-                                              200, // Ubah sesuai kebutuhan
-                                        ), // Sesuaikan lebar sesuai kebutuhan
-                                        child: Text(
-                                          anekdot.tanggapan,
-                                          overflow: TextOverflow.visible,
-                                          softWrap: true,
-                                        ),
-                                      ),
-                                    ),
-                                    DataCell(
-                                      Row(
-                                        children: [
-                                          IconButton(
-                                            icon: const Icon(Icons.edit),
-                                            onPressed: () {
-                                              Navigator.push(
-                                                  context,
-                                                  EditAnekdotPage.route(
-                                                      anekdot: anekdot,
-                                                      kelompok: kelompok,
-                                                      levelUser: levelUser));
-                                            },
+                                      DataCell(
+                                        ConstrainedBox(
+                                          constraints: const BoxConstraints(
+                                            maxWidth: 150,
+                                            maxHeight: 150,
                                           ),
-                                          if (levelUser != 3)
+                                          child: ref
+                                              .watch(getAnekdotImageProvider(
+                                                  anekdot.imageId))
+                                              .when(
+                                                data: (imageData) {
+                                                  if (imageData != null) {
+                                                    return Image.memory(
+                                                      imageData,
+                                                      fit: BoxFit.cover,
+                                                    );
+                                                  } else {
+                                                    return const Icon(Icons
+                                                        .image_not_supported);
+                                                  }
+                                                },
+                                                loading: () =>
+                                                    const CircularProgressIndicator(),
+                                                error: (_, __) =>
+                                                    const Icon(Icons.error),
+                                              ),
+                                        ),
+                                      ),
+                                      DataCell(Text(anekdot.nilai)),
+                                      DataCell(Text(anekdot.jatiDiri)),
+                                      DataCell(Text(anekdot.literasi)),
+                                      DataCell(Text(anekdot.umpanBalik)),
+                                      DataCell(Text(anekdot.tanggapan)),
+                                      DataCell(
+                                        Row(
+                                          children: [
                                             IconButton(
-                                              icon: const Icon(Icons.delete),
+                                              icon: const Icon(Icons.edit),
                                               onPressed: () {
-                                                _showDeleteDialog(context, ref,
-                                                    anekdot, muridData);
+                                                Navigator.push(
+                                                    context,
+                                                    EditAnekdotPage.route(
+                                                        anekdot: anekdot,
+                                                        kelompok: kelompok,
+                                                        sekolah: sekolah,
+                                                        levelUser: levelUser));
                                               },
                                             ),
-                                        ],
+                                            if (levelUser != 3)
+                                              IconButton(
+                                                icon: const Icon(Icons.delete),
+                                                onPressed: () {
+                                                  _showDeleteDialog(context,
+                                                      ref, anekdot, muridData);
+                                                },
+                                              ),
+                                          ],
+                                        ),
                                       ),
-                                    ),
-                                  ],
-                                );
-                              }).toList(),
+                                    ],
+                                  );
+                                }).toList(),
+                              ),
                             ),
-                          ),
-                        ],
-                      );
-                    },
-                    loading: () =>
-                        const Center(child: CircularProgressIndicator()),
-                    error: (error, stack) {
-                      if (error.toString().contains('Failed host lookup')) {
-                        return ReloadError(
-                          onReload: () {
-                            ref.refresh(anekdotControllerProvider);
-                            Navigator.pushReplacement(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => const AnekdotPage()),
-                            );
-                          },
+                            const SizedBox(height: 40)
+                          ],
                         );
-                      }
-                      return Text(error.toString());
-                    },
-                  ),
-                  const SizedBox(height: 40),
-                ],
+                      },
+                      loading: () =>
+                          const Center(child: CircularProgressIndicator()),
+                      error: (error, stack) {
+                        if (error.toString().contains('Failed host lookup')) {
+                          return ReloadError(
+                            onReload: () {
+                              ref.refresh(anekdotControllerProvider);
+                              Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => const AnekdotPage()),
+                              );
+                            },
+                          );
+                        }
+                        return Text(error.toString());
+                      },
+                    ),
+                    const SizedBox(height: 40),
+                  ],
+                ),
               ),
             );
           },
           loading: () => const Center(child: CircularProgressIndicator()),
           error: (error, stack) {
-                      if (error.toString().contains('Failed host lookup')) {
-                        return ReloadError(
-                          onReload: () {
-                            ref.refresh(anekdotControllerProvider);
-                            Navigator.pushReplacement(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => const AnekdotPage()),
-                            );
-                          },
-                        );
-                      }
-                      return const Loader();
-                    },
+            if (error.toString().contains('Failed host lookup')) {
+              return ReloadError(
+                onReload: () {
+                  ref.refresh(anekdotControllerProvider);
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const AnekdotPage()),
+                  );
+                },
+              );
+            }
+            return const Loader();
+          },
         ),
       ),
       drawer: CustomDrawer(

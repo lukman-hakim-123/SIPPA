@@ -11,22 +11,26 @@ import 'package:image_picker/image_picker.dart';
 class EditObservasiPage extends ConsumerStatefulWidget {
   static route(
           {required String kelompok,
+          required String sekolah,
           required ObservasiModel observasi,
           required int levelUser}) =>
       MaterialPageRoute(
           builder: (context) => EditObservasiPage(
                 kelompok: kelompok,
+                sekolah: sekolah,
                 observasi: observasi,
                 levelUser: levelUser,
               ));
 
   final String kelompok;
+  final String sekolah;
   final ObservasiModel observasi;
   final int levelUser;
 
   const EditObservasiPage(
       {super.key,
       required this.kelompok,
+      required this.sekolah,
       required this.observasi,
       required this.levelUser});
 
@@ -47,9 +51,10 @@ class _EditObservasiPageState extends ConsumerState<EditObservasiPage> {
   final ImagePicker picker = ImagePicker();
   File? _image;
   String? _errorMessage;
-  static const int maxFileSize = 2 * 1024 * 1024;
+  // static const int maxFileSize = 2 * 1024 * 1024;
   bool _isNewImage = false;
   bool _deleteImage = false;
+  late final Map<String, String> _filterParams;
 
   @override
   void initState() {
@@ -61,6 +66,10 @@ class _EditObservasiPageState extends ConsumerState<EditObservasiPage> {
     muridIdController.text = widget.observasi.muridId;
     tanggapanController.text = widget.observasi.tanggapan;
     _selectedDate = DateFormat('dd MMMM yyyy').parse(widget.observasi.tanggal);
+    _filterParams = {
+      'kelompok': widget.kelompok,
+      'sekolah': widget.sekolah,
+    };
   }
 
   Future<void> _selectDate(BuildContext context) async {
@@ -86,7 +95,7 @@ class _EditObservasiPageState extends ConsumerState<EditObservasiPage> {
 
       if (pickedFile != null) {
         final file = File(pickedFile.path);
-        final fileSize = await file.length();
+        // final fileSize = await file.length();
 
         setState(() {
           _image = file;
@@ -119,14 +128,14 @@ class _EditObservasiPageState extends ConsumerState<EditObservasiPage> {
           imageId: widget.observasi.imageId,
           deleteId: _deleteImage,
           muridId: muridIdController.text,
-          context: context);
+          context: context,
+          sekolah: widget.sekolah);
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final muridAsyncValue =
-        ref.watch(getMuridByFiltersProvider(widget.kelompok));
+    final muridAsyncValue = ref.watch(getMuridByFiltersProvider(_filterParams));
 
     return Scaffold(
       appBar: const CustomAppBar(

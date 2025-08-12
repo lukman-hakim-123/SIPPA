@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:appwrite/models.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -14,15 +16,20 @@ final cpControllerProvider = StateNotifierProvider<CpController, bool>((ref) {
   );
 });
 
-final getCpByUserIdProvider = FutureProvider.family((ref, String id) async {
+final getCpByUserIdProvider =
+    FutureProvider.family<List<CpModel>, String>((ref, paramKey) async {
   final cpController = ref.watch(cpControllerProvider.notifier);
   final levelUser = ref.watch(currentUserDetailsProvider).value!.levelUser;
+  final params = jsonDecode(paramKey) as Map<String, dynamic>;
+  final sekolah = params['sekolah'] as String;
+  final id = params['id'] as String;
+
   if (levelUser == 1) {
-    return cpController.getAllCp();
+    return cpController.getAllCp(sekolah);
   } else if (levelUser == 2) {
-    return cpController.getAllCp();
+    return cpController.getAllCp(sekolah);
   } else {
-    return cpController.getUserCp(id);
+    return cpController.getUserCp(id, sekolah);
   }
 });
 final getUserDataProvider =
@@ -32,6 +39,7 @@ final getUserDataProvider =
 });
 
 final getLatestCpProvider = StreamProvider((ref) {
+  ref.keepAlive();
   final cpAPI = ref.watch(cpAPIProvider);
   return cpAPI.getLatestCp();
 });
@@ -46,18 +54,18 @@ class CpController extends StateNotifier<bool> {
         _cpAPI = cpAPI,
         super(false);
 
-  Future<List<CpModel>> getUserCp(String uid) async {
-    final cpList = await _cpAPI.getUserCp(uid);
+  Future<List<CpModel>> getUserCp(String uid, String sekolah) async {
+    final cpList = await _cpAPI.getUserCp(uid, sekolah);
     return cpList.map((cp) => CpModel.fromMap(cp.data)).toList();
   }
 
-  Future<List<CpModel>> getKelompokCp(String kelompok) async {
-    final cpList = await _cpAPI.getKelompokCp(kelompok);
+  Future<List<CpModel>> getKelompokCp(String kelompok, String sekolah) async {
+    final cpList = await _cpAPI.getKelompokCp(kelompok, sekolah);
     return cpList.map((cp) => CpModel.fromMap(cp.data)).toList();
   }
 
-  Future<List<CpModel>> getAllCp() async {
-    final cpList = await _cpAPI.getAllCp();
+  Future<List<CpModel>> getAllCp(String sekolah) async {
+    final cpList = await _cpAPI.getAllCp(sekolah);
     return cpList.map((cp) => CpModel.fromMap(cp.data)).toList();
   }
 
@@ -71,6 +79,7 @@ class CpController extends StateNotifier<bool> {
     required bool isDone,
     required String muridId,
     required String rekomendasi,
+    required String sekolah,
     required BuildContext context,
   }) async {
     state = true;
@@ -94,6 +103,7 @@ class CpController extends StateNotifier<bool> {
       uid: user.id,
       id: '',
       rekomendasi: rekomendasi,
+      sekolah: sekolah,
       tanggapan: '',
     );
     final res = await _cpAPI.addCp(cp);
@@ -116,6 +126,7 @@ class CpController extends StateNotifier<bool> {
     required String muridId,
     required String rekomendasi,
     required String tanggapan,
+    required String sekolah,
     required BuildContext context,
   }) async {
     state = true;
@@ -140,6 +151,7 @@ class CpController extends StateNotifier<bool> {
       uid: user.id,
       rekomendasi: rekomendasi,
       tanggapan: tanggapan,
+      sekolah: sekolah,
     );
     final res = await _cpAPI.updateCp(cp);
     state = false;

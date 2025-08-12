@@ -12,12 +12,14 @@ import 'package:sippa/widget_view/appbar.dart';
 import 'package:sippa/widget_view/teks.dart';
 
 class AddHkPage extends ConsumerStatefulWidget {
-  static route({required kelompok}) =>
-      MaterialPageRoute(builder: (context) => AddHkPage(kelompok: kelompok));
+  static route({required kelompok, required sekolah}) => MaterialPageRoute(
+      builder: (context) => AddHkPage(kelompok: kelompok, sekolah: sekolah));
   final String kelompok;
+  final String sekolah;
   const AddHkPage({
     super.key,
     required this.kelompok,
+    required this.sekolah,
   });
 
   @override
@@ -38,7 +40,7 @@ class _AddHkPageState extends ConsumerState<AddHkPage> {
   DateTime? _selectedDate;
   File? _image;
   String? _errorMessage;
-  static const int maxFileSize = 2 * 1024 * 1024;
+  // static const int maxFileSize = 2 * 1024 * 1024;
   String? selectedSemester;
 
   @override
@@ -71,7 +73,7 @@ class _AddHkPageState extends ConsumerState<AddHkPage> {
 
     if (pickedFile != null) {
       final file = File(pickedFile.path);
-      final fileSize = await file.length();
+      // final fileSize = await file.length();
 
       setState(() {
         _image = file;
@@ -96,14 +98,25 @@ class _AddHkPageState extends ConsumerState<AddHkPage> {
           muridId: muridIdController.text,
           rekomendasi: rekomendasiController.text,
           image: _image,
+          sekolah: widget.sekolah,
           context: context);
     }
   }
 
+  late final Map<String, String> _filterParams;
+
+  @override
+  void initState() {
+    super.initState();
+    _filterParams = {
+      'kelompok': widget.kelompok,
+      'sekolah': widget.sekolah,
+    };
+  }
+
   @override
   Widget build(BuildContext context) {
-    final muridAsyncValue =
-        ref.watch(getMuridByFiltersProvider(widget.kelompok));
+    final muridAsyncValue = ref.watch(getMuridByFiltersProvider(_filterParams));
     final isLoading = ref.watch(hkControllerProvider);
 
     return Scaffold(
@@ -323,27 +336,28 @@ class _AddHkPageState extends ConsumerState<AddHkPage> {
               isLoading
                   ? const Loader()
                   : ElevatedButton(
-                onPressed: addHasilKarya,
-                style: ButtonStyle(
-                  backgroundColor:
-                      MaterialStateProperty.all(const Color(0xff104993)),
-                  shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                    RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(6.0),
+                      onPressed: addHasilKarya,
+                      style: ButtonStyle(
+                        backgroundColor:
+                            MaterialStateProperty.all(const Color(0xff104993)),
+                        shape:
+                            MaterialStateProperty.all<RoundedRectangleBorder>(
+                          RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(6.0),
+                          ),
+                        ),
+                        fixedSize: MaterialStateProperty.all(
+                            const Size.fromHeight(45)),
+                      ),
+                      child: Container(
+                        width: double.infinity,
+                        alignment: Alignment.center,
+                        child: const CustomText(
+                          text: 'Tambah Hasil Karya',
+                          color: Colors.white,
+                        ),
+                      ),
                     ),
-                  ),
-                  fixedSize:
-                      MaterialStateProperty.all(const Size.fromHeight(45)),
-                ),
-                child: Container(
-                  width: double.infinity,
-                  alignment: Alignment.center,
-                  child: const CustomText(
-                    text: 'Tambah Hasil Karya',
-                    color: Colors.white,
-                  ),
-                ),
-              ),
               const SizedBox(height: 40),
             ],
           ),

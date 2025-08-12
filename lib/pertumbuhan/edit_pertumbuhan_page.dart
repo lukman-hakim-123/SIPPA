@@ -11,22 +11,26 @@ import 'package:sippa/widget_view/teks.dart';
 class EditPertumbuhanPage extends ConsumerStatefulWidget {
   static route(
           {required String kelompok,
+          required String sekolah,
           required PertumbuhanModel pertumbuhan,
           required int levelUser}) =>
       MaterialPageRoute(
           builder: (context) => EditPertumbuhanPage(
                 kelompok: kelompok,
+                sekolah: sekolah,
                 pertumbuhan: pertumbuhan,
                 levelUser: levelUser,
               ));
 
   final String kelompok;
+  final String sekolah;
   final PertumbuhanModel pertumbuhan;
   final int levelUser;
 
   const EditPertumbuhanPage(
       {super.key,
       required this.kelompok,
+      required this.sekolah,
       required this.pertumbuhan,
       required this.levelUser});
 
@@ -45,8 +49,8 @@ class _EditPertumbuhanPageState extends ConsumerState<EditPertumbuhanPage> {
   final tanggapanController = TextEditingController();
   final tanggalController = TextEditingController();
   final muridIdController = TextEditingController();
-
   DateTime? _selectedDate;
+  late final Map<String, String> _filterParams;
 
   @override
   void initState() {
@@ -62,6 +66,10 @@ class _EditPertumbuhanPageState extends ConsumerState<EditPertumbuhanPage> {
 
     _selectedDate =
         DateFormat('dd MMMM yyyy').parse(widget.pertumbuhan.tanggal);
+    _filterParams = {
+      'kelompok': widget.kelompok,
+      'sekolah': widget.sekolah,
+    };
   }
 
   Future<void> _selectDate(BuildContext context) async {
@@ -92,6 +100,7 @@ class _EditPertumbuhanPageState extends ConsumerState<EditPertumbuhanPage> {
             rekomendasi: rekomendasiController.text,
             tanggapan: tanggapanController.text,
             context: context,
+            sekolah: widget.sekolah,
             pertumbuhanId: widget.pertumbuhan.id,
           );
     }
@@ -99,8 +108,7 @@ class _EditPertumbuhanPageState extends ConsumerState<EditPertumbuhanPage> {
 
   @override
   Widget build(BuildContext context) {
-    final muridAsyncValue =
-        ref.watch(getMuridByFiltersProvider(widget.kelompok));
+    final muridAsyncValue = ref.watch(getMuridByFiltersProvider(_filterParams));
     final isLoading = ref.watch(pertumbuhanControllerProvider);
 
     return Scaffold(
@@ -321,7 +329,7 @@ class _EditPertumbuhanPageState extends ConsumerState<EditPertumbuhanPage> {
                       ),
                     ),
               const SizedBox(
-                height: 15,
+                height: 40,
               ),
             ],
           ),

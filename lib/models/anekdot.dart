@@ -15,6 +15,8 @@ class AnekdotModel {
   final String id;
   final String muridId;
   final String tanggapan;
+  final String sekolah; // ✅ tambahan
+
   AnekdotModel({
     required this.pengamatan,
     required this.tujuan,
@@ -29,6 +31,7 @@ class AnekdotModel {
     required this.id,
     required this.muridId,
     required this.tanggapan,
+    required this.sekolah, // ✅ tambahan
   });
 
   AnekdotModel copyWith({
@@ -45,6 +48,7 @@ class AnekdotModel {
     String? id,
     String? muridId,
     String? tanggapan,
+    String? sekolah, // ✅ tambahan
   }) {
     return AnekdotModel(
       pengamatan: pengamatan ?? this.pengamatan,
@@ -60,6 +64,7 @@ class AnekdotModel {
       id: id ?? this.id,
       muridId: muridId ?? this.muridId,
       tanggapan: tanggapan ?? this.tanggapan,
+      sekolah: sekolah ?? this.sekolah, // ✅ tambahan
     );
   }
 
@@ -77,6 +82,7 @@ class AnekdotModel {
       'uid': uid,
       'muridId': muridId,
       'tanggapan': tanggapan,
+      'sekolah': sekolah, // ✅ tambahan
     };
   }
 
@@ -95,6 +101,7 @@ class AnekdotModel {
       id: map['\$id'] ?? '',
       muridId: map['muridId'] ?? '',
       tanggapan: map['tanggapan'] ?? '',
+      sekolah: map['sekolah'] ?? '', // ✅ tambahan
     );
   }
 
@@ -105,7 +112,7 @@ class AnekdotModel {
 
   @override
   String toString() {
-    return 'AnekdotModel(pengamatan: $pengamatan, tujuan: $tujuan, tanggal: $tanggal, nilai: $nilai, jatiDiri: $jatiDiri, literasi: $literasi, umpanBalik: $umpanBalik, kelompok: $kelompok, imageId: $imageId, uid: $uid, id: $id, muridId: $muridId, tanggapan: $tanggapan)';
+    return 'AnekdotModel(pengamatan: $pengamatan, tujuan: $tujuan, tanggal: $tanggal, nilai: $nilai, jatiDiri: $jatiDiri, literasi: $literasi, umpanBalik: $umpanBalik, kelompok: $kelompok, imageId: $imageId, uid: $uid, id: $id, muridId: $muridId, tanggapan: $tanggapan, sekolah: $sekolah)'; // ✅ tambahan
   }
 
   @override
@@ -124,7 +131,8 @@ class AnekdotModel {
         other.uid == uid &&
         other.id == id &&
         other.muridId == muridId &&
-        other.tanggapan == tanggapan;
+        other.tanggapan == tanggapan &&
+        other.sekolah == sekolah; // ✅ tambahan
   }
 
   @override
@@ -141,6 +149,7 @@ class AnekdotModel {
         uid.hashCode ^
         id.hashCode ^
         muridId.hashCode ^
-        tanggapan.hashCode;
+        tanggapan.hashCode ^
+        sekolah.hashCode; // ✅ tambahan
   }
 }
