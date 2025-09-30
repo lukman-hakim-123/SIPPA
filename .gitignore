@@ -43,3 +43,6 @@ app.*.map.json
 /android/app/release
 
 lib/constant/appwrite.dart
+*.freezed.dart
+*.g.dart
+assets/.env

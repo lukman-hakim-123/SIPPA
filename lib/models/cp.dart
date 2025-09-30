@@ -2,22 +2,24 @@
 import 'dart:convert';
 
 class CpModel {
+  final String id;
+  final String uid;
   final String tujuan;
-  final String konteks; // kegiatan
+  final String konteks;
   final bool isDone;
   final String agama;
   final String jatidiri;
   final String literasi;
   final String tanggal;
-  final String uid;
-  final String id;
   final String muridId;
   final String kelompok;
-  final String rekomendasi; // umpan balik
+  final String rekomendasi;
   final String tanggapan;
-  final String sekolah; // ✅ Tambahan
+  final String sekolah;
 
   CpModel({
+    required this.id,
+    required this.uid,
     required this.tujuan,
     required this.konteks,
     required this.isDone,
@@ -25,8 +27,6 @@ class CpModel {
     required this.jatidiri,
     required this.literasi,
     required this.tanggal,
-    required this.uid,
-    required this.id,
     required this.muridId,
     required this.kelompok,
     required this.rekomendasi,
@@ -35,6 +35,8 @@ class CpModel {
   });
 
   CpModel copyWith({
+    String? id,
+    String? uid,
     String? tujuan,
     String? konteks,
     bool? isDone,
@@ -42,8 +44,6 @@ class CpModel {
     String? jatidiri,
     String? literasi,
     String? tanggal,
-    String? uid,
-    String? id,
     String? muridId,
     String? kelompok,
     String? rekomendasi,
@@ -51,6 +51,8 @@ class CpModel {
     String? sekolah, // ✅
   }) {
     return CpModel(
+      id: id ?? this.id,
+      uid: uid ?? this.uid,
       tujuan: tujuan ?? this.tujuan,
       konteks: konteks ?? this.konteks,
       isDone: isDone ?? this.isDone,
@@ -58,8 +60,6 @@ class CpModel {
       jatidiri: jatidiri ?? this.jatidiri,
       literasi: literasi ?? this.literasi,
       tanggal: tanggal ?? this.tanggal,
-      uid: uid ?? this.uid,
-      id: id ?? this.id,
       muridId: muridId ?? this.muridId,
       kelompok: kelompok ?? this.kelompok,
       rekomendasi: rekomendasi ?? this.rekomendasi,
@@ -70,6 +70,7 @@ class CpModel {
 
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
+      'uid': uid,
       'tujuan': tujuan,
       'konteks': konteks,
       'isDone': isDone,
@@ -77,7 +78,6 @@ class CpModel {
       'jatidiri': jatidiri,
       'literasi': literasi,
       'tanggal': tanggal,
-      'uid': uid,
       'muridId': muridId,
       'kelompok': kelompok,
       'rekomendasi': rekomendasi,
