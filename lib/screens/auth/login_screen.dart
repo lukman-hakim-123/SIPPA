@@ -100,6 +100,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     CustomTextFormField(
                       controller: _passwordController,
                       obscureText: _obscure,
+                      maxLines: 1,
                       labelText: 'Password',
                       suffixIcon: IconButton(
                         icon: Icon(

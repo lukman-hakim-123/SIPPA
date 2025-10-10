@@ -314,22 +314,28 @@ class _FormAdminScreenState extends ConsumerState<FormAdminScreen> {
                       ),
                 const SizedBox(height: 10),
 
-                Row(
-                  children: [
-                    Icon(Icons.location_city, size: 25.0),
-                    CustomText(
-                      text: 'Nama Sekolah',
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 4.0),
-                CustomTextFormField(
-                  controller: _sekolahController,
-                  hintText: 'Nama Sekolah',
-                  validator: (value) =>
-                      ValidationHelper.validateNotEmpty(value, 'Nama Sekolah'),
-                ),
+                isEdit
+                    ? Container()
+                    : Row(
+                        children: [
+                          Icon(Icons.location_city, size: 25.0),
+                          CustomText(
+                            text: 'Nama Sekolah',
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ],
+                      ),
+                isEdit ? Container() : const SizedBox(height: 4.0),
+                isEdit
+                    ? Container()
+                    : CustomTextFormField(
+                        controller: _sekolahController,
+                        hintText: 'Nama Sekolah',
+                        validator: (value) => ValidationHelper.validateNotEmpty(
+                          value,
+                          'Nama Sekolah',
+                        ),
+                      ),
                 const SizedBox(height: 24),
                 CustomButton(
                   onPressed: adminState.isLoading || _isSubmitting

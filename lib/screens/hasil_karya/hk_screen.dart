@@ -108,7 +108,7 @@ class _HkScreenState extends ConsumerState<HkScreen> {
                               height: MediaQuery.of(context).size.height * 0.5,
                               child: const Center(
                                 child: CustomText(
-                                  text: 'Belum ada data HK',
+                                  text: 'Belum ada data',
                                   fontSize: 16,
                                 ),
                               ),

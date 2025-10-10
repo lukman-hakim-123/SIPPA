@@ -26,6 +26,7 @@ class FormGuruScreen extends ConsumerStatefulWidget {
 class _FormGuruScreenState extends ConsumerState<FormGuruScreen> {
   final _formKey = GlobalKey<FormState>();
   final _namaController = TextEditingController();
+  final _kelasController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordLamaController = TextEditingController();
   final _ulangiPasswordBaruController = TextEditingController();
@@ -39,6 +40,7 @@ class _FormGuruScreenState extends ConsumerState<FormGuruScreen> {
     super.initState();
     if (widget.guru != null) {
       _namaController.text = widget.guru!.nama;
+      _kelasController.text = widget.guru!.kelompok;
       _emailController.text = widget.guru!.email;
     }
   }
@@ -46,6 +48,7 @@ class _FormGuruScreenState extends ConsumerState<FormGuruScreen> {
   @override
   void dispose() {
     _namaController.dispose();
+    _kelasController.dispose();
     _emailController.dispose();
     super.dispose();
   }
@@ -307,6 +310,20 @@ class _FormGuruScreenState extends ConsumerState<FormGuruScreen> {
                               },
                             ]),
                       ),
+                const SizedBox(height: 10),
+                Row(
+                  children: [
+                    Icon(Icons.school, size: 25.0),
+                    CustomText(text: 'Kelas', fontWeight: FontWeight.bold),
+                  ],
+                ),
+                const SizedBox(height: 4.0),
+                CustomTextFormField(
+                  controller: _kelasController,
+                  hintText: 'Kelas',
+                  validator: (value) =>
+                      ValidationHelper.validateNotEmpty(value, 'Kelas'),
+                ),
                 const SizedBox(height: 24),
                 CustomButton(
                   onPressed: guruState.isLoading || _isSubmitting
@@ -345,7 +362,7 @@ class _FormGuruScreenState extends ConsumerState<FormGuruScreen> {
                                 levelUser: 2,
                                 nama: _namaController.text,
                                 sekolah: profile.sekolah,
-                                kelompok: profile.kelompok,
+                                kelompok: _kelasController.text,
                               );
                               ref
                                   .read(guruProvider.notifier)
@@ -362,7 +379,7 @@ class _FormGuruScreenState extends ConsumerState<FormGuruScreen> {
                                     _emailController.text,
                                     _passwordLamaController.text,
                                     profile.sekolah,
-                                    profile.kelompok,
+                                    _kelasController.text,
                                     _pickedImage!,
                                   );
                             }

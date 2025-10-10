@@ -33,6 +33,7 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
 
+  flutter_native_splash: ^2.4.6
   flutter_lints: ^6.0.0
   riverpod_generator: ^3.0.0
   build_runner: ^2.4.11
@@ -49,6 +50,19 @@ flutter_launcher_icons:
   ios: true
   image_path: "assets/icons/sippa.png"
   min_sdk_android: 21
+
+flutter_native_splash:
+  color: "#ffffff"
+  image: assets/icons/sippa_splash.png
+  color_dark: "#ffffff"
+  android: true
+  ios: true
+
+  android_12:
+    color: "#ffffff"
+    image: assets/icons/sippa_splash.png
+    color_dark: "#ffffff"
+    icon_background_color: "#ffffff"
 
 flutter:
   uses-material-design: true
