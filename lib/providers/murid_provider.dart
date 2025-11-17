@@ -155,13 +155,14 @@ class MuridNotifier extends _$MuridNotifier {
 
   Future<void> deleteMurid(User murid) async {
     final previous = state.value ?? [];
-    state = const AsyncValue.loading();
 
     try {
       await _muridService.deleteImage(murid.imageId);
       final result = await _muridService.deleteMurid(murid.id);
       if (!ref.mounted) return;
+
       if (result.isSuccess) {
+        // Hanya update data, jangan set loading
         state = AsyncValue.data(
           previous.where((g) => g.id != murid.id).toList(),
         );

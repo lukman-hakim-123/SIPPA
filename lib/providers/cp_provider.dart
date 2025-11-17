@@ -19,13 +19,16 @@ class CpNotifier extends _$CpNotifier {
     if (profileAsync.isLoading) {
       state = const AsyncValue.loading();
     }
+
     if (profileAsync.hasError) {
       throw profileAsync.error!;
     }
+
     final profile = profileAsync.value;
     if (profile == null) return [];
 
     final level = profile.levelUser;
+
     if (level == 1) {
       final result = await _cpService.getAllCpBySekolah(profile.sekolah);
       if (result.isSuccess) {
@@ -33,7 +36,9 @@ class CpNotifier extends _$CpNotifier {
       } else {
         throw Exception(result.errorMessage);
       }
-    } else if (level == 2) {
+    }
+
+    if (level == 2) {
       final result = await _cpService.getAllCpByKelompok(
         profile.sekolah,
         profile.kelompok,
@@ -43,7 +48,9 @@ class CpNotifier extends _$CpNotifier {
       } else {
         throw Exception(result.errorMessage);
       }
-    } else if (level == 3) {
+    }
+
+    if (level == 3) {
       final result = await _cpService.getAllCpByUId(
         profile.id,
         profile.sekolah,
@@ -54,13 +61,13 @@ class CpNotifier extends _$CpNotifier {
       } else {
         throw Exception(result.errorMessage);
       }
+    }
+
+    final result = await _cpService.getAllCp();
+    if (result.isSuccess) {
+      return result.resultValue ?? [];
     } else {
-      final result = await _cpService.getAllCp();
-      if (result.isSuccess) {
-        return result.resultValue ?? [];
-      } else {
-        throw Exception(result.errorMessage);
-      }
+      throw Exception(result.errorMessage);
     }
   }
 

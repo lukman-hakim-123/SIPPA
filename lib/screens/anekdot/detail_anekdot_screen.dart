@@ -11,11 +11,12 @@ import '../../utils/arg/anekdot_arg.dart';
 import '../../widgets/app_colors.dart';
 import '../../widgets/common/app_dialog.dart';
 import '../../widgets/common/build_image.dart';
+import '../../widgets/common/error.dart';
 import '../../widgets/common/info_row.dart';
 import '../../widgets/common/loading.dart';
 import '../../widgets/common/text_block.dart';
+import '../../widgets/custom_app_bar.dart';
 import '../../widgets/custom_button.dart';
-import '../../widgets/custom_text.dart';
 import '../../widgets/my_double_tap_exit.dart';
 
 class DetailAnekdotScreen extends ConsumerWidget {
@@ -33,24 +34,15 @@ class DetailAnekdotScreen extends ConsumerWidget {
     return MyDoubleTapExit(
       child: Scaffold(
         backgroundColor: AppColors.background,
-        appBar: AppBar(
-          title: const CustomText(
-            text: 'Detail Anekdot',
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-            fontSize: 20,
-          ),
-          backgroundColor: AppColors.primary,
-          centerTitle: true,
-          leading: BackButton(
-            color: Colors.white,
-            onPressed: () => context.go('/anekdot'),
-          ),
+        appBar: CustomAppBar(
+          title: 'Detail Anekdot',
+          showBack: true,
+          onBack: () => context.go('/anekdot'),
         ),
 
         body: anekdotState.when(
           loading: () => const Loader(),
-          error: (e, _) => Center(child: Text('Error: $e')),
+          error: (e, _) => ErrorPage(error: e.toString()),
 
           data: (list) {
             final match = list.where((a) => a.id == anekdotId).toList();
@@ -66,7 +58,7 @@ class DetailAnekdotScreen extends ConsumerWidget {
 
             return muridState.when(
               loading: () => const Loader(),
-              error: (e, _) => Center(child: Text("Error: $e")),
+              error: (e, _) => ErrorText(error: e.toString()),
 
               data: (muridList) {
                 final muridMap = {for (var m in muridList) m.id: m.nama};

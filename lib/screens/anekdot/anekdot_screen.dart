@@ -7,6 +7,7 @@ import '../../providers/murid_provider.dart';
 import '../../providers/user_provider.dart';
 
 import '../../widgets/app_colors.dart';
+import '../../widgets/custom_app_bar.dart';
 import '../../widgets/custom_button.dart';
 import '../../widgets/custom_text.dart';
 import '../../widgets/custom_text_field.dart';
@@ -34,21 +35,10 @@ class _AnekdotScreenState extends ConsumerState<AnekdotScreen> {
     return MyDoubleTapExit(
       child: Scaffold(
         backgroundColor: AppColors.background,
-        appBar: AppBar(
-          title: const CustomText(
-            text: 'Catatan Anekdot',
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-            fontSize: 20,
-          ),
-          backgroundColor: AppColors.primary,
-          centerTitle: true,
-          elevation: 0,
-          scrolledUnderElevation: 0,
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back, color: Colors.white),
-            onPressed: () => context.go('/home'),
-          ),
+        appBar: CustomAppBar(
+          title: 'Anekdot',
+          showBack: true,
+          onBack: () => context.go('/home'),
         ),
 
         body: userState.when(
@@ -64,10 +54,7 @@ class _AnekdotScreenState extends ConsumerState<AnekdotScreen> {
             return RefreshIndicator(
               onRefresh: () async => ref.invalidate(anekdotProvider),
               child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 20,
-                  vertical: 20,
-                ),
+                padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
                 child: Column(
                   children: [
                     // SEARCH

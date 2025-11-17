@@ -10,10 +10,13 @@ import '../../providers/guru_provider.dart';
 import '../../providers/user_provider.dart';
 import '../../utils/validation_helper.dart';
 import '../../widgets/app_colors.dart';
+import '../../widgets/avatar_picker.dart';
+import '../../widgets/common/snackbar_helper.dart';
 import '../../widgets/custom_button.dart';
 import '../../widgets/custom_text.dart';
-import '../../widgets/custom_text_field.dart';
+import '../../widgets/labeled_text_field.dart';
 import '../../widgets/my_double_tap_exit.dart';
+import '../../widgets/password_field.dart';
 
 class FormGuruScreen extends ConsumerStatefulWidget {
   final User? guru;
@@ -28,8 +31,8 @@ class _FormGuruScreenState extends ConsumerState<FormGuruScreen> {
   final _namaController = TextEditingController();
   final _kelasController = TextEditingController();
   final _emailController = TextEditingController();
-  final _passwordLamaController = TextEditingController();
-  final _ulangiPasswordBaruController = TextEditingController();
+  final _passwordController = TextEditingController();
+  final _ulangiPasswordController = TextEditingController();
   File? _pickedImage;
   bool _isSubmitting = false;
   bool _obscure = true;
@@ -65,56 +68,99 @@ class _FormGuruScreenState extends ConsumerState<FormGuruScreen> {
     }
   }
 
+  void _handleGuruState(
+    BuildContext context,
+    AsyncValue<List<User>> state,
+    bool isEdit,
+  ) {
+    state.when(
+      data: (listguru) {
+        if (!_isSubmitting) return;
+
+        SnackbarHelper.show(
+          context,
+          isEdit
+              ? 'Data guru berhasil diperbarui'
+              : 'Data guru berhasil ditambahkan',
+        );
+
+        setState(() => _isSubmitting = false);
+
+        if (isEdit) {
+          final updatedguru = listguru.firstWhere(
+            (g) => g.id == widget.guru!.id,
+            orElse: () => widget.guru!,
+          );
+          context.go('/detailGuru', extra: updatedguru);
+        } else {
+          context.go('/guru');
+        }
+      },
+      error: (err, _) {
+        if (!_isSubmitting) return;
+        SnackbarHelper.show(context, "Gagal menyimpan: $err");
+        setState(() => _isSubmitting = false);
+      },
+      loading: () {},
+    );
+  }
+
+  void _onSubmit() {
+    if (_formKey.currentState!.validate()) {
+      final isEdit = widget.guru != null;
+
+      if (!isEdit && _pickedImage == null) {
+        SnackbarHelper.show(context, 'Foto belum dipilih');
+        return;
+      }
+
+      setState(() => _isSubmitting = true);
+
+      final profile = ref.read(userProvider).value;
+      if (profile == null) {
+        SnackbarHelper.show(context, 'Profile belum dimuat');
+        return;
+      }
+
+      if (isEdit) {
+        final User updatedModel = User(
+          id: widget.guru!.id,
+          email: widget.guru!.email,
+          imageId: widget.guru!.imageId,
+          levelUser: 2,
+          nama: _namaController.text,
+          sekolah: profile.sekolah,
+          kelompok: _kelasController.text,
+        );
+
+        ref
+            .read(guruProvider.notifier)
+            .updateGuru(updatedModel, widget.guru!, _pickedImage);
+      } else {
+        ref
+            .read(guruProvider.notifier)
+            .createGuru(
+              _namaController.text,
+              _emailController.text,
+              _passwordController.text,
+              profile.sekolah,
+              _kelasController.text,
+              _pickedImage!,
+            );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final guruState = ref.watch(guruProvider);
     final url = ref.read(guruProvider.notifier).getPublicImageUrl;
     final isEdit = widget.guru != null;
 
-    ref.listen<AsyncValue<List<User>>>(guruProvider, (_, state) {
-      state.when(
-        data: (listguru) {
-          if (_isSubmitting) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: CustomText(
-                  text: isEdit
-                      ? 'Data guru berhasil diperbarui'
-                      : 'Data guru berhasil ditambahkan',
-                  color: Colors.white,
-                ),
-              ),
-            );
-            setState(() => _isSubmitting = false);
-
-            if (isEdit) {
-              final updatedguru = listguru.firstWhere(
-                (g) => g.id == widget.guru!.id,
-                orElse: () => widget.guru!,
-              );
-              context.go('/detailGuru', extra: updatedguru);
-            } else {
-              context.go('/guru');
-            }
-          }
-        },
-        error: (err, _) {
-          if (_isSubmitting) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: CustomText(
-                  text: 'Gagal menyimpan: $err',
-                  color: Colors.white,
-                ),
-              ),
-            );
-            setState(() => _isSubmitting = false);
-          }
-        },
-        loading: () {},
-      );
-    });
-
+    ref.listen<AsyncValue<List<User>>>(
+      guruProvider,
+      (previous, next) => _handleGuruState(context, next, isEdit),
+    );
     return MyDoubleTapExit(
       child: Scaffold(
         appBar: AppBar(
@@ -139,252 +185,72 @@ class _FormGuruScreenState extends ConsumerState<FormGuruScreen> {
             key: _formKey,
             child: Column(
               children: [
-                Column(
-                  children: [
-                    CircleAvatar(
-                      radius: 53,
-                      backgroundColor: Colors.white,
-                      child: CircleAvatar(
-                        radius: 50,
-                        backgroundColor: Colors.grey[300],
-                        child: _pickedImage != null
-                            ? ClipOval(
-                                child: Image.file(
-                                  _pickedImage!,
-                                  fit: BoxFit.cover,
-                                  width: 100,
-                                  height: 100,
-                                ),
-                              )
-                            : isEdit && widget.guru!.imageId.isNotEmpty
-                            ? ClipOval(
-                                child: Image.network(
-                                  url(widget.guru!.imageId),
-                                  fit: BoxFit.cover,
-                                  width: 100,
-                                  height: 100,
-                                ),
-                              )
-                            : const Icon(
-                                Icons.person,
-                                size: 50,
-                                color: Colors.white,
-                              ),
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.white,
-                        foregroundColor: Colors.black,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 4,
-                        ),
-                      ),
-                      onPressed: _pickImage,
-                      child: CustomText(
-                        text: isEdit ? 'Ganti Foto' : 'Tambah Foto',
-                      ),
-                    ),
-                  ],
+                AvatarPicker(
+                  pickedImage: _pickedImage,
+                  imageUrl: isEdit ? url(widget.guru!.imageId) : null,
+                  isEdit: isEdit,
+                  onPickImage: _pickImage,
                 ),
                 const SizedBox(height: 10),
-                Row(
-                  children: [
-                    Icon(Icons.person, size: 25.0),
-                    CustomText(text: 'Nama Guru', fontWeight: FontWeight.bold),
-                  ],
-                ),
-                const SizedBox(height: 4.0),
-                CustomTextFormField(
+                LabeledTextField(
+                  icon: Icons.person,
+                  label: 'Nama Guru',
                   controller: _namaController,
-                  hintText: 'Nama Guru',
                   validator: (value) =>
                       ValidationHelper.validateNotEmpty(value, 'Nama Guru'),
                 ),
-                const SizedBox(height: 10),
-                Row(
-                  children: [
-                    Icon(Icons.email, size: 25.0),
-                    CustomText(text: 'Email', fontWeight: FontWeight.bold),
-                  ],
-                ),
-                const SizedBox(height: 4.0),
-                CustomTextFormField(
+
+                LabeledTextField(
+                  icon: Icons.email,
+                  label: 'Email',
                   controller: _emailController,
-                  hintText: 'Email',
                   keyboardType: TextInputType.emailAddress,
                   readOnly: isEdit,
-                  validator: (value) => ValidationHelper.validateEmail(value),
+                  validator: ValidationHelper.validateEmail,
                 ),
-                const SizedBox(height: 10),
-                isEdit
-                    ? Container()
-                    : Row(
-                        children: [
-                          Icon(Icons.lock, size: 25),
-                          CustomText(
-                            text: 'Password',
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ],
-                      ),
-                const SizedBox(height: 4),
-                isEdit
-                    ? Container()
-                    : CustomTextFormField(
-                        controller: _passwordLamaController,
-                        obscureText: _obscure,
-                        maxLines: 1,
-                        suffixIcon: IconButton(
-                          icon: Icon(
-                            _obscure ? Icons.visibility_off : Icons.visibility,
-                          ),
-                          onPressed: () => setState(() => _obscure = !_obscure),
-                        ),
-                        validator: (value) => ValidationHelper.validateMultiple(
-                          value,
-                          [
-                            if (isEdit)
-                              (v) =>
-                                  ValidationHelper.validatePasswordOnEmailChange(
-                                    v,
-                                    widget.guru!.email,
-                                    _emailController.text,
-                                  ),
-                            (v) => ValidationHelper.validateNotEmpty(
-                              v,
-                              'Password',
-                            ),
-                            (v) => ValidationHelper.validateOptionalMinLength(
-                              v,
-                              8,
-                              'Password',
-                            ),
-                          ],
-                        ),
-                      ),
-                isEdit ? Container() : const SizedBox(height: 10),
-                isEdit
-                    ? Container()
-                    : Row(
-                        children: [
-                          Icon(Icons.lock, size: 25),
-                          CustomText(
-                            text: 'Ulangi Password',
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ],
-                      ),
-                isEdit ? Container() : const SizedBox(height: 10),
-                isEdit
-                    ? Container()
-                    : CustomTextFormField(
-                        controller: _ulangiPasswordBaruController,
-                        obscureText: _obscure2,
-                        maxLines: 1,
-                        suffixIcon: IconButton(
-                          icon: Icon(
-                            _obscure2 ? Icons.visibility_off : Icons.visibility,
-                          ),
-                          onPressed: () =>
-                              setState(() => _obscure2 = !_obscure2),
-                        ),
-                        validator: (value) =>
-                            ValidationHelper.validateMultiple(value, [
-                              (v) => ValidationHelper.validateOptionalMinLength(
-                                v,
-                                8,
-                                'Ulangi Password',
-                              ),
-                              (v) {
-                                if (v != _passwordLamaController.text &&
-                                    !isEdit) {
-                                  return 'Password tidak sama';
-                                }
-                                return null;
-                              },
-                            ]),
-                      ),
-                const SizedBox(height: 10),
-                Row(
-                  children: [
-                    Icon(Icons.school, size: 25.0),
-                    CustomText(text: 'Kelas', fontWeight: FontWeight.bold),
-                  ],
-                ),
-                const SizedBox(height: 4.0),
-                CustomTextFormField(
+
+                if (!isEdit) ...[
+                  PasswordField(
+                    label: 'Password',
+                    controller: _passwordController,
+                    obscure: _obscure,
+                    toggleObscure: () => setState(() => _obscure = !_obscure),
+                    validator: (v) =>
+                        ValidationHelper.validateMinLength(v, 8, 'Password'),
+                  ),
+                  const SizedBox(height: 12),
+                  PasswordField(
+                    label: 'Ulangi Password',
+                    controller: _ulangiPasswordController,
+                    obscure: _obscure2,
+                    toggleObscure: () => setState(() => _obscure2 = !_obscure2),
+                    validator: (v) {
+                      if (v == null || v.isEmpty) {
+                        return 'Ulangi Password tidak boleh kosong';
+                      }
+                      if (v != _passwordController.text) {
+                        return 'Password tidak sesuai';
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 12),
+                ],
+
+                LabeledTextField(
+                  icon: Icons.school,
+                  label: 'Kelas',
                   controller: _kelasController,
-                  hintText: 'Kelas',
                   validator: (value) =>
                       ValidationHelper.validateNotEmpty(value, 'Kelas'),
                 ),
+
                 const SizedBox(height: 24),
+
                 CustomButton(
                   onPressed: guruState.isLoading || _isSubmitting
                       ? null
-                      : () {
-                          if (_formKey.currentState!.validate()) {
-                            if (!isEdit && _pickedImage == null) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: CustomText(
-                                    text: 'Foto belum dipilih',
-                                    color: Colors.white,
-                                  ),
-                                ),
-                              );
-                              return;
-                            }
-                            setState(() => _isSubmitting = true);
-                            final profile = ref.read(userProvider).value;
-                            if (profile == null) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: CustomText(
-                                    text: 'Profile belum dimuat',
-                                    color: Colors.white,
-                                  ),
-                                ),
-                              );
-                              return;
-                            }
-                            if (isEdit) {
-                              final User updatedModel = User(
-                                id: widget.guru!.id,
-                                email: widget.guru!.email,
-                                imageId: widget.guru!.imageId,
-                                levelUser: 2,
-                                nama: _namaController.text,
-                                sekolah: profile.sekolah,
-                                kelompok: _kelasController.text,
-                              );
-                              ref
-                                  .read(guruProvider.notifier)
-                                  .updateGuru(
-                                    updatedModel,
-                                    widget.guru!,
-                                    _pickedImage,
-                                  );
-                            } else {
-                              ref
-                                  .read(guruProvider.notifier)
-                                  .createGuru(
-                                    _namaController.text,
-                                    _emailController.text,
-                                    _passwordLamaController.text,
-                                    profile.sekolah,
-                                    _kelasController.text,
-                                    _pickedImage!,
-                                  );
-                            }
-                          }
-                        },
+                      : _onSubmit,
                   isLoading: _isSubmitting,
                   text: isEdit ? 'Edit Data Guru' : 'Tambah Data Guru',
                 ),

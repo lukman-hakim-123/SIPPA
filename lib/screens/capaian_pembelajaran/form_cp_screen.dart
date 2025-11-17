@@ -7,11 +7,11 @@ import '../../models/cp.dart';
 import '../../models/user.dart';
 import '../../providers/cp_provider.dart';
 import '../../providers/user_provider.dart';
-import '../../utils/validation_helper.dart';
-import '../../widgets/app_colors.dart';
+import '../../widgets/common/snackbar_helper.dart';
+import '../../widgets/custom_app_bar.dart';
 import '../../widgets/custom_button.dart';
+import '../../widgets/custom_input_field.dart';
 import '../../widgets/custom_text.dart';
-import '../../widgets/custom_text_field.dart';
 import '../../widgets/my_double_tap_exit.dart';
 
 class FormCpScreen extends ConsumerStatefulWidget {
@@ -26,8 +26,8 @@ class FormCpScreen extends ConsumerStatefulWidget {
 class _FormCpScreenState extends ConsumerState<FormCpScreen> {
   final _formKey = GlobalKey<FormState>();
   final _tujuanController = TextEditingController();
-  final _konteksController = TextEditingController();
-  final _agamaController = TextEditingController();
+  final _kegiatanController = TextEditingController();
+  final _nilaiAgamaController = TextEditingController();
   final _jatiDiriController = TextEditingController();
   final _literasiController = TextEditingController();
   final _tanggalController = TextEditingController();
@@ -36,16 +36,18 @@ class _FormCpScreenState extends ConsumerState<FormCpScreen> {
   bool _isSubmitting = false;
   bool _isDone = false;
 
+  bool get isEdit => widget.cp != null;
+
   @override
   void initState() {
     super.initState();
     if (widget.cp != null) {
-      _agamaController.text = widget.cp!.agama;
-      _jatiDiriController.text = widget.cp!.jatidiri;
+      _nilaiAgamaController.text = widget.cp!.nilaiAgama;
+      _jatiDiriController.text = widget.cp!.jatiDiri;
       _literasiController.text = widget.cp!.literasi;
       _umpanBalikController.text = widget.cp!.rekomendasi;
       _tanggalController.text = widget.cp!.tanggal;
-      _konteksController.text = widget.cp!.konteks;
+      _kegiatanController.text = widget.cp!.kegiatan;
       _tujuanController.text = widget.cp!.tujuan;
       _isDone = widget.cp!.isDone;
     }
@@ -53,12 +55,12 @@ class _FormCpScreenState extends ConsumerState<FormCpScreen> {
 
   @override
   void dispose() {
-    _agamaController.dispose();
+    _nilaiAgamaController.dispose();
     _jatiDiriController.dispose();
     _literasiController.dispose();
     _umpanBalikController.dispose();
     _tanggalController.dispose();
-    _konteksController.dispose();
+    _kegiatanController.dispose();
     _tujuanController.dispose();
     super.dispose();
   }
@@ -79,73 +81,87 @@ class _FormCpScreenState extends ConsumerState<FormCpScreen> {
     }
   }
 
+  Future<void> _handleSubmit(WidgetRef ref) async {
+    if (!_formKey.currentState!.validate()) return;
+    setState(() => _isSubmitting = true);
+    final profile = ref.read(userProvider).value;
+
+    if (profile == null) {
+      SnackbarHelper.show(context, "Profile belum dimuat");
+      return;
+    }
+
+    final base = CpModel(
+      id: isEdit ? widget.cp!.id : '',
+      sekolah: isEdit ? profile.sekolah : widget.murid!.sekolah,
+      kelompok: isEdit ? profile.kelompok : widget.murid!.kelompok,
+      tujuan: _tujuanController.text,
+      tanggal: _tanggalController.text,
+      literasi: _literasiController.text,
+      uid: profile.id,
+      muridId: isEdit ? widget.cp!.muridId : widget.murid!.id,
+      tanggapan: '',
+      kegiatan: _kegiatanController.text,
+      isDone: _isDone,
+      nilaiAgama: _nilaiAgamaController.text,
+      jatiDiri: _jatiDiriController.text,
+      rekomendasi: _umpanBalikController.text,
+    );
+
+    final notifier = ref.read(cpProvider.notifier);
+
+    isEdit ? notifier.updateCp(base) : notifier.createCp(base);
+  }
+
+  void _listenCpState(
+    AsyncValue<List<CpModel>>? previous,
+    AsyncValue<List<CpModel>> next,
+  ) {
+    next.when(
+      data: (listCP) {
+        if (_isSubmitting) {
+          SnackbarHelper.show(
+            context,
+            isEdit ? 'Data berhasil diperbarui' : 'Data berhasil ditambahkan',
+          );
+
+          setState(() => _isSubmitting = false);
+
+          if (isEdit) {
+            final updated = listCP.firstWhere(
+              (g) => g.id == widget.cp!.id,
+              orElse: () => widget.cp!,
+            );
+            context.go('/detailCp', extra: updated.id);
+          } else {
+            context.go('/cp');
+          }
+        }
+      },
+      error: (err, _) {
+        if (_isSubmitting) {
+          SnackbarHelper.show(context, "Gagal menyimpan: $err");
+          setState(() => _isSubmitting = false);
+        }
+      },
+      loading: () {},
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final cpState = ref.watch(cpProvider);
-    final isEdit = widget.cp != null;
 
-    ref.listen<AsyncValue<List<CpModel>>>(cpProvider, (_, state) {
-      state.when(
-        data: (listCP) {
-          if (_isSubmitting) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: CustomText(
-                  text: isEdit
-                      ? 'Data berhasil diperbarui'
-                      : 'Data berhasil ditambahkan',
-                  color: Colors.white,
-                ),
-              ),
-            );
-            setState(() => _isSubmitting = false);
-
-            if (isEdit) {
-              final updated = listCP.firstWhere(
-                (g) => g.id == widget.cp!.id,
-                orElse: () => widget.cp!,
-              );
-              context.go('/detailCp', extra: updated.id);
-            } else {
-              context.go('/cp');
-            }
-          }
-        },
-        error: (err, _) {
-          if (_isSubmitting) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: CustomText(
-                  text: 'Gagal menyimpan: $err',
-                  color: Colors.white,
-                ),
-              ),
-            );
-            setState(() => _isSubmitting = false);
-          }
-        },
-        loading: () {},
-      );
-    });
+    ref.listen<AsyncValue<List<CpModel>>>(cpProvider, _listenCpState);
 
     return MyDoubleTapExit(
       child: Scaffold(
-        appBar: AppBar(
-          title: CustomText(
-            text: isEdit
-                ? 'Edit Capaian Pembelajaran'
-                : 'Tambah Capaian Pembelajaran',
-            color: Colors.white,
-            fontSize: 18.0,
-            fontWeight: FontWeight.bold,
-          ),
-          backgroundColor: AppColors.primary,
-          elevation: 0.0,
-          automaticallyImplyLeading: false,
-          centerTitle: true,
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back, color: Colors.white),
-            onPressed: () => context.go('/cp'),
+        appBar: CustomAppBar(
+          title: isEdit ? "Edit Capaian Pembelajaran" : "Tambah Capaian",
+          showBack: true,
+          onBack: () => context.go(
+            isEdit ? '/detailCp' : '/cp',
+            extra: isEdit ? widget.cp!.id : null,
           ),
         ),
         body: SingleChildScrollView(
@@ -155,206 +171,59 @@ class _FormCpScreenState extends ConsumerState<FormCpScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                CustomText(text: 'Tanggal', fontWeight: FontWeight.bold),
-                const SizedBox(height: 4),
-                CustomTextFormField(
+                CustomInputField(
+                  label: "Tanggal",
                   controller: _tanggalController,
-                  hintText: 'Tanggal',
                   readOnly: true,
-                  suffixIcon: const Icon(Icons.date_range, color: Colors.grey),
+                  icon: Icons.date_range,
                   onTap: _pickDate,
-                  validator: (value) =>
-                      ValidationHelper.validateNotEmpty(value, 'Tanggal'),
                 ),
-                const SizedBox(height: 10),
-                CustomText(text: 'Kegiatan', fontWeight: FontWeight.bold),
-                CustomTextFormField(
-                  controller: _konteksController,
-                  hintText: 'Kegiatan',
+                CustomInputField(
+                  label: "Kegiatan",
+                  controller: _kegiatanController,
                   minLines: 2,
-                  validator: (value) =>
-                      ValidationHelper.validateNotEmpty(value, 'Kegiatan'),
                 ),
-                const SizedBox(height: 10),
-
+                CustomInputField(
+                  label: "Tujuan Pembelajaran",
+                  controller: _tujuanController,
+                  minLines: 2,
+                ),
                 CustomText(
-                  text: 'Tujuan Pembelajaran',
+                  text: "Status Kemunculan Capaian",
                   fontWeight: FontWeight.bold,
                 ),
-                const SizedBox(height: 4),
-
-                CustomTextFormField(
-                  controller: _tujuanController,
-                  hintText: 'Tujuan Pembelajaran',
-                  minLines: 2,
-                  validator: (value) => ValidationHelper.validateNotEmpty(
-                    value,
-                    'Tujuan Pembelajaran',
-                  ),
-                ),
-                const SizedBox(height: 10),
+                SizedBox(height: 8),
                 Row(
                   children: [
-                    InkWell(
-                      onTap: () {
-                        setState(() {
-                          _isDone = false;
-                        });
-                      },
-                      child: Row(
-                        children: [
-                          Radio(
-                            value: false,
-                            groupValue: _isDone,
-                            onChanged: (value) {
-                              setState(() {
-                                _isDone = value!;
-                              });
-                            },
-                          ),
-                          const CustomText(text: 'Belum Muncul'),
-                        ],
-                      ),
-                    ),
-                    InkWell(
-                      onTap: () {
-                        setState(() {
-                          _isDone = true;
-                        });
-                      },
-                      child: Row(
-                        children: [
-                          Radio(
-                            value: true,
-                            groupValue: _isDone,
-                            onChanged: (value) {
-                              setState(() {
-                                _isDone = value!;
-                              });
-                            },
-                          ),
-                          const CustomText(text: 'Sudah Muncul'),
-                        ],
-                      ),
-                    ),
+                    _radio(false, "Belum Muncul"),
+                    _radio(true, "Sudah Muncul"),
                   ],
                 ),
-                const SizedBox(height: 10),
-                CustomText(
-                  text: 'Nilai Agama dan Budi Pekerti',
-                  fontWeight: FontWeight.bold,
-                ),
-                const SizedBox(height: 4),
-
-                CustomTextFormField(
-                  controller: _agamaController,
+                CustomInputField(
+                  label: "Nilai Agama dan Budi Pekerti",
+                  controller: _nilaiAgamaController,
                   minLines: 2,
-                  hintText: 'agama Agama dan Budi Pekerti',
-                  validator: (value) => ValidationHelper.validateNotEmpty(
-                    value,
-                    'agama Agama dan Budi Pekerti',
-                  ),
                 ),
-                const SizedBox(height: 10),
-
-                CustomText(text: 'Jati Diri', fontWeight: FontWeight.bold),
-                const SizedBox(height: 4),
-
-                CustomTextFormField(
+                CustomInputField(
+                  label: "Jati Diri",
                   controller: _jatiDiriController,
-                  hintText: 'Jati Diri',
                   minLines: 2,
-                  validator: (value) =>
-                      ValidationHelper.validateNotEmpty(value, 'Jati Diri'),
                 ),
-                const SizedBox(height: 10),
-
-                CustomText(
-                  text: 'Literasi dan STEAM',
-                  fontWeight: FontWeight.bold,
-                ),
-                const SizedBox(height: 4),
-
-                CustomTextFormField(
+                CustomInputField(
+                  label: "Literasi dan STEAM",
                   controller: _literasiController,
-                  hintText: 'Literasi dan STEAM',
                   minLines: 2,
-                  validator: (value) => ValidationHelper.validateNotEmpty(
-                    value,
-                    'Literasi dan STEAM',
-                  ),
                 ),
-                const SizedBox(height: 10),
-                CustomText(text: 'Umpan Balik', fontWeight: FontWeight.bold),
-                const SizedBox(height: 4),
-                CustomTextFormField(
+                CustomInputField(
+                  label: "Umpan Balik",
                   controller: _umpanBalikController,
-                  hintText: 'Umpan Balik',
                   minLines: 2,
-                  validator: (value) =>
-                      ValidationHelper.validateNotEmpty(value, 'Umpan Balik'),
                 ),
                 const SizedBox(height: 24),
                 CustomButton(
                   onPressed: cpState.isLoading || _isSubmitting
                       ? null
-                      : () {
-                          if (_formKey.currentState!.validate()) {
-                            setState(() => _isSubmitting = true);
-                            final profile = ref.read(userProvider).value;
-                            if (profile == null) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: CustomText(
-                                    text: 'Profile belum dimuat',
-                                    color: Colors.white,
-                                  ),
-                                ),
-                              );
-                              return;
-                            }
-                            if (isEdit) {
-                              final CpModel updatedModel = CpModel(
-                                id: widget.cp!.id,
-                                sekolah: profile.sekolah,
-                                kelompok: profile.kelompok,
-                                tujuan: _tujuanController.text,
-                                tanggal: _tanggalController.text,
-                                literasi: _literasiController.text,
-                                uid: profile.id,
-                                muridId: widget.cp!.muridId,
-                                tanggapan: '',
-                                konteks: _konteksController.text,
-                                isDone: _isDone,
-                                agama: _agamaController.text,
-                                jatidiri: _jatiDiriController.text,
-                                rekomendasi: _umpanBalikController.text,
-                              );
-                              ref
-                                  .read(cpProvider.notifier)
-                                  .updateCp(updatedModel);
-                            } else {
-                              final CpModel cp = CpModel(
-                                tujuan: _tujuanController.text,
-                                tanggal: _tanggalController.text,
-                                literasi: _literasiController.text,
-                                kelompok: widget.murid!.kelompok,
-                                uid: profile.id,
-                                id: '',
-                                muridId: widget.murid!.id,
-                                tanggapan: '',
-                                sekolah: widget.murid!.sekolah,
-                                konteks: _konteksController.text,
-                                isDone: _isDone,
-                                agama: _agamaController.text,
-                                jatidiri: _jatiDiriController.text,
-                                rekomendasi: _umpanBalikController.text,
-                              );
-
-                              ref.read(cpProvider.notifier).createCp(cp);
-                            }
-                          }
-                        },
+                      : () => _handleSubmit(ref),
                   isLoading: _isSubmitting,
                   text: isEdit ? 'Edit Data' : 'Tambah Data',
                 ),
@@ -363,6 +232,22 @@ class _FormCpScreenState extends ConsumerState<FormCpScreen> {
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _radio(bool value, String label) {
+    return InkWell(
+      onTap: () => setState(() => _isDone = value),
+      child: Row(
+        children: [
+          Radio(
+            value: value,
+            groupValue: _isDone,
+            onChanged: (_) => setState(() => _isDone = value),
+          ),
+          CustomText(text: label),
+        ],
       ),
     );
   }

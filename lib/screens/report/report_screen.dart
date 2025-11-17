@@ -184,7 +184,7 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
                         phaseIndex < capaians.length
                             ? SectionData(
                                 tanggal: capaians[phaseIndex].tanggal,
-                                kegiatan: capaians[phaseIndex].konteks,
+                                kegiatan: capaians[phaseIndex].kegiatan,
                                 tujuan: capaians[phaseIndex].tujuan,
                               )
                             : null,

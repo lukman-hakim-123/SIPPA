@@ -125,7 +125,6 @@ class AdminNotifier extends _$AdminNotifier {
 
   Future<void> deleteAdmin(User admin) async {
     final previous = state.value ?? [];
-    state = const AsyncValue.loading();
 
     try {
       await _adminService.deleteImage(admin.imageId);
@@ -133,6 +132,7 @@ class AdminNotifier extends _$AdminNotifier {
       if (!ref.mounted) return;
 
       if (result.isSuccess) {
+        // Hanya update data, jangan set loading
         state = AsyncValue.data(
           previous.where((g) => g.id != admin.id).toList(),
         );

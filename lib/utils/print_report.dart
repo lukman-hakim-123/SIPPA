@@ -192,10 +192,10 @@ Future<void> printFullPhasePDF({
           sectionTitle("CAPAIAN PEMBELAJARAN"),
           table([
             row("Tanggal", capaian.tanggal),
-            row("Kegiatan", capaian.konteks),
+            row("Kegiatan", capaian.kegiatan),
             row("Tujuan", capaian.tujuan),
-            row("Nilai Agama & Budi Pekerti", capaian.agama),
-            row("Jati Diri", capaian.jatidiri),
+            row("Nilai Agama & Budi Pekerti", capaian.nilaiAgama),
+            row("Jati Diri", capaian.jatiDiri),
             row("Literasi & STEAM", capaian.literasi),
             row("Umpan Balik", capaian.rekomendasi),
             row(

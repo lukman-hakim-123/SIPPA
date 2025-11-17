@@ -145,7 +145,6 @@ class GuruNotifier extends _$GuruNotifier {
 
   Future<void> deleteGuru(User guru) async {
     final previous = state.value ?? [];
-    state = const AsyncValue.loading();
 
     try {
       await _guruService.deleteImage(guru.imageId);
@@ -153,6 +152,7 @@ class GuruNotifier extends _$GuruNotifier {
       if (!ref.mounted) return;
 
       if (result.isSuccess) {
+        // Hanya update data, jangan set loading
         state = AsyncValue.data(
           previous.where((g) => g.id != guru.id).toList(),
         );

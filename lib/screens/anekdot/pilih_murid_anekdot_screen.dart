@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../utils/arg/anekdot_arg.dart';
-import '../../widgets/select_murid_page.dart';
+import '../../widgets/template/select_murid_page.dart';
 
 class PilihMuridAnekdotScreen extends ConsumerStatefulWidget {
   const PilihMuridAnekdotScreen({super.key});

@@ -152,6 +152,4 @@ class AnekdotModel {
         tanggapan.hashCode ^
         sekolah.hashCode; // ✅ tambahan
   }
-
-  static empty() {}
 }

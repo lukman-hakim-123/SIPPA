@@ -5,10 +5,10 @@ class CpModel {
   final String id;
   final String uid;
   final String tujuan;
-  final String konteks;
+  final String kegiatan;
   final bool isDone;
-  final String agama;
-  final String jatidiri;
+  final String nilaiAgama;
+  final String jatiDiri;
   final String literasi;
   final String tanggal;
   final String muridId;
@@ -21,50 +21,50 @@ class CpModel {
     required this.id,
     required this.uid,
     required this.tujuan,
-    required this.konteks,
+    required this.kegiatan,
     required this.isDone,
-    required this.agama,
-    required this.jatidiri,
+    required this.nilaiAgama,
+    required this.jatiDiri,
     required this.literasi,
     required this.tanggal,
     required this.muridId,
     required this.kelompok,
     required this.rekomendasi,
     required this.tanggapan,
-    required this.sekolah, // ✅
+    required this.sekolah,
   });
 
   CpModel copyWith({
     String? id,
     String? uid,
     String? tujuan,
-    String? konteks,
+    String? kegiatan,
     bool? isDone,
-    String? agama,
-    String? jatidiri,
+    String? nilaiAgama,
+    String? jatiDiri,
     String? literasi,
     String? tanggal,
     String? muridId,
     String? kelompok,
     String? rekomendasi,
     String? tanggapan,
-    String? sekolah, // ✅
+    String? sekolah,
   }) {
     return CpModel(
       id: id ?? this.id,
       uid: uid ?? this.uid,
       tujuan: tujuan ?? this.tujuan,
-      konteks: konteks ?? this.konteks,
+      kegiatan: kegiatan ?? this.kegiatan,
       isDone: isDone ?? this.isDone,
-      agama: agama ?? this.agama,
-      jatidiri: jatidiri ?? this.jatidiri,
+      nilaiAgama: nilaiAgama ?? this.nilaiAgama,
+      jatiDiri: jatiDiri ?? this.jatiDiri,
       literasi: literasi ?? this.literasi,
       tanggal: tanggal ?? this.tanggal,
       muridId: muridId ?? this.muridId,
       kelompok: kelompok ?? this.kelompok,
       rekomendasi: rekomendasi ?? this.rekomendasi,
       tanggapan: tanggapan ?? this.tanggapan,
-      sekolah: sekolah ?? this.sekolah, // ✅
+      sekolah: sekolah ?? this.sekolah,
     );
   }
 
@@ -72,27 +72,27 @@ class CpModel {
     return <String, dynamic>{
       'uid': uid,
       'tujuan': tujuan,
-      'konteks': konteks,
+      'kegiatan': kegiatan,
       'isDone': isDone,
-      'agama': agama,
-      'jatidiri': jatidiri,
+      'nilaiAgama': nilaiAgama,
+      'jatiDiri': jatiDiri,
       'literasi': literasi,
       'tanggal': tanggal,
       'muridId': muridId,
       'kelompok': kelompok,
       'rekomendasi': rekomendasi,
       'tanggapan': tanggapan,
-      'sekolah': sekolah, // ✅
+      'sekolah': sekolah,
     };
   }
 
   factory CpModel.fromMap(Map<String, dynamic> map) {
     return CpModel(
       tujuan: map['tujuan'] ?? '',
-      konteks: map['konteks'] ?? '',
+      kegiatan: map['kegiatan'] ?? '',
       isDone: map['isDone'] ?? false,
-      agama: map['agama'] ?? '',
-      jatidiri: map['jatidiri'] ?? '',
+      nilaiAgama: map['nilaiAgama'] ?? '',
+      jatiDiri: map['jatiDiri'] ?? '',
       literasi: map['literasi'] ?? '',
       tanggal: map['tanggal'] ?? '',
       uid: map['uid'] ?? '',
@@ -101,7 +101,7 @@ class CpModel {
       kelompok: map['kelompok'] ?? '',
       rekomendasi: map['rekomendasi'] ?? '',
       tanggapan: map['tanggapan'] ?? '',
-      sekolah: map['sekolah'] ?? '', // ✅
+      sekolah: map['sekolah'] ?? '',
     );
   }
 
@@ -112,7 +112,7 @@ class CpModel {
 
   @override
   String toString() {
-    return 'CpModel(tujuan: $tujuan, konteks: $konteks, isDone: $isDone, agama: $agama, jatidiri: $jatidiri, literasi: $literasi, tanggal: $tanggal, uid: $uid, id: $id, muridId: $muridId, kelompok: $kelompok, rekomendasi: $rekomendasi, tanggapan: $tanggapan, sekolah: $sekolah)';
+    return 'CpModel(tujuan: $tujuan, kegiatan: $kegiatan, isDone: $isDone, nilaiAgama: $nilaiAgama, jatiDiri: $jatiDiri, literasi: $literasi, tanggal: $tanggal, uid: $uid, id: $id, muridId: $muridId, kelompok: $kelompok, rekomendasi: $rekomendasi, tanggapan: $tanggapan, sekolah: $sekolah)';
   }
 
   @override
@@ -120,10 +120,10 @@ class CpModel {
     if (identical(this, other)) return true;
 
     return other.tujuan == tujuan &&
-        other.konteks == konteks &&
+        other.kegiatan == kegiatan &&
         other.isDone == isDone &&
-        other.agama == agama &&
-        other.jatidiri == jatidiri &&
+        other.nilaiAgama == nilaiAgama &&
+        other.jatiDiri == jatiDiri &&
         other.literasi == literasi &&
         other.tanggal == tanggal &&
         other.uid == uid &&
@@ -138,10 +138,10 @@ class CpModel {
   @override
   int get hashCode {
     return tujuan.hashCode ^
-        konteks.hashCode ^
+        kegiatan.hashCode ^
         isDone.hashCode ^
-        agama.hashCode ^
-        jatidiri.hashCode ^
+        nilaiAgama.hashCode ^
+        jatiDiri.hashCode ^
         literasi.hashCode ^
         tanggal.hashCode ^
         uid.hashCode ^

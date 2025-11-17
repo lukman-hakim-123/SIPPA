@@ -11,7 +11,7 @@ import 'auth_provider.dart';
 
 part 'user_provider.g.dart';
 
-@riverpod
+@Riverpod(keepAlive: true)
 class UserNotifier extends _$UserNotifier {
   late final UserService _userService = UserService(
     db: ref.read(appwriteTableDBProvider),

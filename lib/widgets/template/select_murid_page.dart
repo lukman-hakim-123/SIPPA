@@ -2,11 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../providers/murid_provider.dart';
-import 'app_colors.dart';
-import 'common/loading.dart';
-import 'custom_text.dart';
-import 'custom_text_field.dart';
+import '../../../providers/murid_provider.dart';
+import '../app_colors.dart';
+import '../common/loading.dart';
+import '../custom_app_bar.dart';
+import '../custom_text.dart';
+import '../custom_text_field.dart';
 
 class SelectMuridPage extends ConsumerStatefulWidget {
   final String title;
@@ -33,31 +34,21 @@ class _SelectMuridPageState extends ConsumerState<SelectMuridPage> {
     final muridState = ref.watch(muridProvider);
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: AppBar(
-        title: CustomText(
-          text: widget.title,
-          color: Colors.white,
-          fontWeight: FontWeight.bold,
-          fontSize: 20.0,
-        ),
-        backgroundColor: AppColors.primary,
-        centerTitle: true,
-        elevation: 0.0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () {
-            if (widget.backRoute != null) {
-              context.go(widget.backRoute!);
-            } else {
-              Navigator.pop(context);
-            }
-          },
-        ),
+      appBar: CustomAppBar(
+        title: widget.title,
+        showBack: true,
+        onBack: () {
+          if (widget.backRoute != null) {
+            context.go(widget.backRoute!);
+          } else {
+            context.pop();
+          }
+        },
       ),
       body: RefreshIndicator(
         onRefresh: () async => ref.invalidate(muridProvider),
         child: Padding(
-          padding: const EdgeInsets.all(20.0),
+          padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
           child: Column(
             children: [
               SizedBox(
@@ -98,6 +89,7 @@ class _SelectMuridPageState extends ConsumerState<SelectMuridPage> {
                         final murid = filtered[index];
 
                         return Card(
+                          color: Colors.white,
                           child: ListTile(
                             leading: CircleAvatar(
                               radius: 30,

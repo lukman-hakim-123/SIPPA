@@ -60,8 +60,8 @@ final router = GoRouter(
     GoRoute(
       path: '/detailMurid',
       builder: (context, state) {
-        final murid = state.extra as User;
-        return DetailMuridScreen(murid: murid);
+        final muridId = state.extra as String;
+        return DetailMuridScreen(muridId: muridId);
       },
     ),
     GoRoute(path: '/guru', builder: (context, state) => GuruScreen()),
@@ -75,8 +75,8 @@ final router = GoRouter(
     GoRoute(
       path: '/detailGuru',
       builder: (context, state) {
-        final guru = state.extra as User;
-        return DetailGuruScreen(guru: guru);
+        final id = state.extra as String;
+        return DetailGuruScreen(guruId: id);
       },
     ),
     GoRoute(path: '/admin', builder: (context, state) => AdminScreen()),
@@ -90,8 +90,8 @@ final router = GoRouter(
     GoRoute(
       path: '/detailAdmin',
       builder: (context, state) {
-        final admin = state.extra as User;
-        return DetailAdminScreen(admin: admin);
+        final id = state.extra as String;
+        return DetailAdminScreen(adminId: id);
       },
     ),
     GoRoute(path: '/anekdot', builder: (context, state) => AnekdotScreen()),
