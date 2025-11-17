@@ -16,7 +16,7 @@ import '../screens/capaian_pembelajaran/pilih_murid_cp_screen.dart';
 import '../screens/guru/detail_guru_screen.dart';
 import '../screens/guru/form_guru_screen.dart';
 import '../screens/guru/guru_screen.dart';
-import '../screens/hasil_karya/detail_anekdot_screen.dart';
+import '../screens/hasil_karya/detail_hk_screen.dart';
 import '../screens/hasil_karya/form_hk_screen.dart';
 import '../screens/hasil_karya/hk_screen.dart';
 import '../screens/hasil_karya/pilih_murid_hk_screen.dart';
@@ -29,6 +29,8 @@ import '../screens/profile/profile_screen.dart';
 import '../screens/murid/detail_murid_screen.dart';
 import '../screens/murid/form_murid_screen.dart';
 import '../screens/murid/murid_screen.dart';
+import '../screens/report/pilih_murid_report_screen.dart';
+import '../screens/report/report_screen.dart';
 import '../screens/rubrik/detail_rubrik_screen.dart';
 import '../screens/rubrik/form_rubrik_screen.dart';
 import '../screens/rubrik/pilih_murid_rubrik_screen.dart';
@@ -37,6 +39,7 @@ import 'arg/anekdot_arg.dart';
 import 'arg/cp_arg.dart';
 import 'arg/hk_arg.dart';
 import 'arg/pertumbuhan_arg.dart';
+import 'arg/report_arg.dart';
 import 'arg/rubrik_arg.dart';
 
 final router = GoRouter(
@@ -190,6 +193,22 @@ final router = GoRouter(
       builder: (context, state) {
         final id = state.extra as String;
         return DetailRubrikScreen(rubrikId: id);
+      },
+    ),
+    GoRoute(
+      path: '/pilihMuridReport',
+      builder: (context, state) => PilihMuridReportScreen(),
+    ),
+    GoRoute(
+      path: '/report',
+      builder: (context, state) {
+        final args = state.extra as ReportArgs;
+        return ReportScreen(
+          anakId: args.anakId,
+          nama: args.nama,
+          sekolah: args.sekolah,
+          kelompok: args.kelompok,
+        );
       },
     ),
   ],

@@ -22,33 +22,41 @@ class AnekdotNotifier extends _$AnekdotNotifier {
     if (profileAsync.isLoading) {
       state = const AsyncValue.loading();
     }
+
     if (profileAsync.hasError) {
       throw profileAsync.error!;
     }
+
     final profile = profileAsync.value;
     if (profile == null) return [];
 
     final level = profile.levelUser;
+
+    // Level 1 → by sekolah
     if (level == 1) {
       final result = await _anekdotService.getAllAnekdotBySekolah(
         profile.sekolah,
       );
       if (result.isSuccess) {
         return result.resultValue ?? [];
-      } else {
-        throw Exception(result.errorMessage);
       }
-    } else if (level == 2) {
+      throw Exception(result.errorMessage);
+    }
+
+    // Level 2 → by kelompok
+    if (level == 2) {
       final result = await _anekdotService.getAllAnekdotByKelompok(
         profile.sekolah,
         profile.kelompok,
       );
       if (result.isSuccess) {
         return result.resultValue ?? [];
-      } else {
-        throw Exception(result.errorMessage);
       }
-    } else if (level == 3) {
+      throw Exception(result.errorMessage);
+    }
+
+    // Level 3 → by user id
+    if (level == 3) {
       final result = await _anekdotService.getAllAnekdotByUId(
         profile.id,
         profile.sekolah,
@@ -56,17 +64,17 @@ class AnekdotNotifier extends _$AnekdotNotifier {
       );
       if (result.isSuccess) {
         return result.resultValue ?? [];
-      } else {
-        throw Exception(result.errorMessage);
       }
-    } else {
-      final result = await _anekdotService.getAllAnekdot();
-      if (result.isSuccess) {
-        return result.resultValue ?? [];
-      } else {
-        throw Exception(result.errorMessage);
-      }
+      throw Exception(result.errorMessage);
     }
+
+    // Default → get all
+    final result = await _anekdotService.getAllAnekdot();
+    if (result.isSuccess) {
+      return result.resultValue ?? [];
+    }
+
+    throw Exception(result.errorMessage);
   }
 
   Future<void> createAnekdot(AnekdotModel anekdot, File photoFile) async {

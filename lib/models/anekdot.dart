@@ -2,10 +2,10 @@ import 'dart:convert';
 
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 class AnekdotModel {
-  final String pengamatan;
+  final String kegiatan;
   final String tujuan;
   final String tanggal;
-  final String nilai;
+  final String nilaiAgama;
   final String jatiDiri;
   final String literasi;
   final String umpanBalik;
@@ -15,13 +15,13 @@ class AnekdotModel {
   final String id;
   final String muridId;
   final String tanggapan;
-  final String sekolah; // ✅ tambahan
+  final String sekolah;
 
   AnekdotModel({
-    required this.pengamatan,
+    required this.kegiatan,
     required this.tujuan,
     required this.tanggal,
-    required this.nilai,
+    required this.nilaiAgama,
     required this.jatiDiri,
     required this.literasi,
     required this.umpanBalik,
@@ -35,10 +35,10 @@ class AnekdotModel {
   });
 
   AnekdotModel copyWith({
-    String? pengamatan,
+    String? kegiatan,
     String? tujuan,
     String? tanggal,
-    String? nilai,
+    String? nilaiAgama,
     String? jatiDiri,
     String? literasi,
     String? umpanBalik,
@@ -51,10 +51,10 @@ class AnekdotModel {
     String? sekolah, // ✅ tambahan
   }) {
     return AnekdotModel(
-      pengamatan: pengamatan ?? this.pengamatan,
+      kegiatan: kegiatan ?? this.kegiatan,
       tujuan: tujuan ?? this.tujuan,
       tanggal: tanggal ?? this.tanggal,
-      nilai: nilai ?? this.nilai,
+      nilaiAgama: nilaiAgama ?? this.nilaiAgama,
       jatiDiri: jatiDiri ?? this.jatiDiri,
       literasi: literasi ?? this.literasi,
       umpanBalik: umpanBalik ?? this.umpanBalik,
@@ -70,10 +70,10 @@ class AnekdotModel {
 
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
-      'pengamatan': pengamatan,
+      'kegiatan': kegiatan,
       'tujuan': tujuan,
       'tanggal': tanggal,
-      'nilai': nilai,
+      'nilaiAgama': nilaiAgama,
       'jatiDiri': jatiDiri,
       'literasi': literasi,
       'umpanBalik': umpanBalik,
@@ -88,10 +88,10 @@ class AnekdotModel {
 
   factory AnekdotModel.fromMap(Map<String, dynamic> map) {
     return AnekdotModel(
-      pengamatan: map['pengamatan'] ?? '',
+      kegiatan: map['kegiatan'] ?? '',
       tujuan: map['tujuan'] ?? '',
       tanggal: map['tanggal'] ?? '',
-      nilai: map['nilai'] ?? '',
+      nilaiAgama: map['nilaiAgama'] ?? '',
       jatiDiri: map['jatiDiri'] ?? '',
       literasi: map['literasi'] ?? '',
       umpanBalik: map['umpanBalik'] ?? '',
@@ -112,17 +112,17 @@ class AnekdotModel {
 
   @override
   String toString() {
-    return 'AnekdotModel(pengamatan: $pengamatan, tujuan: $tujuan, tanggal: $tanggal, nilai: $nilai, jatiDiri: $jatiDiri, literasi: $literasi, umpanBalik: $umpanBalik, kelompok: $kelompok, imageId: $imageId, uid: $uid, id: $id, muridId: $muridId, tanggapan: $tanggapan, sekolah: $sekolah)'; // ✅ tambahan
+    return 'AnekdotModel(kegiatan: $kegiatan, tujuan: $tujuan, tanggal: $tanggal, nilaiAgama: $nilaiAgama, jatiDiri: $jatiDiri, literasi: $literasi, umpanBalik: $umpanBalik, kelompok: $kelompok, imageId: $imageId, uid: $uid, id: $id, muridId: $muridId, tanggapan: $tanggapan, sekolah: $sekolah)'; // ✅ tambahan
   }
 
   @override
   bool operator ==(covariant AnekdotModel other) {
     if (identical(this, other)) return true;
 
-    return other.pengamatan == pengamatan &&
+    return other.kegiatan == kegiatan &&
         other.tujuan == tujuan &&
         other.tanggal == tanggal &&
-        other.nilai == nilai &&
+        other.nilaiAgama == nilaiAgama &&
         other.jatiDiri == jatiDiri &&
         other.literasi == literasi &&
         other.umpanBalik == umpanBalik &&
@@ -137,10 +137,10 @@ class AnekdotModel {
 
   @override
   int get hashCode {
-    return pengamatan.hashCode ^
+    return kegiatan.hashCode ^
         tujuan.hashCode ^
         tanggal.hashCode ^
-        nilai.hashCode ^
+        nilaiAgama.hashCode ^
         jatiDiri.hashCode ^
         literasi.hashCode ^
         umpanBalik.hashCode ^
@@ -152,4 +152,6 @@ class AnekdotModel {
         tanggapan.hashCode ^
         sekolah.hashCode; // ✅ tambahan
   }
+
+  static empty() {}
 }

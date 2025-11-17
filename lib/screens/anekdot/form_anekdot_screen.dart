@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -10,16 +9,17 @@ import '../../models/anekdot.dart';
 import '../../models/user.dart';
 import '../../providers/anekdot_provider.dart';
 import '../../providers/user_provider.dart';
-import '../../utils/validation_helper.dart';
 import '../../widgets/app_colors.dart';
 import '../../widgets/custom_button.dart';
 import '../../widgets/custom_text.dart';
-import '../../widgets/custom_text_field.dart';
 import '../../widgets/my_double_tap_exit.dart';
+import '../../widgets/custom_image_picker.dart';
+import '../../widgets/custom_input_field.dart';
 
 class FormAnekdotScreen extends ConsumerStatefulWidget {
   final AnekdotModel? anekdot;
   final User? murid;
+
   const FormAnekdotScreen({super.key, this.anekdot, this.murid});
 
   @override
@@ -28,117 +28,142 @@ class FormAnekdotScreen extends ConsumerStatefulWidget {
 
 class _FormAnekdotScreenState extends ConsumerState<FormAnekdotScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _nilaiController = TextEditingController();
-  final _jatiDiriController = TextEditingController();
-  final _literasiController = TextEditingController();
-  final _umpanBalikController = TextEditingController();
-  final _tanggalController = TextEditingController();
-  final _pengamatanController = TextEditingController();
-  final _tujuanController = TextEditingController();
+
+  final _nilaiAgama = TextEditingController();
+  final _jatiDiri = TextEditingController();
+  final _literasi = TextEditingController();
+  final _umpanBalik = TextEditingController();
+  final _tanggal = TextEditingController();
+  final _kegiatan = TextEditingController();
+  final _tujuan = TextEditingController();
+
   File? _pickedImage;
   bool _isSubmitting = false;
+
+  bool get isEdit => widget.anekdot != null;
 
   @override
   void initState() {
     super.initState();
-    if (widget.anekdot != null) {
-      _nilaiController.text = widget.anekdot!.nilai;
-      _jatiDiriController.text = widget.anekdot!.jatiDiri;
-      _literasiController.text = widget.anekdot!.literasi;
-      _umpanBalikController.text = widget.anekdot!.umpanBalik;
-      _tanggalController.text = widget.anekdot!.tanggal;
-      _pengamatanController.text = widget.anekdot!.pengamatan;
-      _tujuanController.text = widget.anekdot!.tujuan;
+
+    if (isEdit) {
+      final a = widget.anekdot!;
+      _nilaiAgama.text = a.nilaiAgama;
+      _jatiDiri.text = a.jatiDiri;
+      _literasi.text = a.literasi;
+      _umpanBalik.text = a.umpanBalik;
+      _tanggal.text = a.tanggal;
+      _kegiatan.text = a.kegiatan;
+      _tujuan.text = a.tujuan;
     }
   }
 
   @override
   void dispose() {
-    _nilaiController.dispose();
-    _jatiDiriController.dispose();
-    _literasiController.dispose();
-    _umpanBalikController.dispose();
-    _tanggalController.dispose();
-    _pengamatanController.dispose();
-    _tujuanController.dispose();
+    _nilaiAgama.dispose();
+    _jatiDiri.dispose();
+    _literasi.dispose();
+    _umpanBalik.dispose();
+    _tanggal.dispose();
+    _kegiatan.dispose();
+    _tujuan.dispose();
     super.dispose();
   }
 
   Future<void> _pickImage() async {
-    final picker = ImagePicker();
-    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
-
-    if (pickedFile != null) {
-      final newImage = File(pickedFile.path);
-      setState(() {
-        _pickedImage = newImage;
-      });
-    }
+    final file = await ImagePicker().pickImage(source: ImageSource.gallery);
+    if (file != null) setState(() => _pickedImage = File(file.path));
   }
 
   Future<void> _pickDate() async {
-    final now = DateTime.now();
     final picked = await showDatePicker(
       context: context,
-      initialDate: now,
+      initialDate: DateTime.now(),
       firstDate: DateTime(2020),
       lastDate: DateTime(2100),
     );
     if (picked != null) {
-      final formatted = DateFormat('dd-MM-yyyy').format(picked);
       setState(() {
-        _tanggalController.text = formatted;
+        _tanggal.text = DateFormat('dd-MM-yyyy').format(picked);
       });
     }
   }
 
+  Future<void> _handleSubmit(WidgetRef ref) async {
+    if (!_formKey.currentState!.validate()) return;
+
+    if (!isEdit && _pickedImage == null) {
+      _showSnack("Foto belum dipilih");
+      return;
+    }
+
+    final profile = ref.read(userProvider).value;
+    if (profile == null) {
+      _showSnack("Profile belum dimuat");
+      return;
+    }
+
+    setState(() => _isSubmitting = true);
+
+    final base = AnekdotModel(
+      id: isEdit ? widget.anekdot!.id : '',
+      imageId: isEdit ? widget.anekdot!.imageId : '',
+      sekolah: isEdit ? profile.sekolah : widget.murid!.sekolah,
+      kelompok: isEdit ? profile.kelompok : widget.murid!.kelompok,
+      kegiatan: _kegiatan.text,
+      tujuan: _tujuan.text,
+      tanggal: _tanggal.text,
+      nilaiAgama: _nilaiAgama.text,
+      jatiDiri: _jatiDiri.text,
+      literasi: _literasi.text,
+      umpanBalik: _umpanBalik.text,
+      uid: profile.id,
+      muridId: isEdit ? widget.anekdot!.muridId : widget.murid!.id,
+      tanggapan: '',
+    );
+
+    final notifier = ref.read(anekdotProvider.notifier);
+
+    isEdit
+        ? notifier.updateAnekdot(base, widget.anekdot!, _pickedImage)
+        : notifier.createAnekdot(base, _pickedImage!);
+  }
+
   @override
   Widget build(BuildContext context) {
-    final anekdotState = ref.watch(anekdotProvider);
-    final url = ref.read(anekdotProvider.notifier).getPublicImageUrl;
-    final isEdit = widget.anekdot != null;
+    final anekdotUrl = ref.read(anekdotProvider.notifier).getPublicImageUrl;
+    final state = ref.watch(anekdotProvider);
 
-    ref.listen<AsyncValue<List<AnekdotModel>>>(anekdotProvider, (_, state) {
-      state.when(
-        data: (listAnekdot) {
-          if (_isSubmitting) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: CustomText(
-                  text: isEdit
-                      ? 'Data anekdot berhasil diperbarui'
-                      : 'Data anekdot berhasil ditambahkan',
-                  color: Colors.white,
-                ),
-              ),
-            );
-            setState(() => _isSubmitting = false);
-
-            if (isEdit) {
-              final updatedAnekdot = listAnekdot.firstWhere(
-                (g) => g.id == widget.anekdot!.id,
-                orElse: () => widget.anekdot!,
-              );
-              context.go('/detailAnekdot', extra: updatedAnekdot.id);
-            } else {
-              context.go('/anekdot');
-            }
-          }
-        },
-        error: (err, _) {
-          if (_isSubmitting) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: CustomText(
-                  text: 'Gagal menyimpan: $err',
-                  color: Colors.white,
-                ),
-              ),
-            );
-            setState(() => _isSubmitting = false);
-          }
-        },
+    ref.listen<AsyncValue<List<AnekdotModel>>>(anekdotProvider, (_, next) {
+      next.when(
         loading: () {},
+        error: (e, _) {
+          if (_isSubmitting) {
+            _showSnack("Gagal menyimpan: $e");
+            setState(() => _isSubmitting = false);
+          }
+        },
+        data: (list) {
+          if (!_isSubmitting) return;
+
+          _showSnack(
+            isEdit
+                ? "Data anekdot berhasil diperbarui"
+                : "Data anekdot berhasil ditambahkan",
+          );
+
+          setState(() => _isSubmitting = false);
+
+          if (isEdit) {
+            final updated = list.firstWhere(
+              (g) => g.id == widget.anekdot!.id,
+              orElse: () => widget.anekdot!,
+            );
+            context.go('/detailAnekdot', extra: updated.id);
+          } else {
+            context.go('/anekdot');
+          }
+        },
       );
     });
 
@@ -146,271 +171,89 @@ class _FormAnekdotScreenState extends ConsumerState<FormAnekdotScreen> {
       child: Scaffold(
         appBar: AppBar(
           title: CustomText(
-            text: isEdit ? 'Edit Anekdot' : 'Tambah Anekdot',
+            text: isEdit ? "Edit Anekdot" : "Tambah Anekdot",
             color: Colors.white,
-            fontSize: 20.0,
+            fontSize: 20,
             fontWeight: FontWeight.bold,
           ),
-          backgroundColor: AppColors.primary,
-          elevation: 0.0,
-          automaticallyImplyLeading: false,
           centerTitle: true,
+          backgroundColor: AppColors.primary,
           leading: IconButton(
             icon: const Icon(Icons.arrow_back, color: Colors.white),
             onPressed: () => context.go('/anekdot'),
           ),
         ),
         body: SingleChildScrollView(
-          padding: const EdgeInsets.all(20.0),
+          padding: const EdgeInsets.all(20),
           child: Form(
             key: _formKey,
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Column(
-                  children: [
-                    Container(
-                      height: 200,
-                      width: double.infinity,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.all(Radius.circular(12)),
-                        color: Colors.grey[300],
-                      ),
-                      child: _pickedImage != null
-                          ? Image.file(
-                              _pickedImage!,
-                              fit: BoxFit.scaleDown,
-                              width: double.infinity,
-                              height: double.infinity,
-                            )
-                          : isEdit && widget.anekdot!.imageId.isNotEmpty
-                          ? Image.network(
-                              url(widget.anekdot!.imageId),
-                              fit: BoxFit.scaleDown,
-                              width: double.infinity,
-                              height: double.infinity,
-                              loadingBuilder:
-                                  (context, child, loadingProgress) {
-                                    if (loadingProgress == null) return child;
-                                    return const Center(
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 2,
-                                      ),
-                                    );
-                                  },
-                              errorBuilder: (context, error, stackTrace) =>
-                                  const Icon(
-                                    Icons.broken_image,
-                                    size: 50,
-                                    color: Colors.grey,
-                                  ),
-                            )
-                          : const Icon(
-                              Icons.image,
-                              size: 50,
-                              color: Colors.grey,
-                            ),
-                    ),
-                    const SizedBox(height: 12),
-                    ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.white,
-                        foregroundColor: Colors.black,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 4,
-                        ),
-                      ),
-                      onPressed: _pickImage,
-                      child: CustomText(
-                        text: isEdit ? 'Ganti Foto' : 'Tambah Foto',
-                      ),
-                    ),
-                  ],
+                CustomImagePicker(
+                  pickedImage: _pickedImage,
+                  isEdit: isEdit,
+                  imageUrl: isEdit ? anekdotUrl(widget.anekdot!.imageId) : null,
+                  onPick: _pickImage,
                 ),
                 const SizedBox(height: 10),
-                CustomText(text: 'Tanggal', fontWeight: FontWeight.bold),
-                const SizedBox(height: 4),
-                CustomTextFormField(
-                  controller: _tanggalController,
-                  hintText: 'Tanggal',
+                CustomInputField(
+                  label: "Tanggal",
+                  controller: _tanggal,
                   readOnly: true,
-                  suffixIcon: const Icon(Icons.date_range, color: Colors.grey),
+                  icon: Icons.date_range,
                   onTap: _pickDate,
-                  validator: (value) =>
-                      ValidationHelper.validateNotEmpty(value, 'Tanggal'),
                 ),
-                const SizedBox(height: 10),
-                CustomText(text: 'Kegiatan', fontWeight: FontWeight.bold),
-                CustomTextFormField(
-                  controller: _pengamatanController,
-                  hintText: 'Kegiatan',
+                CustomInputField(
+                  label: "Kegiatan",
+                  controller: _kegiatan,
                   minLines: 2,
-                  validator: (value) =>
-                      ValidationHelper.validateNotEmpty(value, 'Kegiatan'),
                 ),
-                const SizedBox(height: 10),
-
-                CustomText(
-                  text: 'Tujuan Pembelajaran',
-                  fontWeight: FontWeight.bold,
-                ),
-                const SizedBox(height: 4),
-
-                CustomTextFormField(
-                  controller: _tujuanController,
-                  hintText: 'Tujuan Pembelajaran',
+                CustomInputField(
+                  label: "Tujuan Pembelajaran",
+                  controller: _tujuan,
                   minLines: 2,
-                  validator: (value) => ValidationHelper.validateNotEmpty(
-                    value,
-                    'Tujuan Pembelajaran',
-                  ),
                 ),
-                const SizedBox(height: 10),
-
-                CustomText(
-                  text: 'Nilai Agama dan Budi Pekerti',
-                  fontWeight: FontWeight.bold,
-                ),
-                const SizedBox(height: 4),
-
-                CustomTextFormField(
-                  controller: _nilaiController,
+                CustomInputField(
+                  label: "Nilai Agama dan Budi Pekerti",
+                  controller: _nilaiAgama,
                   minLines: 2,
-                  hintText: 'Nilai Agama dan Budi Pekerti',
-                  validator: (value) => ValidationHelper.validateNotEmpty(
-                    value,
-                    'Nilai Agama dan Budi Pekerti',
-                  ),
                 ),
-                const SizedBox(height: 10),
-
-                CustomText(text: 'Jati Diri', fontWeight: FontWeight.bold),
-                const SizedBox(height: 4),
-
-                CustomTextFormField(
-                  controller: _jatiDiriController,
-                  hintText: 'Jati Diri',
+                CustomInputField(
+                  label: "Jati Diri",
+                  controller: _jatiDiri,
                   minLines: 2,
-                  validator: (value) =>
-                      ValidationHelper.validateNotEmpty(value, 'Jati Diri'),
                 ),
-                const SizedBox(height: 10),
-
-                CustomText(
-                  text: 'Literasi dan STEAM',
-                  fontWeight: FontWeight.bold,
-                ),
-                const SizedBox(height: 4),
-
-                CustomTextFormField(
-                  controller: _literasiController,
-                  hintText: 'Literasi dan STEAM',
+                CustomInputField(
+                  label: "Literasi dan STEAM",
+                  controller: _literasi,
                   minLines: 2,
-                  validator: (value) => ValidationHelper.validateNotEmpty(
-                    value,
-                    'Literasi dan STEAM',
-                  ),
                 ),
-                const SizedBox(height: 10),
-                CustomText(text: 'Umpan Balik', fontWeight: FontWeight.bold),
-                const SizedBox(height: 4),
-                CustomTextFormField(
-                  controller: _umpanBalikController,
-                  hintText: 'Umpan Balik',
+                CustomInputField(
+                  label: "Umpan Balik",
+                  controller: _umpanBalik,
                   minLines: 2,
-                  validator: (value) =>
-                      ValidationHelper.validateNotEmpty(value, 'Umpan Balik'),
                 ),
                 const SizedBox(height: 24),
                 CustomButton(
-                  onPressed: anekdotState.isLoading || _isSubmitting
+                  onPressed: state.isLoading || _isSubmitting
                       ? null
-                      : () {
-                          if (_formKey.currentState!.validate()) {
-                            if (!isEdit && _pickedImage == null) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: CustomText(
-                                    text: 'Foto belum dipilih',
-                                    color: Colors.white,
-                                  ),
-                                ),
-                              );
-                              return;
-                            }
-                            setState(() => _isSubmitting = true);
-                            final profile = ref.read(userProvider).value;
-                            if (profile == null) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: CustomText(
-                                    text: 'Profile belum dimuat',
-                                    color: Colors.white,
-                                  ),
-                                ),
-                              );
-                              return;
-                            }
-                            if (isEdit) {
-                              final AnekdotModel updatedModel = AnekdotModel(
-                                id: widget.anekdot!.id,
-                                imageId: widget.anekdot!.imageId,
-                                sekolah: profile.sekolah,
-                                kelompok: profile.kelompok,
-                                pengamatan: _pengamatanController.text,
-                                tujuan: _tujuanController.text,
-                                tanggal: _tanggalController.text,
-                                nilai: _nilaiController.text,
-                                jatiDiri: _jatiDiriController.text,
-                                literasi: _literasiController.text,
-                                umpanBalik: _umpanBalikController.text,
-                                uid: profile.id,
-                                muridId: widget.anekdot!.muridId,
-                                tanggapan: '',
-                              );
-                              ref
-                                  .read(anekdotProvider.notifier)
-                                  .updateAnekdot(
-                                    updatedModel,
-                                    widget.anekdot!,
-                                    _pickedImage,
-                                  );
-                            } else {
-                              final AnekdotModel anekdot = AnekdotModel(
-                                pengamatan: _pengamatanController.text,
-                                tujuan: _tujuanController.text,
-                                tanggal: _tanggalController.text,
-                                nilai: _nilaiController.text,
-                                jatiDiri: _jatiDiriController.text,
-                                literasi: _literasiController.text,
-                                umpanBalik: _umpanBalikController.text,
-                                kelompok: widget.murid!.kelompok,
-                                imageId: '',
-                                uid: profile.id,
-                                id: '',
-                                muridId: widget.murid!.id,
-                                tanggapan: '',
-                                sekolah: widget.murid!.sekolah,
-                              );
-
-                              ref
-                                  .read(anekdotProvider.notifier)
-                                  .createAnekdot(anekdot, _pickedImage!);
-                            }
-                          }
-                        },
+                      : () => _handleSubmit(ref),
                   isLoading: _isSubmitting,
-                  text: isEdit ? 'Edit Data Anekdot' : 'Tambah Data Anekdot',
+                  text: isEdit ? "Edit Data Anekdot" : "Tambah Data Anekdot",
                 ),
                 const SizedBox(height: 30),
               ],
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  void _showSnack(String msg) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: CustomText(text: msg, color: Colors.white),
       ),
     );
   }

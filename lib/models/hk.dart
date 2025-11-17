@@ -2,9 +2,9 @@ import 'dart:convert';
 
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 class HkModel {
-  final String semester;
+  final String semester; // Tujuan
   final String tanggal;
-  final String deskripsi;
+  final String deskripsi; // Kegiatan
   final String nilai;
   final String jatiDiri;
   final String literasi;

@@ -159,7 +159,7 @@ class DetailHkScreen extends ConsumerWidget {
                             children: [
                               CustomButton(
                                 text: 'Edit Data',
-                                onPressed: userLevel != 3
+                                onPressed: userLevel != 0
                                     ? () {
                                         GoRouter.of(context).push(
                                           '/formHk',
