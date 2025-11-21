@@ -57,11 +57,7 @@ class AnekdotNotifier extends _$AnekdotNotifier {
 
     // Level 3 → by user id
     if (level == 3) {
-      final result = await _anekdotService.getAllAnekdotByUId(
-        profile.id,
-        profile.sekolah,
-        profile.kelompok,
-      );
+      final result = await _anekdotService.getAllAnekdotByUId(profile.id);
       if (result.isSuccess) {
         return result.resultValue ?? [];
       }

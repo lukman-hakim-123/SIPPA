@@ -1,6 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'custom_text.dart';
+import '../custom_text.dart';
 
 class AvatarPicker extends StatelessWidget {
   final File? pickedImage;

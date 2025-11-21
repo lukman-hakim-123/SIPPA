@@ -152,21 +152,12 @@ class RubrikService {
     }
   }
 
-  Future<Result<List<RubrikModel>>> getAllRubrikByUId(
-    String id,
-    String sekolah,
-    kelompok,
-  ) async {
+  Future<Result<List<RubrikModel>>> getAllRubrikByUId(String id) async {
     try {
       final documents = await _db.listRows(
         databaseId: dotenv.env['APPWRITE_DATABASE_ID']!,
         tableId: dotenv.env['APPWRITE_RUBRIK_COLLECTION_ID']!,
-        queries: [
-          Query.equal('muridId', id),
-          Query.equal('sekolah', sekolah),
-          Query.equal('kelompok', kelompok),
-          Query.orderDesc('\$createdAt'),
-        ],
+        queries: [Query.equal('muridId', id), Query.orderDesc('\$createdAt')],
       );
       final rubrikList = documents.rows.map((doc) {
         final Map<String, dynamic> data = Map<String, dynamic>.from(doc.data);

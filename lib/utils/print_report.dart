@@ -177,7 +177,7 @@ Future<void> printFullPhasePDF({
             row("Nilai Agama & Budi Pekerti", anekdot.nilaiAgama),
             row("Jati Diri", anekdot.jatiDiri),
             row("Literasi & STEAM", anekdot.literasi),
-            row("Umpan Balik", anekdot.umpanBalik),
+            row("Umpan Balik", anekdot.rekomendasi),
             row(
               "Tanggapan Orang Tua",
               (anekdot.tanggapan == '' || anekdot.tanggapan.isEmpty)
@@ -232,9 +232,9 @@ Future<void> printFullPhasePDF({
               ],
             ),
             row("Tanggal", hasilKarya.tanggal),
-            row("Kegiatan", hasilKarya.deskripsi),
-            row("Tujuan", hasilKarya.semester),
-            row("Nilai Agama & Budi Pekerti", hasilKarya.nilai),
+            row("Kegiatan", hasilKarya.kegiatan),
+            row("Tujuan", hasilKarya.tujuan),
+            row("Nilai Agama & Budi Pekerti", hasilKarya.nilaiAgama),
             row("Jati Diri", hasilKarya.jatiDiri),
             row("Literasi & STEAM", hasilKarya.literasi),
             row("Umpan Balik", hasilKarya.rekomendasi),

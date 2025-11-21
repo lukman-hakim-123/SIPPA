@@ -48,8 +48,6 @@ class PertumbuhanNotifier extends _$PertumbuhanNotifier {
     } else if (level == 3) {
       final result = await _pertumbuhanService.getAllPertumbuhanByUId(
         profile.id,
-        profile.sekolah,
-        profile.kelompok,
       );
       if (result.isSuccess) {
         return result.resultValue ?? [];

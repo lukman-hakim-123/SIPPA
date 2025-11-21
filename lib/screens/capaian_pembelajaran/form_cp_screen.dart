@@ -10,7 +10,7 @@ import '../../providers/user_provider.dart';
 import '../../widgets/common/snackbar_helper.dart';
 import '../../widgets/custom_app_bar.dart';
 import '../../widgets/custom_button.dart';
-import '../../widgets/custom_input_field.dart';
+import '../../widgets/form/custom_input_field.dart';
 import '../../widgets/custom_text.dart';
 import '../../widgets/my_double_tap_exit.dart';
 
@@ -199,6 +199,7 @@ class _FormCpScreenState extends ConsumerState<FormCpScreen> {
                     _radio(true, "Sudah Muncul"),
                   ],
                 ),
+                SizedBox(height: 8),
                 CustomInputField(
                   label: "Nilai Agama dan Budi Pekerti",
                   controller: _nilaiAgamaController,

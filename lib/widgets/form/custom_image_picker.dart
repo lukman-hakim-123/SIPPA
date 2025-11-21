@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 
-import 'custom_text.dart';
+import '../custom_text.dart';
 
 class CustomImagePicker extends StatelessWidget {
   final File? pickedImage;

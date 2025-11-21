@@ -107,7 +107,7 @@ class _UserDetailScreenState extends ConsumerState<UserDetailScreen> {
   }
 
   Widget _avatar(String? url) {
-    if (url == null || url.isEmpty) {
+    if (url == null || url.isEmpty || url == '') {
       return CircleAvatar(
         radius: 50,
         backgroundColor: Colors.grey[300],

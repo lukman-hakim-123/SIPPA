@@ -8,13 +8,13 @@ import 'package:image_picker/image_picker.dart';
 import '../../models/user.dart';
 import '../../providers/admin_provider.dart';
 import '../../utils/validation_helper.dart';
-import '../../widgets/avatar_picker.dart';
+import '../../widgets/form/avatar_picker.dart';
 import '../../widgets/common/snackbar_helper.dart';
 import '../../widgets/custom_app_bar.dart';
 import '../../widgets/custom_button.dart';
-import '../../widgets/labeled_text_field.dart';
+import '../../widgets/form/labeled_text_field.dart';
 import '../../widgets/my_double_tap_exit.dart';
-import '../../widgets/password_field.dart';
+import '../../widgets/form/password_field.dart';
 
 class FormAdminScreen extends ConsumerStatefulWidget {
   final User? admin;
@@ -123,7 +123,7 @@ class _FormAdminScreenState extends ConsumerState<FormAdminScreen> {
           showBack: true,
           onBack: () => context.go(
             isEdit ? '/detailAdmin' : '/admin',
-            extra: widget.admin,
+            extra: isEdit ? widget.admin!.id : null,
           ),
         ),
         body: SingleChildScrollView(
@@ -134,7 +134,9 @@ class _FormAdminScreenState extends ConsumerState<FormAdminScreen> {
               children: [
                 AvatarPicker(
                   pickedImage: _pickedImage,
-                  imageUrl: isEdit ? url(widget.admin!.imageId) : null,
+                  imageUrl: isEdit && widget.admin!.imageId != ''
+                      ? url(widget.admin!.imageId)
+                      : null,
                   isEdit: isEdit,
                   onPickImage: _pickImage,
                 ),
@@ -152,7 +154,7 @@ class _FormAdminScreenState extends ConsumerState<FormAdminScreen> {
                   controller: _emailController,
                   keyboardType: TextInputType.emailAddress,
                   readOnly: isEdit,
-                  validator: ValidationHelper.validateEmail,
+                  validator: (value) => ValidationHelper.validateEmail(value),
                 ),
                 if (!isEdit) ...[
                   PasswordField(
@@ -170,8 +172,9 @@ class _FormAdminScreenState extends ConsumerState<FormAdminScreen> {
                     obscure: _obscure2,
                     toggleObscure: () => setState(() => _obscure2 = !_obscure2),
                     validator: (v) {
-                      if (v != _passwordController.text)
+                      if (v != _passwordController.text) {
                         return 'Password tidak sama';
+                      }
                       return null;
                     },
                   ),

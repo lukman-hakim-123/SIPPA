@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'app_colors.dart';
+import '../app_colors.dart';
 
 class CustomDropdown<T> extends StatelessWidget {
   final String? hintText;
@@ -36,6 +36,7 @@ class CustomDropdown<T> extends StatelessWidget {
       onChanged: onChanged,
       validator: validator,
       isExpanded: isExpanded,
+
       decoration: InputDecoration(
         labelText: labelText,
         hintText: hintText,

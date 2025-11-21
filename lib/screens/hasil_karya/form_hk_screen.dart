@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -10,16 +9,17 @@ import '../../models/hk.dart';
 import '../../models/user.dart';
 import '../../providers/hk_provider.dart';
 import '../../providers/user_provider.dart';
-import '../../utils/validation_helper.dart';
-import '../../widgets/app_colors.dart';
+import '../../widgets/common/snackbar_helper.dart';
+import '../../widgets/custom_app_bar.dart';
 import '../../widgets/custom_button.dart';
-import '../../widgets/custom_text.dart';
-import '../../widgets/custom_text_field.dart';
 import '../../widgets/my_double_tap_exit.dart';
+import '../../widgets/form/custom_image_picker.dart';
+import '../../widgets/form/custom_input_field.dart';
 
 class FormHkScreen extends ConsumerStatefulWidget {
   final HkModel? hk;
   final User? murid;
+
   const FormHkScreen({super.key, this.hk, this.murid});
 
   @override
@@ -28,383 +28,217 @@ class FormHkScreen extends ConsumerStatefulWidget {
 
 class _FormHkScreenState extends ConsumerState<FormHkScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _nilaiController = TextEditingController();
+
+  final _nilaiAgamaController = TextEditingController();
   final _jatiDiriController = TextEditingController();
   final _literasiController = TextEditingController();
-  final _rekomendasiController = TextEditingController();
+  final _umpanBalikController = TextEditingController();
   final _tanggalController = TextEditingController();
-  final _deskripsiController = TextEditingController();
+  final _kegiatanController = TextEditingController();
   final _tujuanController = TextEditingController();
+
   File? _pickedImage;
   bool _isSubmitting = false;
+
+  bool get isEdit => widget.hk != null;
 
   @override
   void initState() {
     super.initState();
-    if (widget.hk != null) {
-      _nilaiController.text = widget.hk!.nilai;
-      _jatiDiriController.text = widget.hk!.jatiDiri;
-      _literasiController.text = widget.hk!.literasi;
-      _rekomendasiController.text = widget.hk!.rekomendasi;
-      _tanggalController.text = widget.hk!.tanggal;
-      _deskripsiController.text = widget.hk!.deskripsi;
-      _tujuanController.text = widget.hk!.semester;
+
+    if (isEdit) {
+      final a = widget.hk!;
+      _nilaiAgamaController.text = a.nilaiAgama;
+      _jatiDiriController.text = a.jatiDiri;
+      _literasiController.text = a.literasi;
+      _umpanBalikController.text = a.rekomendasi;
+      _tanggalController.text = a.tanggal;
+      _kegiatanController.text = a.kegiatan;
+      _tujuanController.text = a.tujuan;
     }
   }
 
   @override
   void dispose() {
-    _nilaiController.dispose();
+    _nilaiAgamaController.dispose();
     _jatiDiriController.dispose();
     _literasiController.dispose();
-    _rekomendasiController.dispose();
+    _umpanBalikController.dispose();
     _tanggalController.dispose();
-    _deskripsiController.dispose();
+    _kegiatanController.dispose();
     _tujuanController.dispose();
     super.dispose();
   }
 
   Future<void> _pickImage() async {
-    final picker = ImagePicker();
-    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
-
-    if (pickedFile != null) {
-      final newImage = File(pickedFile.path);
-      setState(() {
-        _pickedImage = newImage;
-      });
-    }
+    final file = await ImagePicker().pickImage(source: ImageSource.gallery);
+    if (file != null) setState(() => _pickedImage = File(file.path));
   }
 
   Future<void> _pickDate() async {
-    final now = DateTime.now();
     final picked = await showDatePicker(
       context: context,
-      initialDate: now,
+      initialDate: DateTime.now(),
       firstDate: DateTime(2020),
       lastDate: DateTime(2100),
     );
     if (picked != null) {
-      final formatted = DateFormat('dd-MM-yyyy').format(picked);
       setState(() {
-        _tanggalController.text = formatted;
+        _tanggalController.text = DateFormat('dd-MM-yyyy').format(picked);
       });
     }
   }
 
+  Future<void> _handleSubmit(WidgetRef ref) async {
+    if (!_formKey.currentState!.validate()) return;
+
+    if (!isEdit && _pickedImage == null) {
+      SnackbarHelper.show(context, "Foto belum dipilih");
+      return;
+    }
+
+    final profile = ref.read(userProvider).value;
+    if (profile == null) {
+      SnackbarHelper.show(context, "Profile belum dimuat");
+      return;
+    }
+
+    setState(() => _isSubmitting = true);
+
+    final base = HkModel(
+      id: isEdit ? widget.hk!.id : '',
+      imageId: isEdit ? widget.hk!.imageId : '',
+      sekolah: isEdit ? profile.sekolah : widget.murid!.sekolah,
+      kelompok: isEdit ? profile.kelompok : widget.murid!.kelompok,
+      kegiatan: _kegiatanController.text,
+      tujuan: _tujuanController.text,
+      tanggal: _tanggalController.text,
+      nilaiAgama: _nilaiAgamaController.text,
+      jatiDiri: _jatiDiriController.text,
+      literasi: _literasiController.text,
+      rekomendasi: _umpanBalikController.text,
+      uid: profile.id,
+      muridId: isEdit ? widget.hk!.muridId : widget.murid!.id,
+      tanggapan: '',
+    );
+
+    final notifier = ref.read(hkProvider.notifier);
+    isEdit
+        ? notifier.updateHk(base, widget.hk!, _pickedImage)
+        : notifier.createHk(base, _pickedImage!);
+  }
+
+  void _listenHkState(
+    AsyncValue<List<HkModel>>? previous,
+    AsyncValue<List<HkModel>> next,
+  ) {
+    next.when(
+      loading: () {},
+      error: (e, _) {
+        if (_isSubmitting) {
+          SnackbarHelper.show(context, "Gagal menyimpan: $e");
+          setState(() => _isSubmitting = false);
+        }
+      },
+      data: (list) {
+        if (!_isSubmitting) return;
+
+        SnackbarHelper.show(
+          context,
+          isEdit
+              ? "Data hasil karya berhasil diperbarui"
+              : "Data hasil karya berhasil ditambahkan",
+        );
+
+        setState(() => _isSubmitting = false);
+
+        if (isEdit) {
+          final updated = list.firstWhere(
+            (g) => g.id == widget.hk!.id,
+            orElse: () => widget.hk!,
+          );
+          context.go('/detailHk', extra: updated.id);
+        } else {
+          context.go('/hk');
+        }
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    final hkState = ref.watch(hkProvider);
-    final url = ref.read(hkProvider.notifier).getPublicImageUrl;
-    final isEdit = widget.hk != null;
+    final hkUrl = ref.read(hkProvider.notifier).getPublicImageUrl;
+    final state = ref.watch(hkProvider);
 
-    ref.listen<AsyncValue<List<HkModel>>>(hkProvider, (_, state) {
-      state.when(
-        data: (listHk) {
-          if (_isSubmitting) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: CustomText(
-                  text: isEdit
-                      ? 'Hasil Karya berhasil diperbarui'
-                      : 'Hasil Karya berhasil ditambahkan',
-                  color: Colors.white,
-                ),
-              ),
-            );
-            setState(() => _isSubmitting = false);
-
-            if (isEdit) {
-              final updatedHk = listHk.firstWhere(
-                (g) => g.id == widget.hk!.id,
-                orElse: () => widget.hk!,
-              );
-              context.go('/detailHk', extra: updatedHk.id);
-            } else {
-              context.go('/hk');
-            }
-          }
-        },
-        error: (err, _) {
-          if (_isSubmitting) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: CustomText(
-                  text: 'Gagal menyimpan: $err',
-                  color: Colors.white,
-                ),
-              ),
-            );
-            setState(() => _isSubmitting = false);
-          }
-        },
-        loading: () {},
-      );
-    });
+    ref.listen<AsyncValue<List<HkModel>>>(hkProvider, _listenHkState);
 
     return MyDoubleTapExit(
       child: Scaffold(
-        appBar: AppBar(
-          title: CustomText(
-            text: isEdit ? 'Edit Hasil Karya' : 'Tambah Hasil Karya',
-            color: Colors.white,
-            fontSize: 20.0,
-            fontWeight: FontWeight.bold,
-          ),
-          backgroundColor: AppColors.primary,
-          elevation: 0.0,
-          automaticallyImplyLeading: false,
-          centerTitle: true,
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back, color: Colors.white),
-            onPressed: () => context.go('/hk'),
+        appBar: CustomAppBar(
+          title: isEdit ? "Edit Hasil Karya" : "Tambah Hasil Karya",
+          showBack: true,
+          onBack: () => context.go(
+            isEdit ? '/detailHk' : '/hk',
+            extra: isEdit ? widget.hk!.id : null,
           ),
         ),
         body: SingleChildScrollView(
-          padding: const EdgeInsets.all(20.0),
+          padding: const EdgeInsets.all(20),
           child: Form(
             key: _formKey,
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Column(
-                  children: [
-                    Container(
-                      height: 200,
-                      width: double.infinity,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.all(Radius.circular(12)),
-                        color: Colors.grey[300],
-                      ),
-                      child: _pickedImage != null
-                          ? Image.file(
-                              _pickedImage!,
-                              fit: BoxFit.scaleDown,
-                              width: double.infinity,
-                              height: double.infinity,
-                            )
-                          : isEdit && widget.hk!.imageId.isNotEmpty
-                          ? Image.network(
-                              url(widget.hk!.imageId),
-                              fit: BoxFit.scaleDown,
-                              width: double.infinity,
-                              height: double.infinity,
-                              loadingBuilder:
-                                  (context, child, loadingProgress) {
-                                    if (loadingProgress == null) return child;
-                                    return const Center(
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 2,
-                                      ),
-                                    );
-                                  },
-                              errorBuilder: (context, error, stackTrace) =>
-                                  const Icon(
-                                    Icons.broken_image,
-                                    size: 50,
-                                    color: Colors.grey,
-                                  ),
-                            )
-                          : const Icon(
-                              Icons.image,
-                              size: 50,
-                              color: Colors.grey,
-                            ),
-                    ),
-                    const SizedBox(height: 12),
-                    ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.white,
-                        foregroundColor: Colors.black,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 4,
-                        ),
-                      ),
-                      onPressed: _pickImage,
-                      child: CustomText(
-                        text: isEdit ? 'Ganti Foto' : 'Tambah Foto',
-                      ),
-                    ),
-                  ],
+                CustomImagePicker(
+                  pickedImage: _pickedImage,
+                  isEdit: isEdit,
+                  imageUrl: isEdit ? hkUrl(widget.hk!.imageId) : null,
+                  onPick: _pickImage,
                 ),
                 const SizedBox(height: 10),
-                CustomText(text: 'Tanggal', fontWeight: FontWeight.bold),
-                const SizedBox(height: 4),
-                CustomTextFormField(
+                CustomInputField(
+                  label: "Tanggal",
                   controller: _tanggalController,
-                  hintText: 'Tanggal',
                   readOnly: true,
-                  suffixIcon: const Icon(Icons.date_range, color: Colors.grey),
+                  icon: Icons.date_range,
                   onTap: _pickDate,
-                  validator: (value) =>
-                      ValidationHelper.validateNotEmpty(value, 'Tanggal'),
                 ),
-                const SizedBox(height: 10),
-                CustomText(text: 'Kegiatan', fontWeight: FontWeight.bold),
-                CustomTextFormField(
-                  controller: _deskripsiController,
-                  hintText: 'Kegiatan',
+                CustomInputField(
+                  label: "Kegiatan",
+                  controller: _kegiatanController,
                   minLines: 2,
-                  validator: (value) =>
-                      ValidationHelper.validateNotEmpty(value, 'Kegiatan'),
                 ),
-                const SizedBox(height: 10),
-
-                CustomText(
-                  text: 'Tujuan Pembelajaran',
-                  fontWeight: FontWeight.bold,
-                ),
-                const SizedBox(height: 4),
-
-                CustomTextFormField(
+                CustomInputField(
+                  label: "Tujuan Pembelajaran",
                   controller: _tujuanController,
-                  hintText: 'Tujuan Pembelajaran',
                   minLines: 2,
-                  validator: (value) => ValidationHelper.validateNotEmpty(
-                    value,
-                    'Tujuan Pembelajaran',
-                  ),
                 ),
-                const SizedBox(height: 10),
-
-                CustomText(
-                  text: 'Nilai Agama dan Budi Pekerti',
-                  fontWeight: FontWeight.bold,
-                ),
-                const SizedBox(height: 4),
-
-                CustomTextFormField(
-                  controller: _nilaiController,
+                CustomInputField(
+                  label: "Nilai Agama dan Budi Pekerti",
+                  controller: _nilaiAgamaController,
                   minLines: 2,
-                  hintText: 'Nilai Agama dan Budi Pekerti',
-                  validator: (value) => ValidationHelper.validateNotEmpty(
-                    value,
-                    'Nilai Agama dan Budi Pekerti',
-                  ),
                 ),
-                const SizedBox(height: 10),
-
-                CustomText(text: 'Jati Diri', fontWeight: FontWeight.bold),
-                const SizedBox(height: 4),
-
-                CustomTextFormField(
+                CustomInputField(
+                  label: "Jati Diri",
                   controller: _jatiDiriController,
-                  hintText: 'Jati Diri',
                   minLines: 2,
-                  validator: (value) =>
-                      ValidationHelper.validateNotEmpty(value, 'Jati Diri'),
                 ),
-                const SizedBox(height: 10),
-
-                CustomText(
-                  text: 'Literasi dan STEAM',
-                  fontWeight: FontWeight.bold,
-                ),
-                const SizedBox(height: 4),
-
-                CustomTextFormField(
+                CustomInputField(
+                  label: "Literasi dan STEAM",
                   controller: _literasiController,
-                  hintText: 'Literasi dan STEAM',
                   minLines: 2,
-                  validator: (value) => ValidationHelper.validateNotEmpty(
-                    value,
-                    'Literasi dan STEAM',
-                  ),
                 ),
-                const SizedBox(height: 10),
-                CustomText(text: 'Umpan Balik', fontWeight: FontWeight.bold),
-                const SizedBox(height: 4),
-                CustomTextFormField(
-                  controller: _rekomendasiController,
-                  hintText: 'Umpan Balik',
+                CustomInputField(
+                  label: "Umpan Balik",
+                  controller: _umpanBalikController,
                   minLines: 2,
-                  validator: (value) =>
-                      ValidationHelper.validateNotEmpty(value, 'Umpan Balik'),
                 ),
                 const SizedBox(height: 24),
                 CustomButton(
-                  onPressed: hkState.isLoading || _isSubmitting
+                  onPressed: state.isLoading || _isSubmitting
                       ? null
-                      : () {
-                          if (_formKey.currentState!.validate()) {
-                            if (!isEdit && _pickedImage == null) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: CustomText(
-                                    text: 'Foto belum dipilih',
-                                    color: Colors.white,
-                                  ),
-                                ),
-                              );
-                              return;
-                            }
-                            setState(() => _isSubmitting = true);
-                            final profile = ref.read(userProvider).value;
-                            if (profile == null) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: CustomText(
-                                    text: 'Profile belum dimuat',
-                                    color: Colors.white,
-                                  ),
-                                ),
-                              );
-                              return;
-                            }
-                            if (isEdit) {
-                              final HkModel updatedModel = HkModel(
-                                id: widget.hk!.id,
-                                imageId: widget.hk!.imageId,
-                                sekolah: profile.sekolah,
-                                kelompok: profile.kelompok,
-                                deskripsi: _deskripsiController.text,
-                                semester: _tujuanController.text,
-                                tanggal: _tanggalController.text,
-                                nilai: _nilaiController.text,
-                                jatiDiri: _jatiDiriController.text,
-                                literasi: _literasiController.text,
-                                rekomendasi: _rekomendasiController.text,
-                                uid: profile.id,
-                                muridId: widget.hk!.muridId,
-                                tanggapan: '',
-                              );
-                              ref
-                                  .read(hkProvider.notifier)
-                                  .updateHk(
-                                    updatedModel,
-                                    widget.hk!,
-                                    _pickedImage,
-                                  );
-                            } else {
-                              final HkModel hk = HkModel(
-                                deskripsi: _deskripsiController.text,
-                                semester: _tujuanController.text,
-                                tanggal: _tanggalController.text,
-                                nilai: _nilaiController.text,
-                                jatiDiri: _jatiDiriController.text,
-                                literasi: _literasiController.text,
-                                rekomendasi: _rekomendasiController.text,
-                                kelompok: widget.murid!.kelompok,
-                                imageId: '',
-                                uid: profile.id,
-                                id: '',
-                                muridId: widget.murid!.id,
-                                tanggapan: '',
-                                sekolah: widget.murid!.sekolah,
-                              );
-
-                              ref
-                                  .read(hkProvider.notifier)
-                                  .createHk(hk, _pickedImage!);
-                            }
-                          }
-                        },
+                      : () => _handleSubmit(ref),
                   isLoading: _isSubmitting,
-                  text: isEdit ? 'Edit Hasil Karya' : 'Tambah Hasil Karya',
+                  text: isEdit ? "Edit Data" : "Tambah Data",
                 ),
                 const SizedBox(height: 30),
               ],

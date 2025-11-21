@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../custom_text.dart';
-import '../custom_text_field.dart';
+import '../form/custom_text_field.dart';
 
 class AppDialog {
   // KONFIRMASI

@@ -8,6 +8,7 @@ class CustomText extends StatelessWidget {
   final TextAlign textAlign;
   final TextOverflow overflow;
   final int? maxLines;
+  final bool? softWrap;
 
   const CustomText({
     super.key,
@@ -18,6 +19,7 @@ class CustomText extends StatelessWidget {
     this.textAlign = TextAlign.start,
     this.overflow = TextOverflow.visible,
     this.maxLines,
+    this.softWrap,
   });
 
   @override
@@ -27,6 +29,7 @@ class CustomText extends StatelessWidget {
       maxLines: maxLines,
       overflow: overflow,
       textAlign: textAlign,
+      softWrap: softWrap,
       style: TextStyle(
         fontFamily: 'inter',
         fontSize: fontSize,

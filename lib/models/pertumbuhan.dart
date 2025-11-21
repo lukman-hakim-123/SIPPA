@@ -13,7 +13,7 @@ class PertumbuhanModel {
   final String fisik;
   final String rekomendasi;
   final String tanggapan;
-  final String sekolah; // ✅ Tambahan
+  final String sekolah;
 
   PertumbuhanModel({
     required this.tanggal,
@@ -27,7 +27,7 @@ class PertumbuhanModel {
     required this.fisik,
     required this.rekomendasi,
     required this.tanggapan,
-    required this.sekolah, // ✅ Tambahan
+    required this.sekolah,
   });
 
   PertumbuhanModel copyWith({
@@ -42,7 +42,7 @@ class PertumbuhanModel {
     String? fisik,
     String? rekomendasi,
     String? tanggapan,
-    String? sekolah, // ✅ Tambahan
+    String? sekolah,
   }) {
     return PertumbuhanModel(
       tanggal: tanggal ?? this.tanggal,
@@ -56,7 +56,7 @@ class PertumbuhanModel {
       fisik: fisik ?? this.fisik,
       rekomendasi: rekomendasi ?? this.rekomendasi,
       tanggapan: tanggapan ?? this.tanggapan,
-      sekolah: sekolah ?? this.sekolah, // ✅ Tambahan
+      sekolah: sekolah ?? this.sekolah,
     );
   }
 
@@ -72,7 +72,7 @@ class PertumbuhanModel {
       'fisik': fisik,
       'rekomendasi': rekomendasi,
       'tanggapan': tanggapan,
-      'sekolah': sekolah, // ✅ Tambahan
+      'sekolah': sekolah,
     };
   }
 
@@ -89,7 +89,7 @@ class PertumbuhanModel {
       fisik: map['fisik'] ?? '',
       rekomendasi: map['rekomendasi'] ?? '',
       tanggapan: map['tanggapan'] ?? '',
-      sekolah: map['sekolah'] ?? '', // ✅ Tambahan
+      sekolah: map['sekolah'] ?? '',
     );
   }
 
@@ -100,7 +100,7 @@ class PertumbuhanModel {
 
   @override
   String toString() {
-    return 'PertumbuhanModel(tanggal: $tanggal, uid: $uid, id: $id, muridId: $muridId, kelompok: $kelompok, tinggi: $tinggi, berat: $berat, kepala: $kepala, fisik: $fisik, rekomendasi: $rekomendasi, tanggapan: $tanggapan, sekolah: $sekolah)'; // ✅ Tambahan
+    return 'PertumbuhanModel(tanggal: $tanggal, uid: $uid, id: $id, muridId: $muridId, kelompok: $kelompok, tinggi: $tinggi, berat: $berat, kepala: $kepala, fisik: $fisik, rekomendasi: $rekomendasi, tanggapan: $tanggapan, sekolah: $sekolah)';
   }
 
   @override
@@ -118,7 +118,7 @@ class PertumbuhanModel {
         other.fisik == fisik &&
         other.rekomendasi == rekomendasi &&
         other.tanggapan == tanggapan &&
-        other.sekolah == sekolah; // ✅ Tambahan
+        other.sekolah == sekolah;
   }
 
   @override
@@ -134,6 +134,6 @@ class PertumbuhanModel {
         fisik.hashCode ^
         rekomendasi.hashCode ^
         tanggapan.hashCode ^
-        sekolah.hashCode; // ✅ Tambahan
+        sekolah.hashCode;
   }
 }

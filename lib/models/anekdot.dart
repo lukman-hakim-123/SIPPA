@@ -8,7 +8,7 @@ class AnekdotModel {
   final String nilaiAgama;
   final String jatiDiri;
   final String literasi;
-  final String umpanBalik;
+  final String rekomendasi;
   final String kelompok;
   final String imageId;
   final String uid;
@@ -24,14 +24,14 @@ class AnekdotModel {
     required this.nilaiAgama,
     required this.jatiDiri,
     required this.literasi,
-    required this.umpanBalik,
+    required this.rekomendasi,
     required this.kelompok,
     required this.imageId,
     required this.uid,
     required this.id,
     required this.muridId,
     required this.tanggapan,
-    required this.sekolah, // ✅ tambahan
+    required this.sekolah,
   });
 
   AnekdotModel copyWith({
@@ -41,14 +41,14 @@ class AnekdotModel {
     String? nilaiAgama,
     String? jatiDiri,
     String? literasi,
-    String? umpanBalik,
+    String? rekomendasi,
     String? kelompok,
     String? imageId,
     String? uid,
     String? id,
     String? muridId,
     String? tanggapan,
-    String? sekolah, // ✅ tambahan
+    String? sekolah,
   }) {
     return AnekdotModel(
       kegiatan: kegiatan ?? this.kegiatan,
@@ -57,14 +57,14 @@ class AnekdotModel {
       nilaiAgama: nilaiAgama ?? this.nilaiAgama,
       jatiDiri: jatiDiri ?? this.jatiDiri,
       literasi: literasi ?? this.literasi,
-      umpanBalik: umpanBalik ?? this.umpanBalik,
+      rekomendasi: rekomendasi ?? this.rekomendasi,
       kelompok: kelompok ?? this.kelompok,
       imageId: imageId ?? this.imageId,
       uid: uid ?? this.uid,
       id: id ?? this.id,
       muridId: muridId ?? this.muridId,
       tanggapan: tanggapan ?? this.tanggapan,
-      sekolah: sekolah ?? this.sekolah, // ✅ tambahan
+      sekolah: sekolah ?? this.sekolah,
     );
   }
 
@@ -76,13 +76,13 @@ class AnekdotModel {
       'nilaiAgama': nilaiAgama,
       'jatiDiri': jatiDiri,
       'literasi': literasi,
-      'umpanBalik': umpanBalik,
+      'rekomendasi': rekomendasi,
       'kelompok': kelompok,
       'imageId': imageId,
       'uid': uid,
       'muridId': muridId,
       'tanggapan': tanggapan,
-      'sekolah': sekolah, // ✅ tambahan
+      'sekolah': sekolah,
     };
   }
 
@@ -94,14 +94,14 @@ class AnekdotModel {
       nilaiAgama: map['nilaiAgama'] ?? '',
       jatiDiri: map['jatiDiri'] ?? '',
       literasi: map['literasi'] ?? '',
-      umpanBalik: map['umpanBalik'] ?? '',
+      rekomendasi: map['rekomendasi'] ?? '',
       kelompok: map['kelompok'] ?? '',
       imageId: map['imageId'] ?? '',
       uid: map['uid'] ?? '',
       id: map['\$id'] ?? '',
       muridId: map['muridId'] ?? '',
       tanggapan: map['tanggapan'] ?? '',
-      sekolah: map['sekolah'] ?? '', // ✅ tambahan
+      sekolah: map['sekolah'] ?? '',
     );
   }
 
@@ -112,7 +112,7 @@ class AnekdotModel {
 
   @override
   String toString() {
-    return 'AnekdotModel(kegiatan: $kegiatan, tujuan: $tujuan, tanggal: $tanggal, nilaiAgama: $nilaiAgama, jatiDiri: $jatiDiri, literasi: $literasi, umpanBalik: $umpanBalik, kelompok: $kelompok, imageId: $imageId, uid: $uid, id: $id, muridId: $muridId, tanggapan: $tanggapan, sekolah: $sekolah)'; // ✅ tambahan
+    return 'AnekdotModel(kegiatan: $kegiatan, tujuan: $tujuan, tanggal: $tanggal, nilaiAgama: $nilaiAgama, jatiDiri: $jatiDiri, literasi: $literasi, rekomendasi: $rekomendasi, kelompok: $kelompok, imageId: $imageId, uid: $uid, id: $id, muridId: $muridId, tanggapan: $tanggapan, sekolah: $sekolah)';
   }
 
   @override
@@ -125,14 +125,14 @@ class AnekdotModel {
         other.nilaiAgama == nilaiAgama &&
         other.jatiDiri == jatiDiri &&
         other.literasi == literasi &&
-        other.umpanBalik == umpanBalik &&
+        other.rekomendasi == rekomendasi &&
         other.kelompok == kelompok &&
         other.imageId == imageId &&
         other.uid == uid &&
         other.id == id &&
         other.muridId == muridId &&
         other.tanggapan == tanggapan &&
-        other.sekolah == sekolah; // ✅ tambahan
+        other.sekolah == sekolah;
   }
 
   @override
@@ -143,13 +143,13 @@ class AnekdotModel {
         nilaiAgama.hashCode ^
         jatiDiri.hashCode ^
         literasi.hashCode ^
-        umpanBalik.hashCode ^
+        rekomendasi.hashCode ^
         kelompok.hashCode ^
         imageId.hashCode ^
         uid.hashCode ^
         id.hashCode ^
         muridId.hashCode ^
         tanggapan.hashCode ^
-        sekolah.hashCode; // ✅ tambahan
+        sekolah.hashCode;
   }
 }

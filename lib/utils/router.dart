@@ -39,7 +39,6 @@ import 'arg/anekdot_arg.dart';
 import 'arg/cp_arg.dart';
 import 'arg/hk_arg.dart';
 import 'arg/pertumbuhan_arg.dart';
-import 'arg/report_arg.dart';
 import 'arg/rubrik_arg.dart';
 
 final router = GoRouter(
@@ -202,13 +201,8 @@ final router = GoRouter(
     GoRoute(
       path: '/report',
       builder: (context, state) {
-        final args = state.extra as ReportArgs;
-        return ReportScreen(
-          anakId: args.anakId,
-          nama: args.nama,
-          sekolah: args.sekolah,
-          kelompok: args.kelompok,
-        );
+        final murid = state.extra as User;
+        return ReportScreen(murid: murid);
       },
     ),
   ],

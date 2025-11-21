@@ -7,11 +7,10 @@ import '../../models/pertumbuhan.dart';
 import '../../models/user.dart';
 import '../../providers/pertumbuhan_provider.dart';
 import '../../providers/user_provider.dart';
-import '../../utils/validation_helper.dart';
-import '../../widgets/app_colors.dart';
+import '../../widgets/common/snackbar_helper.dart';
+import '../../widgets/custom_app_bar.dart';
 import '../../widgets/custom_button.dart';
-import '../../widgets/custom_text.dart';
-import '../../widgets/custom_text_field.dart';
+import '../../widgets/form/custom_input_field.dart';
 import '../../widgets/my_double_tap_exit.dart';
 
 class FormPertumbuhanScreen extends ConsumerStatefulWidget {
@@ -26,6 +25,7 @@ class FormPertumbuhanScreen extends ConsumerStatefulWidget {
 
 class _FormPertumbuhanScreenState extends ConsumerState<FormPertumbuhanScreen> {
   final _formKey = GlobalKey<FormState>();
+
   final _tinggiController = TextEditingController();
   final _beratController = TextEditingController();
   final _lingkarController = TextEditingController();
@@ -35,27 +35,30 @@ class _FormPertumbuhanScreenState extends ConsumerState<FormPertumbuhanScreen> {
 
   bool _isSubmitting = false;
 
+  bool get isEdit => widget.pertumbuhan != null;
+
   @override
   void initState() {
     super.initState();
-    if (widget.pertumbuhan != null) {
-      _lingkarController.text = widget.pertumbuhan!.kepala.toString();
-      _fisikController.text = widget.pertumbuhan!.fisik;
-      _umpanBalikController.text = widget.pertumbuhan!.rekomendasi;
-      _tanggalController.text = widget.pertumbuhan!.tanggal;
-      _beratController.text = widget.pertumbuhan!.berat.toString();
-      _tinggiController.text = widget.pertumbuhan!.tinggi.toString();
+    if (isEdit) {
+      final p = widget.pertumbuhan!;
+      _tinggiController.text = p.tinggi.toString();
+      _beratController.text = p.berat.toString();
+      _lingkarController.text = p.kepala.toString();
+      _fisikController.text = p.fisik;
+      _umpanBalikController.text = p.rekomendasi;
+      _tanggalController.text = p.tanggal;
     }
   }
 
   @override
   void dispose() {
+    _tinggiController.dispose();
+    _beratController.dispose();
     _lingkarController.dispose();
     _fisikController.dispose();
-    _umpanBalikController.dispose();
     _tanggalController.dispose();
-    _beratController.dispose();
-    _tinggiController.dispose();
+    _umpanBalikController.dispose();
     super.dispose();
   }
 
@@ -69,80 +72,96 @@ class _FormPertumbuhanScreenState extends ConsumerState<FormPertumbuhanScreen> {
     );
     if (picked != null) {
       final formatted = DateFormat('dd-MM-yyyy').format(picked);
-      setState(() {
-        _tanggalController.text = formatted;
-      });
+      setState(() => _tanggalController.text = formatted);
     }
+  }
+
+  Future<void> _handleSubmit(WidgetRef ref) async {
+    if (!_formKey.currentState!.validate()) return;
+
+    setState(() => _isSubmitting = true);
+
+    final profile = ref.read(userProvider).value;
+    if (profile == null) {
+      SnackbarHelper.show(context, "Profile belum dimuat");
+      return;
+    }
+
+    // MODEL BASE
+    final base = PertumbuhanModel(
+      id: isEdit ? widget.pertumbuhan!.id : '',
+      tinggi: int.tryParse(_tinggiController.text) ?? 0,
+      berat: int.tryParse(_beratController.text) ?? 0,
+      kepala: int.tryParse(_lingkarController.text) ?? 0,
+      tanggal: _tanggalController.text,
+      fisik: _fisikController.text,
+      rekomendasi: _umpanBalikController.text,
+      tanggapan: '',
+      uid: profile.id,
+      sekolah: isEdit ? profile.sekolah : widget.murid!.sekolah,
+      kelompok: isEdit ? profile.kelompok : widget.murid!.kelompok,
+      muridId: isEdit ? widget.pertumbuhan!.muridId : widget.murid!.id,
+    );
+
+    final notifier = ref.read(pertumbuhanProvider.notifier);
+
+    isEdit
+        ? notifier.updatePertumbuhan(base)
+        : notifier.createPertumbuhan(base);
+  }
+
+  void _listenPertumbuhanState(
+    AsyncValue<List<PertumbuhanModel>>? previous,
+    AsyncValue<List<PertumbuhanModel>> next,
+  ) {
+    next.when(
+      data: (list) {
+        if (_isSubmitting) {
+          SnackbarHelper.show(
+            context,
+            isEdit ? "Data berhasil diperbarui" : "Data berhasil ditambahkan",
+          );
+
+          setState(() => _isSubmitting = false);
+
+          if (isEdit) {
+            final updated = list.firstWhere(
+              (x) => x.id == widget.pertumbuhan!.id,
+              orElse: () => widget.pertumbuhan!,
+            );
+            context.go('/detailPertumbuhan', extra: updated.id);
+          } else {
+            context.go('/pertumbuhan');
+          }
+        }
+      },
+      error: (err, _) {
+        if (_isSubmitting) {
+          SnackbarHelper.show(context, "Gagal menyimpan: $err");
+          setState(() => _isSubmitting = false);
+        }
+      },
+      loading: () {},
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    final pertumbuhanState = ref.watch(pertumbuhanProvider);
-    final isEdit = widget.pertumbuhan != null;
+    final state = ref.watch(pertumbuhanProvider);
 
-    ref.listen<AsyncValue<List<PertumbuhanModel>>>(pertumbuhanProvider, (
-      _,
-      state,
-    ) {
-      state.when(
-        data: (listPertumbuhan) {
-          if (_isSubmitting) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: CustomText(
-                  text: isEdit
-                      ? 'Data berhasil diperbarui'
-                      : 'Data berhasil ditambahkan',
-                  color: Colors.white,
-                ),
-              ),
-            );
-            setState(() => _isSubmitting = false);
-
-            if (isEdit) {
-              final updated = listPertumbuhan.firstWhere(
-                (g) => g.id == widget.pertumbuhan!.id,
-                orElse: () => widget.pertumbuhan!,
-              );
-              context.go('/detailPertumbuhan', extra: updated.id);
-            } else {
-              context.go('/pertumbuhan');
-            }
-          }
-        },
-        error: (err, _) {
-          if (_isSubmitting) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: CustomText(
-                  text: 'Gagal menyimpan: $err',
-                  color: Colors.white,
-                ),
-              ),
-            );
-            setState(() => _isSubmitting = false);
-          }
-        },
-        loading: () {},
-      );
-    });
+    ref.listen<AsyncValue<List<PertumbuhanModel>>>(
+      pertumbuhanProvider,
+      _listenPertumbuhanState,
+    );
 
     return MyDoubleTapExit(
       child: Scaffold(
-        appBar: AppBar(
-          title: CustomText(
-            text: isEdit ? 'Edit Pertumbuhan Anak' : 'Tambah Pertumbuhan Anak',
-            color: Colors.white,
-            fontSize: 20.0,
-            fontWeight: FontWeight.bold,
-          ),
-          backgroundColor: AppColors.primary,
-          elevation: 0.0,
-          automaticallyImplyLeading: false,
-          centerTitle: true,
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back, color: Colors.white),
-            onPressed: () => context.go('/pertumbuhan'),
+        appBar: CustomAppBar(
+          title: isEdit ? "Edit Pertumbuhan" : "Tambah Pertumbuhan",
+          showBack: true,
+          onBack: () => context.go(
+            isEdit ? '/detailPertumbuhan' : '/pertumbuhan',
+            extra: isEdit ? widget.pertumbuhan!.id : null,
           ),
         ),
         body: SingleChildScrollView(
@@ -152,200 +171,50 @@ class _FormPertumbuhanScreenState extends ConsumerState<FormPertumbuhanScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                CustomText(text: 'Tanggal', fontWeight: FontWeight.bold),
-                const SizedBox(height: 4),
-                CustomTextFormField(
+                CustomInputField(
+                  label: "Tanggal",
                   controller: _tanggalController,
-                  hintText: 'Tanggal',
                   readOnly: true,
-                  suffixIcon: const Icon(Icons.date_range, color: Colors.grey),
+                  icon: Icons.date_range,
                   onTap: _pickDate,
-                  validator: (value) =>
-                      ValidationHelper.validateNotEmpty(value, 'Tanggal'),
                 ),
-                const SizedBox(height: 10),
-                CustomText(
-                  text: 'Tinggi Badan (cm)',
-                  fontWeight: FontWeight.bold,
-                ),
-                const SizedBox(height: 4),
-                CustomTextFormField(
+                CustomInputField(
+                  label: "Tinggi Badan (cm)",
                   controller: _tinggiController,
                   keyboardType: TextInputType.number,
-                  hintText: 'Tinggi Badan (cm)',
-                  suffix: Padding(
-                    padding: const EdgeInsets.only(right: 12),
-                    child: CustomText(
-                      text: "cm",
-                      color: Colors.grey[700],
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  validator: (value) =>
-                      ValidationHelper.validateMultiple(value, [
-                        (val) => ValidationHelper.validateNotEmpty(
-                          value,
-                          'Tinggi Badan',
-                        ),
-                        (val) => ValidationHelper.validateNumberOnly(
-                          value,
-                          'Tinggi Badan',
-                        ),
-                      ]),
+                  suffixText: "cm",
                 ),
-                const SizedBox(height: 10),
-                CustomText(
-                  text: 'Berat Badan (kg)',
-                  fontWeight: FontWeight.bold,
-                ),
-                CustomTextFormField(
+                CustomInputField(
+                  label: "Berat Badan (kg)",
                   controller: _beratController,
                   keyboardType: TextInputType.number,
-                  hintText: 'Berat Badan (kg)',
-                  suffix: Padding(
-                    padding: const EdgeInsets.only(right: 12),
-                    child: CustomText(
-                      text: "kg",
-                      color: Colors.grey[700],
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  validator: (value) =>
-                      ValidationHelper.validateMultiple(value, [
-                        (val) => ValidationHelper.validateNotEmpty(
-                          value,
-                          'Berat Badan',
-                        ),
-                        (val) => ValidationHelper.validateNumberOnly(
-                          value,
-                          'Berat Badan',
-                        ),
-                      ]),
+                  suffixText: "kg",
                 ),
-                const SizedBox(height: 10),
-                CustomText(text: 'Lingkar Kepala', fontWeight: FontWeight.bold),
-                const SizedBox(height: 4),
-
-                CustomTextFormField(
+                CustomInputField(
+                  label: "Lingkar Kepala (cm)",
                   controller: _lingkarController,
                   keyboardType: TextInputType.number,
-                  suffix: Padding(
-                    padding: const EdgeInsets.only(right: 12),
-                    child: CustomText(
-                      text: "cm",
-                      color: Colors.grey[700],
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  hintText: 'Lingkar Kepala (cm)',
-                  validator: (value) =>
-                      ValidationHelper.validateMultiple(value, [
-                        (val) => ValidationHelper.validateNotEmpty(
-                          value,
-                          'Lingkar Kepala',
-                        ),
-                        (val) => ValidationHelper.validateNumberOnly(
-                          value,
-                          'Lingkar Kepala',
-                        ),
-                      ]),
+                  suffixText: "cm",
                 ),
-                const SizedBox(height: 10),
-
-                CustomText(
-                  text: 'Deskripsi Fisik',
-                  fontWeight: FontWeight.bold,
-                ),
-                const SizedBox(height: 4),
-
-                CustomTextFormField(
+                CustomInputField(
+                  label: "Kondisi Fisik",
                   controller: _fisikController,
-                  hintText: 'Deskripsi Fisik',
                   minLines: 2,
-                  validator: (value) => ValidationHelper.validateNotEmpty(
-                    value,
-                    'Deskripsi Fisik',
-                  ),
                 ),
-                const SizedBox(height: 10),
-                CustomText(text: 'Umpan Balik', fontWeight: FontWeight.bold),
-                const SizedBox(height: 4),
-                CustomTextFormField(
+                CustomInputField(
+                  label: "Umpan Balik",
                   controller: _umpanBalikController,
-                  hintText: 'Umpan Balik',
                   minLines: 2,
-                  validator: (value) =>
-                      ValidationHelper.validateNotEmpty(value, 'Umpan Balik'),
                 ),
                 const SizedBox(height: 24),
                 CustomButton(
-                  onPressed: pertumbuhanState.isLoading || _isSubmitting
+                  onPressed: state.isLoading || _isSubmitting
                       ? null
-                      : () {
-                          if (_formKey.currentState!.validate()) {
-                            setState(() => _isSubmitting = true);
-                            final profile = ref.read(userProvider).value;
-                            if (profile == null) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: CustomText(
-                                    text: 'Profile belum dimuat',
-                                    color: Colors.white,
-                                  ),
-                                ),
-                              );
-                              return;
-                            }
-                            if (isEdit) {
-                              final PertumbuhanModel
-                              updatedModel = PertumbuhanModel(
-                                id: widget.pertumbuhan!.id,
-                                sekolah: profile.sekolah,
-                                kelompok: profile.kelompok,
-                                tinggi:
-                                    int.tryParse(_tinggiController.text) ?? 0,
-                                tanggal: _tanggalController.text,
-                                uid: profile.id,
-                                muridId: widget.pertumbuhan!.muridId,
-                                tanggapan: '',
-                                berat: int.tryParse(_beratController.text) ?? 0,
-                                kepala:
-                                    int.tryParse(_lingkarController.text) ?? 0,
-                                fisik: _fisikController.text,
-                                rekomendasi: _umpanBalikController.text,
-                              );
-                              ref
-                                  .read(pertumbuhanProvider.notifier)
-                                  .updatePertumbuhan(updatedModel);
-                            } else {
-                              final PertumbuhanModel
-                              pertumbuhan = PertumbuhanModel(
-                                tinggi:
-                                    int.tryParse(_tinggiController.text) ?? 0,
-                                tanggal: _tanggalController.text,
-                                kelompok: widget.murid!.kelompok,
-                                uid: profile.id,
-                                id: '',
-                                muridId: widget.murid!.id,
-                                tanggapan: '',
-                                sekolah: widget.murid!.sekolah,
-                                berat: int.tryParse(_beratController.text) ?? 0,
-                                kepala:
-                                    int.tryParse(_lingkarController.text) ?? 0,
-                                fisik: _fisikController.text,
-                                rekomendasi: _umpanBalikController.text,
-                              );
-
-                              ref
-                                  .read(pertumbuhanProvider.notifier)
-                                  .createPertumbuhan(pertumbuhan);
-                            }
-                          }
-                        },
+                      : () => _handleSubmit(ref),
                   isLoading: _isSubmitting,
-                  text: isEdit ? 'Edit Data' : 'Tambah Data',
+                  text: isEdit ? "Edit Data" : "Tambah Data",
                 ),
-                const SizedBox(height: 30),
+                const SizedBox(height: 40),
               ],
             ),
           ),

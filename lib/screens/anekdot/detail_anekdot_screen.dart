@@ -124,10 +124,8 @@ class DetailAnekdotScreen extends ConsumerWidget {
       text: isGuruOrAdmin ? "Edit Data" : "Tanggapan Orang Tua",
       onPressed: () async {
         if (isGuruOrAdmin) {
-          // --- EDIT --- //
           context.push('/formAnekdot', extra: AnekdotArgs(anekdot: anekdot));
         } else {
-          // --- INPUT TANGGAPAN --- //
           final result = await AppDialog.input(
             context,
             title: "Tanggapan Orang Tua",
@@ -192,7 +190,7 @@ class DetailAnekdotScreen extends ConsumerWidget {
           textBlock("Nilai Agama & Budi Pekerti :", a.nilaiAgama),
           textBlock("Jati Diri :", a.jatiDiri),
           textBlock("Literasi & STEAM :", a.literasi),
-          textBlock("Umpan Balik :", a.umpanBalik),
+          textBlock("Umpan Balik :", a.rekomendasi),
           textBlock("Tanggapan Orang Tua :", a.tanggapan),
           infoRow("Nama Sekolah :", a.sekolah),
           const SizedBox(height: 8),

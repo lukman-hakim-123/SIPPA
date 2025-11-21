@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../models/user.dart';
 import '../../providers/anekdot_provider.dart';
 import '../../providers/hk_provider.dart';
 import '../../providers/report_provider.dart';
@@ -15,18 +16,9 @@ import 'widget/card_rubrik.dart';
 import 'widget/card_section.dart';
 
 class ReportScreen extends ConsumerStatefulWidget {
-  final String anakId;
-  final String nama;
-  final String sekolah;
-  final String kelompok;
+  final User murid;
 
-  const ReportScreen({
-    super.key,
-    required this.anakId,
-    required this.nama,
-    required this.sekolah,
-    required this.kelompok,
-  });
+  const ReportScreen({super.key, required this.murid});
 
   @override
   ConsumerState<ReportScreen> createState() => _ReportScreenState();
@@ -41,9 +33,9 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
   Widget build(BuildContext context) {
     final reportAsync = ref.watch(
       reportProvider(
-        anakId: widget.anakId,
-        sekolah: widget.sekolah,
-        kelompok: widget.kelompok,
+        anakId: widget.murid.id,
+        sekolah: widget.murid.sekolah,
+        kelompok: widget.murid.kelompok,
       ),
     );
 
@@ -117,7 +109,7 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       CustomText(
-                        text: "Nama: ${widget.nama}",
+                        text: "Nama: ${widget.murid.nama}",
                         fontWeight: FontWeight.bold,
                       ),
                       const SizedBox(height: 5),
@@ -197,8 +189,8 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
                                   hasilKaryas[phaseIndex].imageId,
                                 ),
                                 tanggal: hasilKaryas[phaseIndex].tanggal,
-                                kegiatan: hasilKaryas[phaseIndex].deskripsi,
-                                tujuan: hasilKaryas[phaseIndex].semester,
+                                kegiatan: hasilKaryas[phaseIndex].kegiatan,
+                                tujuan: hasilKaryas[phaseIndex].tujuan,
                               )
                             : null,
                       ),
@@ -228,8 +220,8 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
                       await printFullPhasePDF(
                         context: context,
                         ref: ref,
-                        nama: widget.nama,
-                        kelompok: widget.kelompok,
+                        nama: widget.murid.nama,
+                        kelompok: widget.murid.kelompok,
                         phaseIndex: phaseIndex,
                         anekdot: phaseIndex < anekdots.length
                             ? anekdots[phaseIndex]

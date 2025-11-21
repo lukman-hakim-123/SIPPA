@@ -47,11 +47,7 @@ class HkNotifier extends _$HkNotifier {
         throw Exception(result.errorMessage);
       }
     } else if (level == 3) {
-      final result = await _hkService.getAllHkByUId(
-        profile.id,
-        profile.sekolah,
-        profile.kelompok,
-      );
+      final result = await _hkService.getAllHkByUId(profile.id);
       if (result.isSuccess) {
         return result.resultValue ?? [];
       } else {

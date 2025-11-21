@@ -51,11 +51,7 @@ class CpNotifier extends _$CpNotifier {
     }
 
     if (level == 3) {
-      final result = await _cpService.getAllCpByUId(
-        profile.id,
-        profile.sekolah,
-        profile.kelompok,
-      );
+      final result = await _cpService.getAllCpByUId(profile.id);
       if (result.isSuccess) {
         return result.resultValue ?? [];
       } else {

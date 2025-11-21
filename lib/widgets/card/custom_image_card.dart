@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 
-import '../../../widgets/custom_text.dart';
+import '../../../../widgets/custom_text.dart';
 
-class AnekdotCard extends StatelessWidget {
+class CustomImageCard extends StatelessWidget {
   final String imageUrl;
   final String name;
   final String kelas;
   final VoidCallback onTap;
 
-  const AnekdotCard({
+  const CustomImageCard({
     super.key,
     required this.imageUrl,
     required this.name,

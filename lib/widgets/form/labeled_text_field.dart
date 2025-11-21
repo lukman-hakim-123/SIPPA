@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
-import 'custom_text.dart';
+import '../../utils/validation_helper.dart';
+import '../custom_text.dart';
 import 'custom_text_field.dart';
 
 class LabeledTextField extends StatelessWidget {
@@ -38,7 +39,7 @@ class LabeledTextField extends StatelessWidget {
           hintText: label,
           readOnly: readOnly,
           keyboardType: keyboardType ?? TextInputType.text,
-          validator: validator,
+          validator: validator ?? (value) => ValidationHelper.validateNotEmpty(value, label),
         ),
         const SizedBox(height: 10),
       ],

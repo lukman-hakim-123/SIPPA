@@ -103,7 +103,6 @@ class UserNotifier extends _$UserNotifier {
     String? oldPassword,
     String? newPassword,
   }) async {
-    state = const AsyncValue.loading();
     final authUser = ref.read(authProvider).value;
     if (authUser == null) {
       state = AsyncValue.error("User tidak ditemukan", StackTrace.current);
@@ -118,6 +117,13 @@ class UserNotifier extends _$UserNotifier {
         );
 
         if (!emailResult.isSuccess) {
+          final msg = (emailResult.errorMessage ?? '').toLowerCase();
+          if (msg.contains('invalid credential')) {
+            return Result.failed("Password lama salah. Silakan cek kembali.");
+          }
+          if (msg.contains('already exists')) {
+            return Result.failed("Email sudah digunakan");
+          }
           return Result.failed(emailResult.errorMessage!);
         }
       }
@@ -129,29 +135,37 @@ class UserNotifier extends _$UserNotifier {
         );
 
         if (!passResult.isSuccess) {
+          final msg = (passResult.errorMessage ?? '').toLowerCase();
+          if (msg.contains('invalid credential')) {
+            return Result.failed("Password lama salah. Silakan cek kembali.");
+          }
           return Result.failed(passResult.errorMessage!);
         }
       }
 
       var finalUser = await _uploadPhotoIfNeeded(user, updatedUser, photoFile);
       final result = await _userService.updateUser(finalUser);
+
       if (result.isSuccess) {
         state = AsyncValue.data(result.resultValue);
         return Result.success(result.resultValue!);
       } else {
-        state = AsyncValue.error(result.errorMessage!, StackTrace.current);
+        // state = AsyncValue.error(result.errorMessage!, StackTrace.current);
         return Result.failed(result.errorMessage!);
       }
     } on AppwriteException catch (e) {
-      if (e.code == 401) {
-        state = AsyncValue.data(state.value);
-        return Result.failed("Password lama salah");
+      final msg = (e.message ?? '').toLowerCase();
+
+      if (msg.contains('invalid credential') ||
+          msg.contains('invalid credentials')) {
+        return Result.failed("Password lama salah. Silakan cek kembali.");
       }
-      state = AsyncValue.data(state.value);
-      return Result.failed(e.message ?? "Gagal update user");
-    } catch (e, st) {
-      state = AsyncValue.error(e.toString(), st);
-      return Result.failed(e.toString());
+
+      if (e.code == 409) {
+        return Result.failed("Email sudah digunakan akun lain.");
+      }
+
+      return Result.failed("Terjadi kesalahan. Silakan coba lagi.");
     }
   }
 

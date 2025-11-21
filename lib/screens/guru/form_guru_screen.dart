@@ -9,14 +9,13 @@ import '../../models/user.dart';
 import '../../providers/guru_provider.dart';
 import '../../providers/user_provider.dart';
 import '../../utils/validation_helper.dart';
-import '../../widgets/app_colors.dart';
-import '../../widgets/avatar_picker.dart';
+import '../../widgets/custom_app_bar.dart';
+import '../../widgets/form/avatar_picker.dart';
 import '../../widgets/common/snackbar_helper.dart';
 import '../../widgets/custom_button.dart';
-import '../../widgets/custom_text.dart';
-import '../../widgets/labeled_text_field.dart';
+import '../../widgets/form/labeled_text_field.dart';
 import '../../widgets/my_double_tap_exit.dart';
-import '../../widgets/password_field.dart';
+import '../../widgets/form/password_field.dart';
 
 class FormGuruScreen extends ConsumerStatefulWidget {
   final User? guru;
@@ -91,7 +90,7 @@ class _FormGuruScreenState extends ConsumerState<FormGuruScreen> {
             (g) => g.id == widget.guru!.id,
             orElse: () => widget.guru!,
           );
-          context.go('/detailGuru', extra: updatedguru);
+          context.go('/detailGuru', extra: updatedguru.id);
         } else {
           context.go('/guru');
         }
@@ -163,20 +162,12 @@ class _FormGuruScreenState extends ConsumerState<FormGuruScreen> {
     );
     return MyDoubleTapExit(
       child: Scaffold(
-        appBar: AppBar(
-          title: CustomText(
-            text: isEdit ? 'Edit Guru' : 'Tambah Guru',
-            color: Colors.white,
-            fontSize: 20.0,
-            fontWeight: FontWeight.bold,
-          ),
-          backgroundColor: AppColors.primary,
-          elevation: 0.0,
-          automaticallyImplyLeading: false,
-          centerTitle: true,
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back, color: Colors.white),
-            onPressed: () => context.go('/guru'),
+        appBar: CustomAppBar(
+          title: isEdit ? 'Edit Guru' : 'Tambah Guru',
+          showBack: true,
+          onBack: () => context.go(
+            isEdit ? '/detailGuru' : '/guru',
+            extra: isEdit ? widget.guru!.id : null,
           ),
         ),
         body: SingleChildScrollView(
@@ -187,7 +178,9 @@ class _FormGuruScreenState extends ConsumerState<FormGuruScreen> {
               children: [
                 AvatarPicker(
                   pickedImage: _pickedImage,
-                  imageUrl: isEdit ? url(widget.guru!.imageId) : null,
+                  imageUrl: isEdit && widget.guru!.imageId != ''
+                      ? url(widget.guru!.imageId)
+                      : null,
                   isEdit: isEdit,
                   onPickImage: _pickImage,
                 ),
@@ -206,7 +199,7 @@ class _FormGuruScreenState extends ConsumerState<FormGuruScreen> {
                   controller: _emailController,
                   keyboardType: TextInputType.emailAddress,
                   readOnly: isEdit,
-                  validator: ValidationHelper.validateEmail,
+                  validator: (value) => ValidationHelper.validateEmail(value),
                 ),
 
                 if (!isEdit) ...[

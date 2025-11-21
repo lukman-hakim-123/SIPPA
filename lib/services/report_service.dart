@@ -39,11 +39,11 @@ class ReportService {
     try {
       // Jalankan semua request paralel biar lebih cepat
       final results = await Future.wait([
-        _anekdotService.getAllAnekdotByUId(muridId, sekolah, kelompok),
-        _cpService.getAllCpByUId(muridId, sekolah, kelompok),
-        _hkService.getAllHkByUId(muridId, sekolah, kelompok),
-        _pertumbuhanService.getAllPertumbuhanByUId(muridId, sekolah, kelompok),
-        _rubrikService.getAllRubrikByUId(muridId, sekolah, kelompok),
+        _anekdotService.getAllAnekdotByUId(muridId),
+        _cpService.getAllCpByUId(muridId),
+        _hkService.getAllHkByUId(muridId),
+        _pertumbuhanService.getAllPertumbuhanByUId(muridId),
+        _rubrikService.getAllRubrikByUId(muridId),
       ]);
 
       // Destructure hasil Future.wait (biar gampang dipakai)
@@ -83,74 +83,4 @@ class ReportService {
       return Result.failed('Terjadi kesalahan: $e');
     }
   }
-
-  // /// Generate PDF dari laporan
-  // Future<Result<pw.Document>> generatePdf(ReportModel laporan) async {
-  //   try {
-  //     final pdf = pw.Document();
-
-  //     pdf.addPage(
-  //       pw.MultiPage(
-  //         build: (context) => [
-  //           pw.Text(
-  //             'Laporan Perkembangan Anak',
-  //             style: pw.TextStyle(fontSize: 20, fontWeight: pw.FontWeight.bold),
-  //           ),
-  //           pw.SizedBox(height: 10),
-  //           pw.Text('Sekolah: ${laporan.sekolah}'),
-  //           pw.Text('Kelompok: ${laporan.kelompok}'),
-  //           pw.SizedBox(height: 20),
-
-  //           pw.Text(
-  //             'Catatan Anekdot',
-  //             style: pw.TextStyle(fontSize: 16, fontWeight: pw.FontWeight.bold),
-  //           ),
-  //           ...laporan.anekdotList
-  //               .map((a) => pw.Bullet(text: a.keterangan))
-  //               .toList(),
-  //           pw.SizedBox(height: 10),
-
-  //           pw.Text(
-  //             'Capaian Pembelajaran',
-  //             style: pw.TextStyle(fontSize: 16, fontWeight: pw.FontWeight.bold),
-  //           ),
-  //           ...laporan.capaianList
-  //               .map((c) => pw.Bullet(text: c.deskripsi))
-  //               .toList(),
-  //           pw.SizedBox(height: 10),
-
-  //           pw.Text(
-  //             'Hasil Karya',
-  //             style: pw.TextStyle(fontSize: 16, fontWeight: pw.FontWeight.bold),
-  //           ),
-  //           ...laporan.hasilKaryaList
-  //               .map((h) => pw.Bullet(text: h.judul))
-  //               .toList(),
-  //           pw.SizedBox(height: 10),
-
-  //           pw.Text(
-  //             'Pertumbuhan Anak',
-  //             style: pw.TextStyle(fontSize: 16, fontWeight: pw.FontWeight.bold),
-  //           ),
-  //           ...laporan.pertumbuhanList
-  //               .map((p) => pw.Bullet(text: p.catatan))
-  //               .toList(),
-  //           pw.SizedBox(height: 10),
-
-  //           pw.Text(
-  //             'Rubrik Penilaian',
-  //             style: pw.TextStyle(fontSize: 16, fontWeight: pw.FontWeight.bold),
-  //           ),
-  //           ...laporan.rubrikList
-  //               .map((r) => pw.Bullet(text: '${r.aspek}: ${r.nilai}'))
-  //               .toList(),
-  //         ],
-  //       ),
-  //     );
-
-  //     return Result.success(pdf);
-  //   } catch (e) {
-  //     return Result.failed(e.toString());
-  //   }
-  // }
 }

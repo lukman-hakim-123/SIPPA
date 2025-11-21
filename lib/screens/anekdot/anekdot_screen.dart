@@ -10,9 +10,9 @@ import '../../widgets/app_colors.dart';
 import '../../widgets/custom_app_bar.dart';
 import '../../widgets/custom_button.dart';
 import '../../widgets/custom_text.dart';
-import '../../widgets/custom_text_field.dart';
+import '../../widgets/form/custom_text_field.dart';
+import '../../widgets/card/custom_image_card.dart';
 import '../../widgets/my_double_tap_exit.dart';
-import 'widget/anekdot_card.dart';
 
 class AnekdotScreen extends ConsumerStatefulWidget {
   const AnekdotScreen({super.key});
@@ -49,7 +49,10 @@ class _AnekdotScreenState extends ConsumerState<AnekdotScreen> {
           error: (error, _) => Center(child: Text('Error: $error')),
 
           data: (profile) {
-            final int userLevel = profile!.levelUser;
+            if (profile == null) {
+              return Center(child: Text('Error: Gagal memuat data pengguna'));
+            }
+            final int userLevel = profile.levelUser;
 
             return RefreshIndicator(
               onRefresh: () async => ref.invalidate(anekdotProvider),
@@ -129,7 +132,7 @@ class _AnekdotScreenState extends ConsumerState<AnekdotScreen> {
                             itemCount: filtered.length,
                             itemBuilder: (_, i) {
                               final a = filtered[i];
-                              return AnekdotCard(
+                              return CustomImageCard(
                                 imageUrl: url(a.imageId),
                                 name: muridMap[a.muridId] ?? 'Tidak ditemukan',
                                 kelas: a.kelompok,

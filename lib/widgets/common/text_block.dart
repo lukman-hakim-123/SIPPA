@@ -14,7 +14,10 @@ Widget textBlock(String title, String value) {
         const SizedBox(height: 8),
         Align(
           alignment: Alignment.centerRight,
-          child: CustomText(text: value.isNotEmpty ? value : '-'),
+          child: CustomText(
+            text: value.isNotEmpty ? value : '-',
+            textAlign: TextAlign.right,
+          ),
         ),
         const Divider(),
       ],

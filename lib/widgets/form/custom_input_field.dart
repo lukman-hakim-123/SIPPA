@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../utils/validation_helper.dart';
-import 'custom_text.dart';
+import '../../utils/validation_helper.dart';
+import '../custom_text.dart';
 import 'custom_text_field.dart';
 
 class CustomInputField extends StatelessWidget {
@@ -10,6 +10,9 @@ class CustomInputField extends StatelessWidget {
   final bool readOnly;
   final IconData? icon;
   final VoidCallback? onTap;
+  final String? Function(String?)? validator;
+  final TextInputType? keyboardType;
+  final String? suffixText;
 
   const CustomInputField({
     super.key,
@@ -19,6 +22,9 @@ class CustomInputField extends StatelessWidget {
     this.readOnly = false,
     this.icon,
     this.onTap,
+    this.validator,
+    this.keyboardType,
+    this.suffixText,
   });
 
   @override
@@ -33,9 +39,21 @@ class CustomInputField extends StatelessWidget {
           hintText: label,
           minLines: minLines,
           readOnly: readOnly,
+          keyboardType: keyboardType ?? TextInputType.text,
+          suffix: suffixText != null
+              ? Padding(
+                  padding: const EdgeInsets.only(right: 12),
+                  child: CustomText(
+                    text: suffixText!,
+                    color: Colors.grey[700],
+                    fontWeight: FontWeight.bold,
+                  ),
+                )
+              : null,
           suffixIcon: icon != null ? Icon(icon, color: Colors.grey) : null,
           onTap: onTap,
-          validator: (v) => ValidationHelper.validateNotEmpty(v, label),
+          validator:
+              validator ?? (v) => ValidationHelper.validateNotEmpty(v, label),
         ),
         const SizedBox(height: 10),
       ],

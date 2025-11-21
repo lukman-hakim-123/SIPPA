@@ -46,11 +46,7 @@ class RubrikNotifier extends _$RubrikNotifier {
         throw Exception(result.errorMessage);
       }
     } else if (level == 3) {
-      final result = await _rubrikService.getAllRubrikByUId(
-        profile.id,
-        profile.sekolah,
-        profile.kelompok,
-      );
+      final result = await _rubrikService.getAllRubrikByUId(profile.id);
       if (result.isSuccess) {
         return result.resultValue ?? [];
       } else {

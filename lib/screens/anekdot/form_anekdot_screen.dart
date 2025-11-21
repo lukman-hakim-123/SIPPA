@@ -13,8 +13,8 @@ import '../../widgets/common/snackbar_helper.dart';
 import '../../widgets/custom_app_bar.dart';
 import '../../widgets/custom_button.dart';
 import '../../widgets/my_double_tap_exit.dart';
-import '../../widgets/custom_image_picker.dart';
-import '../../widgets/custom_input_field.dart';
+import '../../widgets/form/custom_image_picker.dart';
+import '../../widgets/form/custom_input_field.dart';
 
 class FormAnekdotScreen extends ConsumerStatefulWidget {
   final AnekdotModel? anekdot;
@@ -51,7 +51,7 @@ class _FormAnekdotScreenState extends ConsumerState<FormAnekdotScreen> {
       _nilaiAgamaController.text = a.nilaiAgama;
       _jatiDiriController.text = a.jatiDiri;
       _literasiController.text = a.literasi;
-      _umpanBalikController.text = a.umpanBalik;
+      _umpanBalikController.text = a.rekomendasi;
       _tanggalController.text = a.tanggal;
       _kegiatanController.text = a.kegiatan;
       _tujuanController.text = a.tujuan;
@@ -116,7 +116,7 @@ class _FormAnekdotScreenState extends ConsumerState<FormAnekdotScreen> {
       nilaiAgama: _nilaiAgamaController.text,
       jatiDiri: _jatiDiriController.text,
       literasi: _literasiController.text,
-      umpanBalik: _umpanBalikController.text,
+      rekomendasi: _umpanBalikController.text,
       uid: profile.id,
       muridId: isEdit ? widget.anekdot!.muridId : widget.murid!.id,
       tanggapan: '',

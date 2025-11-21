@@ -5,13 +5,13 @@ import '../../providers/cp_provider.dart';
 import '../../providers/murid_provider.dart';
 import '../../providers/user_provider.dart';
 import '../../widgets/app_colors.dart';
+import '../../widgets/card/custom_card.dart';
 import '../../widgets/common/loading.dart';
 import '../../widgets/custom_app_bar.dart';
 import '../../widgets/custom_button.dart';
 import '../../widgets/custom_text.dart';
-import '../../widgets/custom_text_field.dart';
+import '../../widgets/form/custom_text_field.dart';
 import '../../widgets/my_double_tap_exit.dart';
-import 'widget/Cp_card.dart';
 
 class CpScreen extends ConsumerStatefulWidget {
   const CpScreen({super.key});
@@ -47,7 +47,10 @@ class _CpScreenState extends ConsumerState<CpScreen> {
         ),
         body: userState.when(
           data: (profile) {
-            final int userLevel = profile!.levelUser;
+            if (profile == null) {
+              return Center(child: Text('Error: Gagal memuat data pengguna'));
+            }
+            final int userLevel = profile.levelUser;
             return RefreshIndicator(
               onRefresh: () async {
                 ref.invalidate(cpProvider);
@@ -100,10 +103,15 @@ class _CpScreenState extends ConsumerState<CpScreen> {
                             itemCount: filtered.length,
                             itemBuilder: (context, index) {
                               final cp = filtered[index];
-                              return CpCard(
-                                cp: cp,
-                                murid: muridMap[cp.muridId],
-                                imageUrlBuilder: url,
+                              final imageId = muridMap[cp.muridId]?.imageId;
+                              return CustomCard(
+                                kelas: cp.kelompok,
+                                tanggal: cp.tanggal,
+                                nama: muridMap[cp.muridId]?.nama,
+                                imageUrl:
+                                    (imageId != null && imageId.isNotEmpty)
+                                    ? url(imageId)
+                                    : null,
                                 onTap: () =>
                                     context.go('/detailCp', extra: cp.id),
                               );

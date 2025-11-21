@@ -1,24 +1,24 @@
 import 'package:flutter/material.dart';
-import '../../../widgets/custom_text.dart';
+import '../custom_text.dart';
 
-class CpCard extends StatelessWidget {
-  final dynamic cp;
-  final dynamic murid;
-  final String Function(String id) imageUrlBuilder;
+class CustomCard extends StatelessWidget {
+  final String kelas;
+  final String tanggal;
+  final String? nama;
+  final String? imageUrl;
   final VoidCallback onTap;
 
-  const CpCard({
+  const CustomCard({
     super.key,
-    required this.cp,
-    required this.murid,
-    required this.imageUrlBuilder,
+    required this.kelas,
+    required this.tanggal,
+    required this.nama,
+    this.imageUrl,
     required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    final hasImage = murid?.imageId != null && murid!.imageId.isNotEmpty;
-
     return Card(
       color: Colors.white,
       child: ListTile(
@@ -27,9 +27,9 @@ class CpCard extends StatelessWidget {
           radius: 30,
           backgroundColor: Colors.grey[300],
           child: ClipOval(
-            child: hasImage
+            child: (imageUrl != null && imageUrl!.isNotEmpty)
                 ? Image.network(
-                    imageUrlBuilder(murid!.imageId),
+                    imageUrl!,
                     width: 100,
                     height: 100,
                     fit: BoxFit.cover,
@@ -40,14 +40,14 @@ class CpCard extends StatelessWidget {
           ),
         ),
         title: CustomText(
-          text: murid?.nama ?? 'Murid tidak ditemukan',
+          text: nama ?? 'Murid tidak ditemukan',
           fontWeight: FontWeight.bold,
         ),
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            CustomText(text: 'Kelas: ${cp.kelompok}'),
-            CustomText(text: cp.tanggal),
+            CustomText(text: 'Kelas: $kelas'),
+            CustomText(text: tanggal),
           ],
         ),
         onTap: onTap,

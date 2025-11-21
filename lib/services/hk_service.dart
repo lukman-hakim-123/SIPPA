@@ -199,21 +199,12 @@ class HkService {
     }
   }
 
-  Future<Result<List<HkModel>>> getAllHkByUId(
-    String id,
-    String sekolah,
-    kelompok,
-  ) async {
+  Future<Result<List<HkModel>>> getAllHkByUId(String id) async {
     try {
       final documents = await _db.listRows(
         databaseId: dotenv.env['APPWRITE_DATABASE_ID']!,
         tableId: dotenv.env['APPWRITE_HK_COLLECTION_ID']!,
-        queries: [
-          Query.equal('muridId', id),
-          Query.equal('sekolah', sekolah),
-          Query.equal('kelompok', kelompok),
-          Query.orderDesc('\$createdAt'),
-        ],
+        queries: [Query.equal('muridId', id), Query.orderDesc('\$createdAt')],
       );
       final hkList = documents.rows.map((doc) {
         final Map<String, dynamic> data = Map<String, dynamic>.from(doc.data);

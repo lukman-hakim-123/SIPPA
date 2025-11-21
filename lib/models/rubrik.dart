@@ -3,7 +3,6 @@ import 'dart:convert';
 
 class RubrikModel {
   final String tujuan;
-  final String kegiatan; // kegiatan
   final String skor;
   final String agama;
   final String jatidiri;
@@ -15,11 +14,10 @@ class RubrikModel {
   final String kelompok;
   final String rekomendasi; // umpan balik
   final String tanggapan;
-  final String sekolah; // ✅ Tambahan
+  final String sekolah;
 
   RubrikModel({
     required this.tujuan,
-    required this.kegiatan,
     required this.skor,
     required this.agama,
     required this.jatidiri,
@@ -31,12 +29,11 @@ class RubrikModel {
     required this.kelompok,
     required this.rekomendasi,
     required this.tanggapan,
-    required this.sekolah, // ✅ Tambahan
+    required this.sekolah,
   });
 
   RubrikModel copyWith({
     String? tujuan,
-    String? kegiatan,
     String? skor,
     String? agama,
     String? jatidiri,
@@ -48,11 +45,10 @@ class RubrikModel {
     String? kelompok,
     String? rekomendasi,
     String? tanggapan,
-    String? sekolah, // ✅ Tambahan
+    String? sekolah,
   }) {
     return RubrikModel(
       tujuan: tujuan ?? this.tujuan,
-      kegiatan: kegiatan ?? this.kegiatan,
       skor: skor ?? this.skor,
       agama: agama ?? this.agama,
       jatidiri: jatidiri ?? this.jatidiri,
@@ -64,14 +60,13 @@ class RubrikModel {
       kelompok: kelompok ?? this.kelompok,
       rekomendasi: rekomendasi ?? this.rekomendasi,
       tanggapan: tanggapan ?? this.tanggapan,
-      sekolah: sekolah ?? this.sekolah, // ✅ Tambahan
+      sekolah: sekolah ?? this.sekolah,
     );
   }
 
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
       'tujuan': tujuan,
-      'kegiatan': kegiatan,
       'skor': skor,
       'agama': agama,
       'jatidiri': jatidiri,
@@ -82,14 +77,13 @@ class RubrikModel {
       'kelompok': kelompok,
       'rekomendasi': rekomendasi,
       'tanggapan': tanggapan,
-      'sekolah': sekolah, // ✅ Tambahan
+      'sekolah': sekolah,
     };
   }
 
   factory RubrikModel.fromMap(Map<String, dynamic> map) {
     return RubrikModel(
       tujuan: map['tujuan'] ?? '',
-      kegiatan: map['kegiatan'] ?? '',
       skor: map['skor'] ?? '',
       agama: map['agama'] ?? '',
       jatidiri: map['jatidiri'] ?? '',
@@ -101,7 +95,7 @@ class RubrikModel {
       kelompok: map['kelompok'] ?? '',
       rekomendasi: map['rekomendasi'] ?? '',
       tanggapan: map['tanggapan'] ?? '',
-      sekolah: map['sekolah'] ?? '', // ✅ Tambahan
+      sekolah: map['sekolah'] ?? '',
     );
   }
 
@@ -112,7 +106,7 @@ class RubrikModel {
 
   @override
   String toString() {
-    return 'RubrikModel(tujuan: $tujuan, kegiatan: $kegiatan, skor: $skor, agama: $agama, jatidiri: $jatidiri, literasi: $literasi, tanggal: $tanggal, uid: $uid, id: $id, muridId: $muridId, kelompok: $kelompok, rekomendasi: $rekomendasi, tanggapan: $tanggapan, sekolah: $sekolah)'; // ✅ Tambahan
+    return 'RubrikModel(tujuan: $tujuan, skor: $skor, agama: $agama, jatidiri: $jatidiri, literasi: $literasi, tanggal: $tanggal, uid: $uid, id: $id, muridId: $muridId, kelompok: $kelompok, rekomendasi: $rekomendasi, tanggapan: $tanggapan, sekolah: $sekolah)';
   }
 
   @override
@@ -120,7 +114,6 @@ class RubrikModel {
     if (identical(this, other)) return true;
 
     return other.tujuan == tujuan &&
-        other.kegiatan == kegiatan &&
         other.skor == skor &&
         other.agama == agama &&
         other.jatidiri == jatidiri &&
@@ -132,13 +125,12 @@ class RubrikModel {
         other.kelompok == kelompok &&
         other.rekomendasi == rekomendasi &&
         other.tanggapan == tanggapan &&
-        other.sekolah == sekolah; // ✅ Tambahan
+        other.sekolah == sekolah;
   }
 
   @override
   int get hashCode {
     return tujuan.hashCode ^
-        kegiatan.hashCode ^
         skor.hashCode ^
         agama.hashCode ^
         jatidiri.hashCode ^
@@ -150,6 +142,6 @@ class RubrikModel {
         kelompok.hashCode ^
         rekomendasi.hashCode ^
         tanggapan.hashCode ^
-        sekolah.hashCode; // ✅ Tambahan
+        sekolah.hashCode;
   }
 }

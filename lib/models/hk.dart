@@ -2,10 +2,10 @@ import 'dart:convert';
 
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 class HkModel {
-  final String semester; // Tujuan
+  final String tujuan;
   final String tanggal;
-  final String deskripsi; // Kegiatan
-  final String nilai;
+  final String kegiatan;
+  final String nilaiAgama;
   final String jatiDiri;
   final String literasi;
   final String imageId;
@@ -15,13 +15,13 @@ class HkModel {
   final String muridId;
   final String rekomendasi;
   final String tanggapan;
-  final String sekolah; // ✅ Tambahan
+  final String sekolah;
 
   HkModel({
-    required this.semester,
+    required this.tujuan,
     required this.tanggal,
-    required this.deskripsi,
-    required this.nilai,
+    required this.kegiatan,
+    required this.nilaiAgama,
     required this.jatiDiri,
     required this.literasi,
     required this.imageId,
@@ -31,14 +31,14 @@ class HkModel {
     required this.muridId,
     required this.rekomendasi,
     required this.tanggapan,
-    required this.sekolah, // ✅ Tambahan
+    required this.sekolah,
   });
 
   HkModel copyWith({
-    String? semester,
+    String? tujuan,
     String? tanggal,
-    String? deskripsi,
-    String? nilai,
+    String? kegiatan,
+    String? nilaiAgama,
     String? jatiDiri,
     String? literasi,
     String? imageId,
@@ -48,13 +48,13 @@ class HkModel {
     String? muridId,
     String? rekomendasi,
     String? tanggapan,
-    String? sekolah, // ✅ Tambahan
+    String? sekolah,
   }) {
     return HkModel(
-      semester: semester ?? this.semester,
+      tujuan: tujuan ?? this.tujuan,
       tanggal: tanggal ?? this.tanggal,
-      deskripsi: deskripsi ?? this.deskripsi,
-      nilai: nilai ?? this.nilai,
+      kegiatan: kegiatan ?? this.kegiatan,
+      nilaiAgama: nilaiAgama ?? this.nilaiAgama,
       jatiDiri: jatiDiri ?? this.jatiDiri,
       literasi: literasi ?? this.literasi,
       imageId: imageId ?? this.imageId,
@@ -64,16 +64,16 @@ class HkModel {
       muridId: muridId ?? this.muridId,
       rekomendasi: rekomendasi ?? this.rekomendasi,
       tanggapan: tanggapan ?? this.tanggapan,
-      sekolah: sekolah ?? this.sekolah, // ✅ Tambahan
+      sekolah: sekolah ?? this.sekolah,
     );
   }
 
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
-      'semester': semester,
+      'tujuan': tujuan,
       'tanggal': tanggal,
-      'deskripsi': deskripsi,
-      'nilai': nilai,
+      'kegiatan': kegiatan,
+      'nilaiAgama': nilaiAgama,
       'jatiDiri': jatiDiri,
       'literasi': literasi,
       'imageId': imageId,
@@ -82,16 +82,16 @@ class HkModel {
       'muridId': muridId,
       'rekomendasi': rekomendasi,
       'tanggapan': tanggapan,
-      'sekolah': sekolah, // ✅ Tambahan
+      'sekolah': sekolah,
     };
   }
 
   factory HkModel.fromMap(Map<String, dynamic> map) {
     return HkModel(
-      semester: map['semester'] ?? '',
+      tujuan: map['tujuan'] ?? '',
       tanggal: map['tanggal'] ?? '',
-      deskripsi: map['deskripsi'] ?? '',
-      nilai: map['nilai'] ?? '',
+      kegiatan: map['kegiatan'] ?? '',
+      nilaiAgama: map['nilaiAgama'] ?? '',
       jatiDiri: map['jatiDiri'] ?? '',
       literasi: map['literasi'] ?? '',
       imageId: map['imageId'] ?? '',
@@ -101,7 +101,7 @@ class HkModel {
       muridId: map['muridId'] ?? '',
       rekomendasi: map['rekomendasi'] ?? '',
       tanggapan: map['tanggapan'] ?? '',
-      sekolah: map['sekolah'] ?? '', // ✅ Tambahan
+      sekolah: map['sekolah'] ?? '',
     );
   }
 
@@ -112,17 +112,17 @@ class HkModel {
 
   @override
   String toString() {
-    return 'HkModel(semester: $semester, tanggal: $tanggal, deskripsi: $deskripsi, nilai: $nilai, jatiDiri: $jatiDiri, literasi: $literasi, imageId: $imageId, kelompok: $kelompok, uid: $uid, id: $id, muridId: $muridId, rekomendasi: $rekomendasi, tanggapan: $tanggapan, sekolah: $sekolah)'; // ✅ Tambahan
+    return 'HkModel(tujuan: $tujuan, tanggal: $tanggal, kegiatan: $kegiatan, nilaiAgama: $nilaiAgama, jatiDiri: $jatiDiri, literasi: $literasi, imageId: $imageId, kelompok: $kelompok, uid: $uid, id: $id, muridId: $muridId, rekomendasi: $rekomendasi, tanggapan: $tanggapan, sekolah: $sekolah)';
   }
 
   @override
   bool operator ==(covariant HkModel other) {
     if (identical(this, other)) return true;
 
-    return other.semester == semester &&
+    return other.tujuan == tujuan &&
         other.tanggal == tanggal &&
-        other.deskripsi == deskripsi &&
-        other.nilai == nilai &&
+        other.kegiatan == kegiatan &&
+        other.nilaiAgama == nilaiAgama &&
         other.jatiDiri == jatiDiri &&
         other.literasi == literasi &&
         other.imageId == imageId &&
@@ -132,15 +132,15 @@ class HkModel {
         other.rekomendasi == rekomendasi &&
         other.tanggapan == tanggapan &&
         other.muridId == muridId &&
-        other.sekolah == sekolah; // ✅ Tambahan
+        other.sekolah == sekolah;
   }
 
   @override
   int get hashCode {
-    return semester.hashCode ^
+    return tujuan.hashCode ^
         tanggal.hashCode ^
-        deskripsi.hashCode ^
-        nilai.hashCode ^
+        kegiatan.hashCode ^
+        nilaiAgama.hashCode ^
         jatiDiri.hashCode ^
         literasi.hashCode ^
         imageId.hashCode ^
@@ -150,6 +150,6 @@ class HkModel {
         rekomendasi.hashCode ^
         tanggapan.hashCode ^
         muridId.hashCode ^
-        sekolah.hashCode; // ✅ Tambahan
+        sekolah.hashCode;
   }
 }

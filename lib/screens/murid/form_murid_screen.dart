@@ -9,13 +9,13 @@ import '../../models/user.dart';
 import '../../providers/murid_provider.dart';
 import '../../providers/user_provider.dart';
 import '../../utils/validation_helper.dart';
-import '../../widgets/avatar_picker.dart';
+import '../../widgets/form/avatar_picker.dart';
 import '../../widgets/common/snackbar_helper.dart';
 import '../../widgets/custom_app_bar.dart';
 import '../../widgets/custom_button.dart';
-import '../../widgets/labeled_text_field.dart';
+import '../../widgets/form/labeled_text_field.dart';
 import '../../widgets/my_double_tap_exit.dart';
-import '../../widgets/password_field.dart';
+import '../../widgets/form/password_field.dart';
 
 class FormMuridScreen extends ConsumerStatefulWidget {
   final User? murid;
@@ -28,6 +28,7 @@ class FormMuridScreen extends ConsumerStatefulWidget {
 class _FormMuridScreenState extends ConsumerState<FormMuridScreen> {
   final _formKey = GlobalKey<FormState>();
   final _namaController = TextEditingController();
+  final _kelasController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _ulangiPasswordController = TextEditingController();
@@ -41,6 +42,7 @@ class _FormMuridScreenState extends ConsumerState<FormMuridScreen> {
     super.initState();
     if (widget.murid != null) {
       _namaController.text = widget.murid!.nama;
+      _kelasController.text = widget.murid!.kelompok;
       _emailController.text = widget.murid!.email;
     }
   }
@@ -48,6 +50,7 @@ class _FormMuridScreenState extends ConsumerState<FormMuridScreen> {
   @override
   void dispose() {
     _namaController.dispose();
+    _kelasController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
     _ulangiPasswordController.dispose();
@@ -108,7 +111,9 @@ class _FormMuridScreenState extends ConsumerState<FormMuridScreen> {
         levelUser: 3,
         nama: _namaController.text,
         sekolah: profile.sekolah,
-        kelompok: profile.kelompok,
+        kelompok: profile.levelUser == 1 || profile.levelUser == 0
+            ? _kelasController.text
+            : profile.kelompok,
       );
       ref
           .read(muridProvider.notifier)
@@ -133,6 +138,11 @@ class _FormMuridScreenState extends ConsumerState<FormMuridScreen> {
     final url = ref.read(muridProvider.notifier).getPublicImageUrl;
     final isEdit = widget.murid != null;
 
+    final profile = ref.watch(userProvider).value;
+    if (profile == null) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
     ref.listen<AsyncValue<List<User>>>(
       muridProvider,
       (_, state) => _handleMuridState(state, isEdit),
@@ -143,7 +153,10 @@ class _FormMuridScreenState extends ConsumerState<FormMuridScreen> {
         appBar: CustomAppBar(
           title: isEdit ? 'Edit Murid' : 'Tambah Murid',
           showBack: true,
-          onBack: () => context.go('/murid'),
+          onBack: () => context.go(
+            isEdit ? '/detailMurid' : '/murid',
+            extra: isEdit ? widget.murid!.id : null,
+          ),
         ),
         body: SingleChildScrollView(
           padding: const EdgeInsets.all(20),
@@ -153,7 +166,9 @@ class _FormMuridScreenState extends ConsumerState<FormMuridScreen> {
               children: [
                 AvatarPicker(
                   pickedImage: _pickedImage,
-                  imageUrl: isEdit ? url(widget.murid!.imageId) : null,
+                  imageUrl: isEdit && widget.murid!.imageId != ''
+                      ? url(widget.murid!.imageId)
+                      : null,
                   isEdit: isEdit,
                   onPickImage: _pickImage,
                 ),
@@ -171,7 +186,7 @@ class _FormMuridScreenState extends ConsumerState<FormMuridScreen> {
                   controller: _emailController,
                   keyboardType: TextInputType.emailAddress,
                   readOnly: isEdit,
-                  validator: ValidationHelper.validateEmail,
+                  validator: (value) => ValidationHelper.validateEmail(value),
                 ),
                 if (!isEdit) ...[
                   PasswordField(
@@ -199,6 +214,16 @@ class _FormMuridScreenState extends ConsumerState<FormMuridScreen> {
                     },
                   ),
                   const SizedBox(height: 12),
+                ],
+                if (isEdit &&
+                    (profile.levelUser == 1 || profile.levelUser == 0)) ...[
+                  LabeledTextField(
+                    icon: Icons.school,
+                    label: 'Kelas',
+                    controller: _kelasController,
+                    validator: (value) =>
+                        ValidationHelper.validateNotEmpty(value, 'Kelas'),
+                  ),
                 ],
                 CustomButton(
                   onPressed: muridState.isLoading || _isSubmitting
